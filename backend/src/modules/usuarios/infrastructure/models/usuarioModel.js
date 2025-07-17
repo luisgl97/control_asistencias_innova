@@ -18,7 +18,7 @@ const Usuario = sequelize.define(
       type: DataTypes.STRING(255),
       allowNull: false,
     },
-     apellidos: {
+    apellidos: {
       type: DataTypes.STRING(255),
       allowNull: false,
     },
@@ -46,6 +46,11 @@ const Usuario = sequelize.define(
         key: "id",
       },
     },
+    estado: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: true,
+    },
   },
   {
     tableName: "usuarios",
@@ -60,10 +65,10 @@ Usuario.associate = (models) => {
     as: "filial",
   });
 
-/*   Usuario.hasMany(models.asistencias, {
-    foreignKey: "usuario_id",
-    as: "asistencias",
-  }); */
+  /*   Usuario.hasMany(models.asistencias, {
+      foreignKey: "usuario_id",
+      as: "asistencias",
+    }); */
 };
 
 module.exports = { Usuario };

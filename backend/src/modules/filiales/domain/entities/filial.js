@@ -1,6 +1,6 @@
-class Filial { 
+class Filial {
     constructor({
-        ruc, 
+        ruc,
         razon_social
     }) {
         this.ruc = ruc;
@@ -16,9 +16,9 @@ class Filial {
 
         if (modo === "editar") {
             const tieneAlMenosUnCampoValido = ["ruc", "razon_social"].some(
-                (campo) => 
-                    datos[campo] !== undefined && 
-                    datos[campo] !== null && 
+                (campo) =>
+                    datos[campo] !== undefined &&
+                    datos[campo] !== null &&
                     datos[campo] !== ""
             );
 

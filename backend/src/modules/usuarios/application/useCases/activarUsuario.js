@@ -12,8 +12,8 @@ module.exports = async (id, usuarioRepository) => {
         };
     }
 
-    const usuarioEliminado = await usuarioRepository.eliminarUsuario(id);
-    
+    const usuarioActivado = await usuarioRepository.activarUsuario(id);
+    console.log(usuarioActivado);
     return {
         codigo: 204,
         respuesta: {

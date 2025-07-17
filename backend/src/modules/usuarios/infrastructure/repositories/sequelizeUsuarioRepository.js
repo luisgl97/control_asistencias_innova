@@ -1,7 +1,6 @@
 const { Usuario } = require("../models/usuarioModel");
 
 class SequelizeUsuarioRepository {
- 
   getModel() {
     return require("../models/usuarioModel").Usuario; // Retorna el modelo de usuario
   }
@@ -11,36 +10,51 @@ class SequelizeUsuarioRepository {
   }
 
   async obtenerUsuarios() {
-    const usuarios = await Usuario.findAll();
+    const usuarios = await Usuario.findAll({
+      attributes: {
+        exclude: ["password"],
+      },
+    });
     return usuarios;
   }
 
   async obtenerPorId(id) {
-    return await Usuario.findByPk(id); // Llama al método del repositorio para obtener un usuario por ID
+    return await Usuario.findByPk(id, {
+      attributes: {
+        exclude: ["password"],
+      },
+    });
   }
 
+  async obtenerPorDni(dni) {
+    return await Usuario.findOne({ where: { dni } });
+  }
   async obtenerPorEmail(email) {
     return await Usuario.findOne({ where: { email } });
   }
 
   async actualizarUsuario(id, usuarioData) {
-    const usuario = await Usuario.findByPk(id); // Busca el usuario por ID
-    if (!usuario) {
-      // Si no se encuentra el usuario, retorna null
-      console.log("❌ Usuario no encontrado");
-      return null;
-    }
-
-    await usuario.update(usuarioData); // Actualiza el usuario con los nuevos datos
-    return usuario; // Retorna el usuario actualizado
+    const usuario = await Usuario.findByPk(id, {
+      attributes: {
+        exclude: ["password"],
+      },
+    });
+    await usuario.update(usuarioData);
+    return usuario;
   }
 
   async eliminarUsuario(id) {
-    const usuario = await this.obtenerPorId(id); // Llama al método del repositorio para obtener el usuario por ID
-    if (!usuario) return null; // Si no se encuentra el usuario, retorna null
-    return await usuario.destroy(); // Elimina el usuario y retorna el resultado
+    const usuario = await this.obtenerPorId(id);
+    if (!usuario) return null;
+    return await usuario.update({ estado: false });
   }
 
+  async activarUsuario(id) {
+    const usuario = await this.obtenerPorId(id);
+    if (!usuario) return null;
+    await usuario.update({ estado: true });
+    return usuario;
+  }
 }
 
-module.exports = SequelizeUsuarioRepository; // Exporta la clase para que pueda ser utilizada en otros módulos
+module.exports = SequelizeUsuarioRepository;
