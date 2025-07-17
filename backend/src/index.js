@@ -49,7 +49,7 @@ console.log(`🔀 API corriendo en: ${API_BASE_PATH}`);
         console.log("✅ Conexión exitosa a la base de datos.");
 
         // 🚀 Iniciar el servidor solo si la base de datos está conectada
-        server.listen(PORT, "0.0.0.0", () => {
+        app.listen(PORT, "0.0.0.0", () => {
             console.log(`🚀 Servidor corriendo en ${API_BASE_URL}`);
         });
     } catch (err) {

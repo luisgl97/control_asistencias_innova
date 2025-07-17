@@ -18,6 +18,10 @@ const Usuario = sequelize.define(
       type: DataTypes.STRING(255),
       allowNull: false,
     },
+     apellidos: {
+      type: DataTypes.STRING(255),
+      allowNull: false,
+    },
     email: {
       type: DataTypes.STRING(100),
       allowNull: true,
@@ -27,7 +31,7 @@ const Usuario = sequelize.define(
       allowNull: true,
     },
     rol: {
-      type: DataTypes.ENUM("ADMINISTRADOR", "TRABAJADOR"),
+      type: DataTypes.ENUM("GERENTE", "ADMINISTRADOR", "TRABAJADOR"),
       allowNull: false,
     },
     cargo: {
@@ -56,10 +60,10 @@ Usuario.associate = (models) => {
     as: "filial",
   });
 
-  Usuario.hasMany(models.asistencias, {
+/*   Usuario.hasMany(models.asistencias, {
     foreignKey: "usuario_id",
     as: "asistencias",
-  });
+  }); */
 };
 
 module.exports = { Usuario };
