@@ -71,7 +71,10 @@ const UsuarioController = {
                 id,
                 usuarioRepository
             );
-            res.status(codigo).json(respuesta);
+            res.status(codigo).json({
+                mensaje: "Usuario eliminado exitosamente",
+                estado: true,
+            });
         } catch (error) {
             res.status(500).json({ error: error.message, estado: false });
         }

@@ -13,7 +13,15 @@ module.exports = async (id, usuarioRepository) => {
     }
 
     const usuarioEliminado = await usuarioRepository.eliminarUsuario(id);
-    
+    if (!usuarioEliminado) {
+        return {
+            codigo: 500,
+            respuesta: {
+                mensaje: "Error al eliminar el usuario",
+                estado: false,
+            },
+        };
+    }
     return {
         codigo: 204,
         respuesta: {
