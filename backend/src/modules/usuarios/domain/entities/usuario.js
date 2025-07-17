@@ -1,7 +1,8 @@
 class Usuario { 
     constructor({
         dni, 
-        nombres, 
+        nombres,
+        apellidos, 
         email, 
         password, 
         rol,
@@ -10,6 +11,7 @@ class Usuario {
     }) {
         this.dni = dni;
         this.nombres = nombres;
+        this.apellidos = apellidos;
         this.email = email;
         this.password = password;
         this.rol = rol;
@@ -19,17 +21,17 @@ class Usuario {
 
     static validarCamposObligatorios(modo = "crear") {
         if (modo === "crear") {
-            if (!this.dni || !this.nombres || !this.email || !this.password || !this.rol || !this.cargo || !this.filial_id) {
-                return "Faltan campos obligatorios: dni, nombres, email, password, rol, cargo y filial_id.";
+            if (!this.dni || !this.nombres || !this.apellidos || !this.email || !this.password || !this.rol || !this.cargo || !this.filial_id) {
+                return "Faltan campos obligatorios: dni, nombres, apellidos, email, password, rol, cargo y filial_id.";
             }
 
             if (!this.filial_id) {
-                return "El campo 'filial_id' es obligatorio al crear una pieza.";
+                return "La filial es obligatoria al registrar un usuario.";
             }
         }
 
         if (modo === "editar") {
-            const tieneAlMenosUnCampoValido = ["dni", "nombres", "email", "password","rol", "cargo","filial_id"].some(
+            const tieneAlMenosUnCampoValido = ["dni", "nombres", "apellidos", "email", "password","rol", "cargo","filial_id"].some(
                 (campo) => 
                     datos[campo] !== undefined && 
                     datos[campo] !== null && 
