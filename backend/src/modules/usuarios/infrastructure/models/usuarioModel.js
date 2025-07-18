@@ -65,10 +65,10 @@ Usuario.associate = (models) => {
     as: "filial",
   });
 
-  /*   Usuario.hasMany(models.asistencias, {
+    Usuario.hasMany(models.asistencias, {
       foreignKey: "usuario_id",
       as: "asistencias",
-    }); */
+    });
 };
 
 module.exports = { Usuario };

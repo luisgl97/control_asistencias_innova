@@ -10,10 +10,10 @@ const AuthController = {
         req.body,
         usuarioRepository
       );
-      res.cookie("token", respuesta.token, {
+     /*  res.cookie("token", respuesta.token, {
         httpOnly: true,
         sameSite: "strict",
-      });
+      }); */
       res
         .status(codigo)
         .json({
@@ -23,6 +23,7 @@ const AuthController = {
           estado: respuesta.estado,
         });
     } catch (error) {
+      console.log('error', error);
       res.status(500).json({ mensaje: "Error en login", error: error.message });
     }
   },

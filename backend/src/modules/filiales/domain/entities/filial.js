@@ -7,9 +7,12 @@ class Filial {
         this.razon_social = razon_social;
     }
 
-    static validarCamposObligatorios(modo = "crear") {
+    static validarCamposObligatorios(datos, modo = "crear") {
+
+        const { ruc, razon_social } = datos;
+
         if (modo === "crear") {
-            if (!this.ruc || !this.razon_social) {
+            if (!ruc || !razon_social) {
                 return "Faltan campos obligatorios: ruc y razon_social.";
             }
         }

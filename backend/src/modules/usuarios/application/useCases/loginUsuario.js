@@ -2,12 +2,11 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const Usuario = require("../../domain/entities/usuario");
 
-module.exports = async (datoslogin, usuarioRepository) => {
+module.exports = async (datosDeUsuario, usuarioRepository) => {
     const {
         success,
-        message,
-        usuario: datosDeUsuario,
-    } = await Usuario.login(datoslogin);
+        message
+    } = await Usuario.login(datosDeUsuario);
     console.log(success, message, datosDeUsuario);
     if (!success) {
         return {
@@ -26,7 +25,7 @@ module.exports = async (datoslogin, usuarioRepository) => {
         return {
             codigo: 401,
             respuesta: {
-                mensaje: "Correo Incorrecto",
+                mensaje: "Credenciales inválidas",
                 estado: false,
             },
         };
@@ -44,7 +43,7 @@ module.exports = async (datoslogin, usuarioRepository) => {
     if (!passwordCorrecta) {
         return {
             codigo: 401,
-            respuesta: { mensaje: "Contraseña Incorrecta", estado: false },
+            respuesta: { mensaje: "Credenciales inválidas", estado: false },
         };
     }
 

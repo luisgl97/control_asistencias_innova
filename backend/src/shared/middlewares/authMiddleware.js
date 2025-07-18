@@ -6,7 +6,7 @@ async function verificarToken(req, res, next) {
 
 
   const token = req.header("Authorization")?.replace("Bearer ", "");
-  
+ 
   if (!token) {
     return res.status(401).json({ mensaje: "Acceso denegado" });
   }

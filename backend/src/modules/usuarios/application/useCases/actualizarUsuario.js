@@ -20,7 +20,7 @@ module.exports = async (id, usuarioData, usuarioRepository) => {
         success,
         message: errorCampos,
         usuario,
-    } = Usuario.editar(usuarioData);
+    } = Usuario.validarCamposObligatorios(usuarioData, modo="editar");
 
     if (!success) {
         return {

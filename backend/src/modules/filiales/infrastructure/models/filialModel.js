@@ -25,7 +25,7 @@ const Filial = sequelize.define(
   }
 );
 
-// Asociaciones (si hay usuarios u otras relaciones)
+// Asociaciones
 Filial.associate = (models) => {
   Filial.hasMany(models.usuarios, {
     foreignKey: "filial_id",

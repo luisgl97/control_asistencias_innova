@@ -1,91 +1,134 @@
 class Usuario {
-    constructor({
-        dni,
-        nombres,
-        apellidos,
-        email,
-        password,
-        rol,
-        cargo,
-        filial_id,
-    }) {
-        this.dni = dni;
-        this.nombres = nombres;
-        this.apellidos = apellidos;
-        this.email = email;
-        this.password = password;
-        this.rol = rol;
-        this.cargo = cargo;
-        this.filial_id = filial_id;
+  constructor({
+    dni,
+    nombres,
+    apellidos,
+    email,
+    password,
+    rol,
+    cargo,
+    estado,
+    filial_id,
+  }) {
+    this.dni = dni;
+    this.nombres = nombres;
+    this.apellidos = apellidos;
+    this.email = email;
+    this.password = password;
+    this.rol = rol;
+    this.cargo = cargo;
+    this.estado = estado;
+    this.filial_id = filial_id;
+  }
+
+  static validarCamposObligatorios(datos, modo = "crear") {
+
+    if(modo === "crear") {
+     const { dni, nombres, apellidos, email, password, rol } = datos;
+
+    if (!dni || !nombres || !apellidos || !email || !password || !rol ) {
+      return {
+        success: false,
+        message:
+          "Los campos dni, nombres, apellidos, email, password y rol son requeridos",
+      };
     }
 
-    static crear(props) {
-        const camposRequeridos = [
-            "dni",
-            "nombres",
-            "apellidos",
-            "email",
-            "password",
-            "rol",
-            "cargo",
-            // "filial_id",
-        ];
-        for (const campo of camposRequeridos) {
-            if (!props[campo]) {
-                return {
-                    success: false,
-                    message: `El campo ${campo} es requerido`,
-                    usuario: null
-                }
-                // [false, `El campo ${campo} es requerido`, null];
-            }
-        }
+    const regexPassword =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d@$!%*?&]{8,}$/;
+    if (!regexPassword.test(password)) {
+      return {
+        success: false,
+        message:
+          "La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula y un número",
+      };
+    }
+
+    const regexNombre = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ ]+$/;
+    if (!regexNombre.test(nombres) && !regexNombre.test(apellidos)) {
+      return {
+        success: false,
+        message: "Nombres y apellidos solo debe contener letras",
+      };
+    }
+
+    const regexEmail = /\S+@\S+\.\S+/;
+    if (!regexEmail.test(email)) {
+      return { success: false, message: "Formato de correo inválido" };
+    }
+
+    const rolesPermitidos = ["GERENTE", "ADMINISTRADOR", "TRABAJADOR"];
+
+    if (!rolesPermitidos.includes(rol)) {
+      return { success: false, message: "Rol no permitido" };
+    }
+
+    return {
+      success: true,
+      message: "Todos los campos correctos",
+      //usuario: new Usuario(datos),
+    };
+    }
+    
+    if (modo === "editar") {
+
+      const tieneAlMenosUnCampoValido = [
+        "dni",
+        "nombres",
+        "apellidos",
+        "email",
+        "rol",
+        "cargo",
+        "estado",
+        "filial_id",
+      ].some(
+        (campo) =>
+          datos[campo] !== undefined &&
+          datos[campo] !== null &&
+          datos[campo] !== ""
+      );
+
+      if (!tieneAlMenosUnCampoValido) {
         return {
-            success: true,
-            message: "Todos los campos correctos",
-            usuario: new Usuario(props),
+          success: false,
+          message: "Debe proporcionar al menos un campo válido para actualizar.",
         };
-    }
+      }
 
-    static editar(props) {
-        const camposValidos = {
-            dni: Number(props.dni),
-            nombres: String(props.nombres),
-            apellidos: String(props.apellidos),
-            email: String(props.email),
-            // password: props.password,
-            rol: String(props.rol),
-            cargo: String(props.cargo),
-            filial_id: String(props.filial_id),
-        }
-        return {
-            success: true,
-            message: "No hay campos requeridos",
-            usuario: new Usuario(props),
-        };
+      return {
+        success: true,
+        message: "No hay campos requeridos",
+        //usuario: new Usuario(datos),
+      };
     }
+   
+  }
 
-    static async login(props) {
-        const camposRequeridos = [
-            "email",
-            "password",
-        ];
-        for (const campo of camposRequeridos) {
-            if (!props[campo]) {
-                return {
-                    success: false,
-                    message: `El campo ${campo} es requerido`,
-                    usuario: null
-                }
-            }
+  static login(datos) {
+    
+    const { email, password } = datos;
+    
+     if (!email || !password) {
+          return {
+            success: false,
+            message: "Ingresar correo y/o contraseña",
+          };
         }
-        return {
-            success: true,
-            message: "Login exitoso",
-            usuario: new Usuario(props),
+      
+        const regexEmail = /\S+@\S+\.\S+/;
+        if (!regexEmail.test(email)) {
+          return {
+            success: false,
+            message: "Formato de correo inválido",
+          };
         }
-    }
+
+    return {
+      success: true,
+      message: "Login exitoso",
+     // usuario: new Usuario(datos),
+    };
+  }
 }
-
 
 module.exports = Usuario;
