@@ -43,6 +43,16 @@ const Asistencia = sequelize.define(
     observacion_salida: {
       type: DataTypes.STRING(255),
     },
+
+    // ✅ Nuevos campos
+  /* estado_ingreso: {
+    type: DataTypes.ENUM('A TIEMPO', 'TARDE', 'SIN MARCAR'),
+    defaultValue: 'SIN MARCAR',
+  },
+  estado_salida: {
+    type: DataTypes.ENUM('A TIEMPO', 'ANTICIPADO', 'SIN MARCAR'),
+    defaultValue: 'SIN MARCAR',
+  }, */
   },
   {
     tableName: "asistencias",

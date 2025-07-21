@@ -1,5 +1,6 @@
-module.exports = async (fecha, asistenciaRepository) => {
-    
+module.exports = async (dataAsitencia, asistenciaRepository) => {
+
+    const { fecha } = dataAsitencia;
     const asistenciasDelDia = await asistenciaRepository.obtenerAsistenciasDelDia(fecha);
 
     return {
