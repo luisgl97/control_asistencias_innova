@@ -22,6 +22,7 @@ import {
 import { toast } from "sonner";
 import { loginSchema } from "../schemas/usuarioSchema";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useAuth } from "@/context/AuthContext";
 
 export default function LoginPage() {
    const [email, setEmail] = useState("");
@@ -29,6 +30,8 @@ export default function LoginPage() {
    const [isLoading, setIsLoading] = useState(false);
    const [errors, setErrores] = useState(null);
    const [showPassword, setShowPassword] = useState(false);
+      const { login } = useAuth();
+
 
    const handleSubmit = async (e) => {
       e.preventDefault();
@@ -41,9 +44,13 @@ export default function LoginPage() {
             }
          );
          setErrores(null);
-         await new Promise((resolve) => setTimeout(resolve, 1000));
+         const res=await login(email,password);
+         console.log('Res: ',res);
+         
          toast.success("Inicio de sessión exitóso.");
       } catch (err) {
+         console.log(err);
+         
          const nuevosErrores = {};
          err.inner.forEach((e) => {
             nuevosErrores[e.path] = e.message;

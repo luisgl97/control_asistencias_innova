@@ -1,8 +1,9 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import axios from "axios";
-import api from "../shared/services/api";
-import { loginService } from "@/modules/auth/services/authService";
+
 import LoaderInnova from "@/shared/components/LoaderInnova";
+import api from "@/shared/service/api";
+import { loginService } from "@/modules/auth/services/authService";
 
 const AuthContext = createContext();
 
@@ -23,6 +24,7 @@ export function AuthProvider({ children }) {
             const res = await api.get("/auth/verify-session", {
                headers: { Authorization: `Bearer ${token}` },
             });
+            console.log(res);
 
             if (res.data.valid) {
                const storedUser = JSON.parse(localStorage.getItem("user"));
@@ -46,15 +48,20 @@ export function AuthProvider({ children }) {
    }, []);
 
    // 🔹 Iniciar sesión con validación de reCAPTCHA
-   const login = async (email, password, recaptchaToken, navigate) => {
-      const data = await loginService(email, password, recaptchaToken);
-
+   const login = async (email, password, navigate) => {
+      const data = await loginService(email, password);
+      console.log('Data: ',data);
+      
       if (data?.error) {
          alert(`❌ ${data.mensaje}`);
          return false;
       }
 
       if (data && data.token && data.usuario) {
+         console.log("All Data: ", data);
+         console.log("Token Data: ", data.token);
+         console.log("Usuario Data: ", data.usuario);
+
          localStorage.setItem("token", data.token);
          localStorage.setItem("user", JSON.stringify(data.usuario));
          axios.defaults.headers.common[

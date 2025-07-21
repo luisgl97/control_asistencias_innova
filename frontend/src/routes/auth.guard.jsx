@@ -1,12 +1,12 @@
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
-import Loader from "@/shared/components/Loader";
+import LoaderInnova from "@/shared/components/LoaderInnova";
 
-export default function ProtectedRoute() {
+export default function AuthGuard() {
   const { user, loading } = useAuth();
   const location = useLocation();
 
-  if (loading) return <Loader />;
+  if (loading) return <LoaderInnova />;
   
   if (!user) {
     return <Navigate to="/login" state={{ from: location }} replace />;

@@ -21,7 +21,11 @@ const PORT = process.env.PORT || 4001;
 const API_BASE_URL = process.env.API_URL || "http://localhost:4001/api";
 
 // ✅ Aplicar middlewares globales
-app.use(cors());
+app.use(cors({
+  origin: ('http://localhost:5173'), // Cambia esto a tu frontend en producción
+  credentials: true
+}));
+
 app.use(express.json());
 app.use(compression()); // 🔥 Reduce el tamaño de las respuestas
 app.use(helmet()); // 🛡️ Protege contra ataques comunes
