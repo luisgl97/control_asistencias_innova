@@ -12,6 +12,7 @@ import LoaderInnova from "@/shared/components/LoaderInnova";
 import AuthGuard from "./auth.guard";
 import MarcarAsistencia from "@/modules/asistencias/pages/MarcarAsistencia";
 import HeaderAsistencias from "@/shared/components/HeaderAsistencias";
+import TablaAsistencias from "@/modules/asistencias/pages/TablaAsistencias";
 
 // Lazy load components
 const Login = lazy(() => import("@/modules/auth/pages/Login"));
@@ -30,6 +31,7 @@ export default function AppRoutes() {
                <Route path="/" element={<AuthGuard />}>
                   <Route element={<HeaderAsistencias />}>
                      <Route index element={<MarcarAsistencia />} />
+                      <Route path="/asistencias" element={<TablaAsistencias />} />
                   </Route>
                </Route>
 

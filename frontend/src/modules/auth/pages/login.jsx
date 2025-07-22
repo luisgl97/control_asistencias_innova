@@ -23,8 +23,10 @@ import { toast } from "sonner";
 import { loginSchema } from "../schemas/usuarioSchema";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useAuth } from "@/context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 export default function LoginPage() {
+   const navigate = useNavigate();
    const [email, setEmail] = useState("");
    const [password, setPassword] = useState("");
    const [isLoading, setIsLoading] = useState(false);
@@ -46,7 +48,8 @@ export default function LoginPage() {
          setErrores(null);
          const res=await login(email,password);
          console.log('Res: ',res);
-         
+         navigate("/"); // Te lleva a la ruta raíz
+
          toast.success("Inicio de sessión exitóso.");
       } catch (err) {
          console.log(err);

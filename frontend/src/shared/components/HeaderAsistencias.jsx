@@ -17,16 +17,16 @@ const HeaderAsistencias = () => {
                         <Clock className="w-6 h-6 text-white" />
                      </div>
                      <div className="hidden sm:block">
-                        <h1 className="text-lg font-semibold text-gray-900">
-                           Marcate
+                        <h1 className="text-lg font-bold text-gray-900">
+                           Márcate
                         </h1>
                         <p className="text-sm text-gray-500">
                            Sistema de asistencias
                         </p>
                      </div>
                      <div className="sm:hidden">
-                        <h1 className="text-base font-semibold text-gray-900">
-                           Asistencias
+                        <h1 className="text-base font-bold text-gray-900 ">
+                           Márcate
                         </h1>
                      </div>
                   </div>
@@ -35,8 +35,8 @@ const HeaderAsistencias = () => {
                   <div className="flex items-center space-x-3">
                      <div className="text-right hidden sm:block">
                         <p className="text-sm font-medium text-gray-900">
-                           {user ? user.nombres : "Loading"}
-                           {user ? user.apellidos : "..."}
+                           {user ? user.nombres : "Loading"} {" "}
+                             {user ? user.apellidos : "..."}
                         </p>
                         <div className="flex items-center space-x-2">
                            <Badge variant="secondary" className="text-xs">

@@ -14,10 +14,10 @@ const AuthController = {
             httpOnly: true,
             sameSite: "strict",
          });
-         //       res.cookie("token", respuesta.token, {
-         //   httpOnly: true,
-         //   sameSite: "None",
-         //   secure:true
+         // res.cookie("token", respuesta.token, {
+         //    httpOnly: true,
+         //    sameSite: "None",
+         //    secure: true,
          // });
          res.status(codigo).json({
             mensaje: respuesta.mensaje,
