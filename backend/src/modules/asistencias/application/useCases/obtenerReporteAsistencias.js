@@ -4,8 +4,7 @@ module.exports = async (dataReporte, asistenciaRepository) => {
    
     const reporte = await asistenciaRepository.obtenerReporteAsistencias(fecha_inicio, fecha_fin);
 
-    console.log('reporte', reporte);
-
+    
     console.table(reporte);
 
     return {

@@ -4,8 +4,7 @@ const {
   Usuario,
 } = require("../../../usuarios/infrastructure/models/usuarioModel");
 
-
- /*  const { DateTime } = require("luxon"); */
+/*  const { DateTime } = require("luxon"); */
 
 const moment = require("moment");
 require("moment/locale/es"); // importa el idioma español
@@ -41,8 +40,8 @@ class SequelizeAsistenciaRepository {
           model: Usuario,
           as: "usuario",
           attributes: ["id", "nombres", "apellidos"],
-        }
-      ]
+        },
+      ],
     });
   }
 
@@ -59,7 +58,6 @@ class SequelizeAsistenciaRepository {
   }
 
   // Registra el ingreso del usuario si aún no existe un registro para hoy
-
   async registrarIngreso(dataIngreso) {
     // Verifica si ya existe una asistencia para la fecha proporcionada
     const yaRegistrado = await Asistencia.findOne({
@@ -99,59 +97,6 @@ class SequelizeAsistenciaRepository {
       asistencia: nuevaAsistencia,
     };
   }
-
-  // Registra el ingreso del usuario con la hora del servidor o una hora específica
-
-/* async registrarIngreso2(dataIngreso, isTest = false) {
-  // Obtener la fecha actual en zona horaria de Perú
-  const now = DateTime.now().setZone("America/Lima");
-
-  const fechaHoy = now.toISODate(); // formato: '2025-07-19'
-  const horaServidor = now.toFormat("HH:mm");
-
-  // Verifica si ya existe una asistencia para hoy
-  const yaRegistrado = await Asistencia.findOne({
-    where: {
-      usuario_id: dataIngreso.usuario_id,
-      fecha: fechaHoy,
-    },
-  });
-
-  if (yaRegistrado) {
-    return {
-      success: false,
-      message: "Ya existe una asistencia registrada para hoy",
-      asistencia: yaRegistrado,
-    };
-  }
-
-  // Usar hora del servidor o permitir hora enviada solo si estás en modo test
-  const horaIngreso = isTest && dataIngreso.hora_ingreso
-    ? dataIngreso.hora_ingreso
-    : horaServidor;
-
-  // Calcular estado de ingreso
-  const [hi, mi] = horaIngreso.split(":").map(Number);
-  const minutosIngreso = hi * 60 + mi;
-  const estadoIngreso = minutosIngreso <= 450 ? "A_TIEMPO" : "TARDE"; // 7:30 AM = 450 min
-
-  // Crear nueva asistencia
-  const nuevaAsistencia = await Asistencia.create({
-    usuario_id: dataIngreso.usuario_id,
-    fecha: fechaHoy,
-    hora_ingreso: horaIngreso,
-    ubicacion_ingreso: dataIngreso.ubicacion_ingreso,
-    observacion_ingreso: dataIngreso.observacion_ingreso || null,
-    estado_ingreso: estadoIngreso,
-  });
-
-  return {
-    success: true,
-    message: "Ingreso registrado correctamente",
-    asistencia: nuevaAsistencia,
-  };
-} */
-
 
   // Registra la salida del usuario y calcula las horas extras si aplica
   async registrarSalida(dataSalida) {
@@ -223,90 +168,126 @@ class SequelizeAsistenciaRepository {
     };
   }
 
+  // Obtiene el reporte de asistencias por fecha
   async obtenerReporteAsistencias(fechaInicio, fechaFin) {
-  const asistencias = await Asistencia.findAll({
-    where: {
-      fecha: {
-        [Op.between]: [fechaInicio, fechaFin],
+    const usuarios = await Usuario.findAll({
+      where: {
+        rol: "TRABAJADOR", // Filtrar solo usuarios con rol de trabajador
       },
-    },
-    include: [
-      {
-        model: Usuario,
-        as: "usuario",
-      },
-    ],
-    order: [["fecha", "ASC"]],
-  });
+    }); // traer todos los usuarios
 
-  const usuariosMap = new Map();
-  asistencias.forEach((asistencia) => {
-    const usuarioId = asistencia.usuario.id;
-    if (!usuariosMap.has(usuarioId)) {
-      usuariosMap.set(usuarioId, {
-        trabajador: asistencia.usuario.nombres + " " + asistencia.usuario.apellidos,
+    console.log("usuarios", usuarios);
+
+    const asistencias = await Asistencia.findAll({
+      where: {
+        fecha: {
+          [Op.between]: [fechaInicio, fechaFin],
+        },
+      },
+      include: [
+        {
+          model: Usuario,
+          as: "usuario",
+        },
+      ],
+      order: [["fecha", "ASC"]],
+    });
+
+    console.log("asistencias", asistencias);
+
+    const usuariosMap = new Map();
+
+    // Inicializar todos los usuarios en el mapa, incluso si no tienen asistencias
+    usuarios.forEach((usuario) => {
+      usuariosMap.set(usuario.id, {
+        trabajador: `${usuario.nombres} ${usuario.apellidos}`,
         asistenciaPorDia: {},
         asistencias: 0,
         tardanzas: 0,
         faltas: 0,
-        observados: 0, // nuevo contador
+        observados: 0,
       });
-    }
+    });
 
-    const usuarioData = usuariosMap.get(usuarioId);
-    const diaSemana = moment(asistencia.fecha).locale("es").format("dddd").toLowerCase(); // día en español
+    // Procesar asistencias registradas
+    asistencias.forEach((asistencia) => {
+      if (!asistencia.usuario) return; // Ignorar si no hay usuario relacionado
 
-    const entrada = asistencia.hora_ingreso
-      ? moment(asistencia.hora_ingreso, "HH:mm:ss").format("HH:mm")
-      : null;
+      const usuarioId = asistencia.usuario.id;
+      const usuarioData = usuariosMap.get(usuarioId);
 
-    const salida = asistencia.hora_salida
-      ? moment(asistencia.hora_salida, "HH:mm:ss").format("HH:mm")
-      : null;
+      if (!usuarioData) return; // Por si acaso no está en el mapa
 
-    if (!entrada && !salida) {
-      usuarioData.asistenciaPorDia[diaSemana] = "Sin marcar";
-      usuarioData.faltas += 1;
-    } else if (entrada && !salida) {
-      usuarioData.asistenciaPorDia[diaSemana] = `${entrada} - No marcado (Observado)`;
-      usuarioData.observados += 1;
-    } else {
-      let label = `${entrada || "No marcado"} - ${salida || "No marcado"}`;
-      if (asistencia.estado_entrada === "Tarde") {
-        label += " (Tarde)";
-        usuarioData.tardanzas += 1;
+      const diaSemana = moment(asistencia.fecha)
+        .locale("es")
+        .format("dddd")
+        .toLowerCase();
+      const entrada = asistencia.hora_ingreso
+        ? moment(asistencia.hora_ingreso, "HH:mm:ss").format("HH:mm")
+        : null;
+      const salida = asistencia.hora_salida
+        ? moment(asistencia.hora_salida, "HH:mm:ss").format("HH:mm")
+        : null;
+
+      if (!entrada && !salida) {
+        usuarioData.asistenciaPorDia[diaSemana] = "Sin marcar";
+        usuarioData.faltas += 1;
+      } else if (entrada && !salida) {
+        usuarioData.asistenciaPorDia[
+          diaSemana
+        ] = `${entrada} - No marcado (Observado)`;
+        usuarioData.observados += 1;
       } else {
-        usuarioData.asistencias += 1;
-      }
-      usuarioData.asistenciaPorDia[diaSemana] = label;
-    }
-  });
-
-  const dias = ["lunes", "martes", "miércoles", "jueves", "viernes", "sábado"];
-
-  const resultado = Array.from(usuariosMap.values()).map((user) => {
-    const fila = {
-      trabajador: user.trabajador,
-      asistencias: user.asistencias,
-      tardanzas: user.tardanzas,
-      observados: user.observados,
-      faltas: user.faltas,
-    };
-
-    dias.forEach((dia) => {
-      fila[dia] = user.asistenciaPorDia[dia] || "Falta";
-      if (!user.asistenciaPorDia[dia]) {
-        fila.faltas += 1;
+        let label = `${entrada} - ${salida}`;
+        if (asistencia.estado_entrada === "Tarde") {
+          label += " (Tarde)";
+          usuarioData.tardanzas += 1;
+        } else {
+          usuarioData.asistencias += 1;
+        }
+        usuarioData.asistenciaPorDia[diaSemana] = label;
       }
     });
 
-    return fila;
-  });
+    const dias = [
+      "lunes",
+      "martes",
+      "miércoles",
+      "jueves",
+      "viernes",
+      "sábado",
+    ];
 
-  return resultado;
-}
+    const resultado = Array.from(usuariosMap.values()).map((user) => {
+      const fila = {
+        trabajador: user.trabajador,
+        asistencias: user.asistencias,
+        tardanzas: user.tardanzas,
+        observados: user.observados,
+        faltas: user.faltas,
+      };
 
- // Verificar asistencia del usuario parar mostrar el boton de ingreso o salida en el frontend
+      dias.forEach((dia, index) => {
+        const fechaDia = moment(fechaInicio).add(index, "days");
+        const hoy = moment();
+
+        if (fechaDia.isAfter(hoy, "day")) {
+          fila[dia] = "Pendiente";
+        } else {
+          fila[dia] = user.asistenciaPorDia[dia] || "Falta";
+          if (!user.asistenciaPorDia[dia]) {
+            fila.faltas += 1;
+          }
+        }
+      });
+
+      return fila;
+    });
+
+    return resultado;
+  }
+ 
+  // Verificar asistencia del usuario parar mostrar el boton de ingreso o salida en el frontend
   async verificarAsistenciaDelUsuarioDelDia(usuarioId, fecha) {
     const asistencia = await Asistencia.findOne({
       where: {
@@ -316,18 +297,34 @@ class SequelizeAsistenciaRepository {
     });
 
     if (!asistencia) {
-      return {estadoIngreso: false, estadoSalida: false, mensaje: "No se ha registrado ingreso ni salida"};
+      return {
+        estadoIngreso: false,
+        estadoSalida: false,
+        mensaje: "No se ha registrado ingreso ni salida",
+      };
     }
 
     if (asistencia.hora_ingreso && !asistencia.hora_salida) {
-      return { estadoIngreso: true, estadoSalida: false, mensaje: "Ingreso registrado, falta registrar salida" };
+      return {
+        estadoIngreso: true,
+        estadoSalida: false,
+        mensaje: "Ingreso registrado, falta registrar salida",
+      };
     }
 
     if (asistencia.hora_salida) {
-      return { estadoIngreso: true, estadoSalida: true, mensaje: "Ingreso y salida registrados"}
+      return {
+        estadoIngreso: true,
+        estadoSalida: true,
+        mensaje: "Ingreso y salida registrados",
+      };
     }
 
-    return {estadoIngreso: false, estadoSalida: false, mensaje: "No se ha registrado ingreso ni salida"};
+    return {
+      estadoIngreso: false,
+      estadoSalida: false,
+      mensaje: "No se ha registrado ingreso ni salida",
+    };
   }
 }
 
