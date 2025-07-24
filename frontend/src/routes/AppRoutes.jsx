@@ -13,6 +13,7 @@ import AuthGuard from "./auth.guard";
 import MarcarAsistencia from "@/modules/asistencias/pages/MarcarAsistencia";
 import HeaderAsistencias from "@/shared/components/HeaderAsistencias";
 import TablaAsistencias from "@/modules/asistencias/pages/TablaAsistencias";
+import RegistrarUsuario from "@/modules/usuarios/pages/RegistrarUsuario";
 
 // Lazy load components
 const Login = lazy(() => import("@/modules/auth/pages/Login"));
@@ -32,9 +33,10 @@ export default function AppRoutes() {
                   <Route element={<HeaderAsistencias />}>
                      <Route index element={<MarcarAsistencia />} />
                       <Route path="/asistencias" element={<TablaAsistencias />} />
+                      <Route path="/usuarios/registrar" element={<RegistrarUsuario />} />
                   </Route>
                </Route>
-
+               
                {/* Catch-all */}
                <Route path="*" element={<Navigate to={"/"} replace />} />
             </Routes>

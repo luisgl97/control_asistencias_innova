@@ -32,8 +32,7 @@ export default function LoginPage() {
    const [isLoading, setIsLoading] = useState(false);
    const [errors, setErrores] = useState(null);
    const [showPassword, setShowPassword] = useState(false);
-      const { login } = useAuth();
-
+   const { login } = useAuth();
 
    const handleSubmit = async (e) => {
       e.preventDefault();
@@ -46,22 +45,27 @@ export default function LoginPage() {
             }
          );
          setErrores(null);
-         const res=await login(email,password);
-         console.log('Res: ',res);
-         navigate("/"); // Te lleva a la ruta raíz
-
+         const res = await login(email, password);
+         if (!res.estado) {
+            throw new Error("Fallo el inicio de sessión");
+         }
+         console.log(res);
+         if (res.rol === "GERENTE" || res.rol === "ADMINISTRADOR") {
+            navigate("/asistencias");
+         }
+         if (res.rol === "TRABAJADOR") {
+            navigate("/");
+         }
          toast.success("Inicio de sessión exitóso.");
       } catch (err) {
-         console.log(err);
-         
-         const nuevosErrores = {};
-         err.inner.forEach((e) => {
-            nuevosErrores[e.path] = e.message;
-         });
+         if (err.inner) {
+            const nuevosErrores = {};
+            err.inner.forEach((e) => {
+               nuevosErrores[e.path] = e.message;
+            });
 
-         setErrores(nuevosErrores);
-         console.log(nuevosErrores);
-
+            setErrores(nuevosErrores);
+         }
          toast.error("Inicio de sessión fallido.");
       } finally {
          setIsLoading(false);
@@ -79,7 +83,7 @@ export default function LoginPage() {
                   </div>
                   <div className="space-y-2">
                      <CardTitle className="text-2xl font-bold text-gray-900">
-                        Sistema de Asistencias
+                        Márcate
                      </CardTitle>
                      <CardDescription className="text-gray-600">
                         Ingresa tus credenciales para acceder

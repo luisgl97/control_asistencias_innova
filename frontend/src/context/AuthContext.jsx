@@ -24,8 +24,6 @@ export function AuthProvider({ children }) {
             const res = await api.get("/auth/verify-session", {
                headers: { Authorization: `Bearer ${token}` },
             });
-            console.log(res);
-
             if (res.data.valid) {
                const storedUser = JSON.parse(localStorage.getItem("user"));
                setUser(storedUser);
@@ -50,11 +48,9 @@ export function AuthProvider({ children }) {
    // 🔹 Iniciar sesión con validación de reCAPTCHA
    const login = async (email, password, navigate) => {
       const data = await loginService(email, password);
-      console.log('Data: ',data);
-      
       if (data?.error) {
          alert(`❌ ${data.mensaje}`);
-         return false;
+         return { estado: false, rol: null };
       }
 
       if (data && data.token && data.usuario) {
@@ -68,12 +64,14 @@ export function AuthProvider({ children }) {
             "Authorization"
          ] = `Bearer ${data.token}`;
          setUser(data.usuario);
+         console.log(data.usuario);
+
          if (navigate) navigate("/", { replace: true });
-         return true;
+         return { estado: true, rol: data.usuario.rol };
       }
 
       alert("❌ Error desconocido al iniciar sesión.");
-      return false;
+      return { estado: false, rol: null };
    };
 
    // 🔹 Cerrar sesión y redirigir correctamente
