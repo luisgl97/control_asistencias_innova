@@ -14,6 +14,7 @@ import MarcarAsistencia from "@/modules/asistencias/pages/MarcarAsistencia";
 import HeaderAsistencias from "@/shared/components/HeaderAsistencias";
 import TablaAsistencias from "@/modules/asistencias/pages/TablaAsistencias";
 import RegistrarUsuario from "@/modules/usuarios/pages/RegistrarUsuario";
+import GestionUsuarios from "@/modules/usuarios/pages/GestionUsuarios";
 
 // Lazy load components
 const Login = lazy(() => import("@/modules/auth/pages/Login"));
@@ -34,6 +35,7 @@ export default function AppRoutes() {
                      <Route index element={<MarcarAsistencia />} />
                       <Route path="/asistencias" element={<TablaAsistencias />} />
                       <Route path="/usuarios/registrar" element={<RegistrarUsuario />} />
+                      <Route path="/usuarios" element={<GestionUsuarios />} />
                   </Route>
                </Route>
                

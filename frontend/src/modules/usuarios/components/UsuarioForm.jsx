@@ -14,6 +14,8 @@ import SelectConEtiquetaFlotante from "../../../shared/components/selectConEtiqu
 import usuarioSchema from "../schemas/registroUsuarioSchema";
 import usuarioService from "../services/usuarioService";
 import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
+import { Loader2 } from "lucide-react";
 
 const claves = {
    nombres: "",
@@ -26,6 +28,7 @@ const claves = {
    filial: "",
 };
 const UsuarioForm = () => {
+   const navigate=useNavigate()
    const [errores, setErrores] = useState({ ...claves });
    const [form, setForm] = useState({ ...claves });
    const [isLoading, setIsLoading] = useState(false);
@@ -37,6 +40,7 @@ const UsuarioForm = () => {
          });
          setIsLoading(true);
          await usuarioService.crear(form);
+         navigate('/usuarios')
          toast.success("Se creó el usuario exitosamente");
       } catch (error) {
          if (error.name === "ValidationError") {
@@ -221,7 +225,7 @@ const UsuarioForm = () => {
             </form>
          </CardContent>
          <CardFooter className="justify-end gap-8">
-            <Button variant="outline" disabled={isLoading}>
+            <Button variant="outline" disabled={isLoading} onClick={()=>navigate('/usuarios')}>
                {" "}
                Cancelar
             </Button>
