@@ -336,8 +336,16 @@ class SequelizeAsistenciaRepository {
 
     if (!asistencia) {
       return {
-        ingreso: null,
-        salida: null,
+        ingreso: {
+          fecha: null,
+          estado: false,
+          hora: null,
+        },
+        salida: {
+          fecha: null,
+          estado: false,
+          hora: null,
+        },
         mensaje: "No se ha registrado ingreso ni salida",
       };
     }
@@ -346,9 +354,14 @@ class SequelizeAsistenciaRepository {
       return {
         ingreso: {
           fecha: asistencia.fecha,
+          estado: true,
           hora: asistencia.hora_ingreso,
         },
-        salida: null,
+        salida: {
+          fecha: null,
+          estado: false,
+          hora: null,
+        },
         mensaje: "Ingreso registrado, falta registrar salida",
       };
     }
@@ -357,10 +370,12 @@ class SequelizeAsistenciaRepository {
       return {
         ingreso: {
           fecha: asistencia.fecha,
+          estado: true,
           hora: asistencia.hora_ingreso,
         },
         salida: {
           fecha: asistencia.fecha,
+          estado: true,
           hora: asistencia.hora_salida,
         },
         mensaje: "Ingreso y salida registrados",
@@ -368,8 +383,16 @@ class SequelizeAsistenciaRepository {
     }
 
     return {
-      ingreso: null,
-      salida: null,
+      ingreso: {
+        fecha: null,
+        estado: false,
+        hora: null,
+      },
+      salida: {
+        fecha: null,
+        estado: false,
+        hora: null,
+      },
       mensaje: "No se ha registrado ingreso ni salida",
     };
   }
