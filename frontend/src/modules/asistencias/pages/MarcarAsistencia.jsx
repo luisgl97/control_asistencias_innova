@@ -35,7 +35,8 @@ export default function MarcarAsistencia() {
          const res = await asistenciaService.verificaAsistencia({
             fecha: new Date(),
          });
-         console.log("respuesta: ", res.data.datos);
+         
+         console.log("Verificación de asistencia response: ", res.data.datos);
          setStatus(res.data.datos);
       } catch (error) {
          console.error(error);
