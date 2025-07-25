@@ -7,7 +7,7 @@ module.exports = async (datosDeUsuario, usuarioRepository) => {
         success,
         message
     } = await Usuario.login(datosDeUsuario);
-    console.log(success, message, datosDeUsuario);
+  
     if (!success) {
         return {
             codigo: 400,

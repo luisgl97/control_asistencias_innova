@@ -55,6 +55,17 @@ class SequelizeUsuarioRepository {
     await usuario.update({ estado: true });
     return usuario;
   }
+
+  async listarUsuariosPorCargo(cargo) {
+    
+    const usuarios = await Usuario.findAll({
+      where: { cargo },
+      attributes: {
+        exclude: ["password"],
+      },
+    });
+    return usuarios;
+  }
 }
 
 module.exports = SequelizeUsuarioRepository;

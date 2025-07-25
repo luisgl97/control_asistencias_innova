@@ -2,8 +2,6 @@ module.exports = async (asistenciaRepository) => {
    
     const asistencias = await asistenciaRepository.obtenerAsistencias();
 
-    console.log('asistencias', asistencias);
-
     return {
         codigo: 200,
         respuesta: {

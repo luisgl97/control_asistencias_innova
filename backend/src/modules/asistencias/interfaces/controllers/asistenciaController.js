@@ -11,15 +11,15 @@ const verificarAsistenciaDelUsuarioDelDia = require("../../application/useCases/
 const asistenciaRepository = new sequelizeAsistenciaRepository(); // Instancia del repositorio de usuario
 
 const AsistenciaController = {
+  
   async obtenerAsistencias(_, res) {
     try {
       const { codigo, respuesta } = await obtenerAsistencias(
         asistenciaRepository
       );
-      console.log('respuesta', respuesta);
       res.status(codigo).json(respuesta);
     } catch (error) {
-      console.log(error);
+      console.log('error', error);
       res.status(500).json({ error: error.message, estado: false });
     }
   },
@@ -110,7 +110,7 @@ const AsistenciaController = {
         req.body,
         asistenciaRepository
       );
-      
+
       res.status(codigo).json(respuesta);
     } catch (error) {
       console.log('error', error);
