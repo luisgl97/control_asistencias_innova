@@ -36,14 +36,19 @@ class SequelizeAsistenciaRepository {
     return asistencia;
   }
 
-  async obtenerAsistenciasPorUsuario(idUsuario) {
+  async obtenerAsistenciasPorUsuario(idUsuario, fecha_inicio, fecha_fin) {
     return await Asistencia.findAll({
-      where: { usuario_id: idUsuario },
+      where: { usuario_id: idUsuario, 
+        fecha: {
+          [Op.between]: [fecha_inicio, fecha_fin],
+        },
+      },
     });
   }
 
   async obtenerAsistenciasDelDia(fecha) {
-    return await Asistencia.findAll({
+
+    const asistencias = await Asistencia.findAll({
       where: { fecha: fecha },
       include: [
         {
@@ -53,6 +58,8 @@ class SequelizeAsistenciaRepository {
         },
       ],
     });
+
+    return asistencias;
   }
 
   async actualizarAsistencia(id, asistenciaData) {

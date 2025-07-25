@@ -15,9 +15,9 @@ router.use(verificarToken); // Verifica token para todas las rutas
 router.get("/", asistenciaController.obtenerAsistencias);
 
 // 🔒 Ruta protegida, solo para usuarios con rol de administrador o gerente
-router.get("/usuario/:id", autorizarRol(["GERENTE", "ADMINISTRADOR"]), asistenciaController.obtenerAsistenciasPorUsuario);
+router.post("/usuario", autorizarRol(["GERENTE", "ADMINISTRADOR", "LIDER TRABAJADOR"]), asistenciaController.obtenerAsistenciasPorUsuario);
 router.post("/reporte", autorizarRol(["GERENTE", "ADMINISTRADOR", "LIDER TRABAJADOR"]), asistenciaController.obtenerReporteAsistencias);
-router.post("/del-dia",autorizarRol(["GERENTE", "ADMINISTRADOR"]), asistenciaController.obtenerAsistenciasDelDia);
+router.post("/del-dia",autorizarRol(["GERENTE", "ADMINISTRADOR", "LIDER TRABAJADOR"]), asistenciaController.obtenerAsistenciasDelDia);
 
 // 🔓 Ruta accesible para cualquier usuario autenticado
 router.post("/registrar-ingreso", asistenciaController.registrarIngreso);
