@@ -15,10 +15,14 @@ db.filiales = Filial;
 const { Asistencia } = require('../modules/asistencias/infrastructure/models/asistenciaModel');
 db.asistencias = Asistencia;
 
+const { Permiso } = require('../modules/permisos/infrastructure/models/permisoModel');
+db.permisos = Permiso;
+
 // ✅ Solo se asocian los que tienen .associate()
 if (db.usuarios.associate) db.usuarios.associate(db);
 if (db.filiales.associate) db.filiales.associate(db);
 if (db.asistencias.associate) db.asistencias.associate(db);
+if (db.permisos.associate) db.permisos.associate(db);
 
 // Sequelize
 db.sequelize = sequelize;

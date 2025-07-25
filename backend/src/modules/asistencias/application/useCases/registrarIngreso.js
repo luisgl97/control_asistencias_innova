@@ -1,4 +1,4 @@
-const Asistencia = require("../../domain/entities/asitencia");
+const Asistencia = require("../../domain/entities/asistencia");
 
 module.exports = async (usuario_id, ingresoData, asistenciaRepository) => {
   // validar con el dominio asistencia

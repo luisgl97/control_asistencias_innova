@@ -37,22 +37,11 @@ const Asistencia = sequelize.define(
       type: DataTypes.FLOAT,
       defaultValue: 0.0,
     },
-    observacion_ingreso: {
-      type: DataTypes.STRING(255),
-    },
-    observacion_salida: {
-      type: DataTypes.STRING(255),
-    },
 
-    // ✅ Nuevos campos
-  /* estado_ingreso: {
-    type: DataTypes.ENUM('A TIEMPO', 'TARDE', 'SIN MARCAR'),
-    defaultValue: 'SIN MARCAR',
-  },
-  estado_salida: {
-    type: DataTypes.ENUM('A TIEMPO', 'ANTICIPADO', 'SIN MARCAR'),
-    defaultValue: 'SIN MARCAR',
-  }, */
+    estado: {
+      type: DataTypes.ENUM("PRESENTE", "FALTA JUSTIFICADA", "TARDANZA", "SALIDA ANTICIPADA", "ASISTIO", "ASISTIO TARDE"),
+      defaultValue: "PRESENTE",
+    },
   },
   {
     tableName: "asistencias",
@@ -66,6 +55,11 @@ Asistencia.associate = (models) => {
     foreignKey: "usuario_id",
     as: "usuario",
   });
+
+  Asistencia.hasOne(models.permisos, {
+  foreignKey: "asistencia_id",
+  as: "permiso",
+});
 };
 
 module.exports = { Asistencia };

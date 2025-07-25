@@ -10,6 +10,13 @@ const moment = require("moment");
 require("moment/locale/es"); // importa el idioma español
 moment.locale("es"); // establece el idioma a español
 
+const ESTADO_PRESENTE = "PRESENTE";
+const ESTADO_FALTA_JUSTIFICADA = "FALTA JUSTIFICADA";
+const ESTADO_TARDANZA = "TARDANZA";
+const ESTADO_SALIDA_ANTICIPADA = "SALIDA ANTICIPADA";
+const ESTADO_ASISTIO = "ASISTIO";
+const ESTADO_ASISTIO_TARDE = "ASISTIO TARDE";
+
 class SequelizeAsistenciaRepository {
   getModel() {
     return require("../models/asistenciaModel").Asistencia; // Retorna el modelo de asistencia
@@ -24,9 +31,12 @@ class SequelizeAsistenciaRepository {
     return asistencias;
   }
 
-  async obtenerAsistenciasPorUsuario(idUsuario) {
-    console.log("idUsuario", idUsuario);
+  async obtenerAsistenciaPorId(id) {
+    const asistencia = await Asistencia.findByPk(id);
+    return asistencia;
+  }
 
+  async obtenerAsistenciasPorUsuario(idUsuario) {
     return await Asistencia.findAll({
       where: { usuario_id: idUsuario },
     });
@@ -49,7 +59,7 @@ class SequelizeAsistenciaRepository {
     const asistencia = await Asistencia.findByPk(id); // Busca el asistencia por ID
     if (!asistencia) {
       // Si no se encuentra el asistencia, retorna null
-      console.log("❌ Asistencia no encontrado");
+      //console.log("❌ Asistencia no encontrado");
       return null;
     }
 
@@ -75,10 +85,13 @@ class SequelizeAsistenciaRepository {
       };
     }
 
-    // Calcular estado_ingreso
+    // Calcular estado de ingreso según la hora
     const [hi, mi] = dataIngreso.hora_ingreso.split(":").map(Number);
     const minutosIngreso = hi * 60 + mi;
-    /* const estadoIngreso = minutosIngreso <= 450 ? "A_TIEMPO" : "TARDE"; // 450 = 7:30 AM */
+    const toleranciaMinutos = 466; // 7:46 AM (466 minutos = 7h × 60 + 46m.)
+
+    const estado =
+      minutosIngreso < toleranciaMinutos ? ESTADO_PRESENTE : ESTADO_TARDANZA;
 
     // Si no existe, crea el nuevo registro de ingreso
     const nuevaAsistencia = await Asistencia.create({
@@ -86,9 +99,7 @@ class SequelizeAsistenciaRepository {
       fecha: dataIngreso.fecha,
       hora_ingreso: dataIngreso.hora_ingreso,
       ubicacion_ingreso: dataIngreso.ubicacion_ingreso,
-      observacion_ingreso: dataIngreso.observacion_ingreso || null,
-
-      /*       estado_ingreso: estadoIngreso, // ✅ */
+      estado: estado,
     });
 
     return {
@@ -115,8 +126,6 @@ class SequelizeAsistenciaRepository {
       };
     }
 
-    console.log("asistencia", asistencia);
-
     // Evita registrar doble salida
     if (asistencia.hora_salida) {
       return {
@@ -134,23 +143,56 @@ class SequelizeAsistenciaRepository {
     // Calculamos la cantidad total de minutos desde las 00:00 hasta la hora de salida
     const minutosSalida = hs * 60 + ms;
 
-    // Obtenemos el día actual de la semana (0 = domingo, 1 = lunes, ..., 6 = sábado)
-    const diaSemana = new Date().getDay();
+    // Usa el día de la fecha de la asistencia, no el 'hoy' del servidor
+    const diaSemana = new Date(`${dataSalida.fecha}T00:00:00`).getDay(); // 0=dom, 6=sáb
 
-    // Definir horario regular según el día
-    const horaLimite = diaSemana === 6 ? 13 * 60 : 17 * 60; // 13:00 sábados, 17:00 otros días
+    // Jornada definida por la empresa
+    const HORA_INICIO = 7 * 60 + 30; // 07:30
+    const HORA_FIN_LV = 17 * 60; // 17:00
+    const HORA_FIN_SAB = 13 * 60; // 13:00
+    const horaLimite = diaSemana === 6 ? HORA_FIN_SAB : HORA_FIN_LV;
+    const minutosMinimos = horaLimite - HORA_INICIO; // 9.5h (570) L–V, 5.5h (330) sáb
 
-    // Calcular diferencia de tiempo en minutos
-    const diferencia = minutosSalida - horaLimite;
     let horasExtras = 0;
 
-    // Si se pasa más de 30 minutos del horario regular, se calcula como horas extras
-    if (diferencia >= 30) {
-      horasExtras = Math.floor(diferencia / 30) * 0.5; // Cada 30 min = 0.5 hora extra
-    }
+    // Verifica que la hora de ingreso exista antes de calcular
+    if (asistencia.hora_ingreso) {
+      // Divide la hora de ingreso en horas y minutos, y convierte a números
+      const [hIn, mIn] = asistencia.hora_ingreso.split(":").map(Number);
 
+      // Convierte la hora de ingreso a minutos totales desde las 00:00
+      const minutosIngreso = hIn * 60 + mIn;
+
+      // 👇 Clave: si ingresó antes de la hora de inicio, cuenta desde la hora de inicio
+      const minutosInicioEfectivo = Math.max(minutosIngreso, HORA_INICIO);
+
+      const minutosTrabajados = minutosSalida - minutosInicioEfectivo;
+
+      // Solo se consideran horas extras si se cumplió el mínimo de jornada laboral
+      if (minutosTrabajados >= minutosMinimos) {
+        // Calcula cuántos minutos trabajó después de la hora de salida normal
+        const diferencia = minutosSalida - horaLimite;
+
+        // Si se pasó al menos 30 minutos del límite, se computan como horas extras
+        if (diferencia >= 30) {
+          // Cada bloque de 30 minutos se cuenta como 0.5 horas extras
+          horasExtras = Math.floor(diferencia / 30) * 0.5;
+        }
+      }
+    }
     // Calcular estado_salida
-    /* const estadoSalida = minutosSalida >= horaLimite ? "A_TIEMPO" : "ANTICIPADO"; */
+
+    let estadoSalida = ESTADO_ASISTIO;
+
+    if (minutosSalida >= horaLimite) {
+      if (asistencia.estado === ESTADO_TARDANZA) {
+        estadoSalida = ESTADO_ASISTIO_TARDE;
+      } else if (asistencia.estado === ESTADO_PRESENTE) {
+        estadoSalida = ESTADO_ASISTIO;
+      }
+    } else {
+      estadoSalida = ESTADO_SALIDA_ANTICIPADA;
+    }
 
     // Actualizar los campos de salida y horas extras
     await asistencia.update({
@@ -158,7 +200,7 @@ class SequelizeAsistenciaRepository {
       ubicacion_salida: dataSalida.ubicacion_salida,
       observacion_salida: dataSalida.observacion_salida || null,
       horas_extras: horasExtras,
-      /*   estado_salida: estadoSalida, // ✅ */
+      estado: estadoSalida,
     });
 
     return {
@@ -176,8 +218,6 @@ class SequelizeAsistenciaRepository {
       },
     }); // traer todos los usuarios
 
-    console.log("usuarios", usuarios);
-
     const asistencias = await Asistencia.findAll({
       where: {
         fecha: {
@@ -192,8 +232,6 @@ class SequelizeAsistenciaRepository {
       ],
       order: [["fecha", "ASC"]],
     });
-
-    console.log("asistencias", asistencias);
 
     const usuariosMap = new Map();
 
@@ -286,7 +324,7 @@ class SequelizeAsistenciaRepository {
 
     return resultado;
   }
- 
+
   // Verificar asistencia del usuario parar mostrar el boton de ingreso o salida en el frontend
   async verificarAsistenciaDelUsuarioDelDia(usuarioId, fecha) {
     const asistencia = await Asistencia.findOne({
@@ -298,33 +336,51 @@ class SequelizeAsistenciaRepository {
 
     if (!asistencia) {
       return {
-        estadoIngreso: false,
-        estadoSalida: false,
+        ingreso: null,
+        salida: null,
         mensaje: "No se ha registrado ingreso ni salida",
       };
     }
 
     if (asistencia.hora_ingreso && !asistencia.hora_salida) {
       return {
-        estadoIngreso: true,
-        estadoSalida: false,
+        ingreso: {
+          fecha: asistencia.fecha,
+          hora: asistencia.hora_ingreso,
+        },
+        salida: null,
         mensaje: "Ingreso registrado, falta registrar salida",
       };
     }
 
     if (asistencia.hora_salida) {
       return {
-        estadoIngreso: true,
-        estadoSalida: true,
+        ingreso: {
+          fecha: asistencia.fecha,
+          hora: asistencia.hora_ingreso,
+        },
+        salida: {
+          fecha: asistencia.fecha,
+          hora: asistencia.hora_salida,
+        },
         mensaje: "Ingreso y salida registrados",
       };
     }
 
     return {
-      estadoIngreso: false,
-      estadoSalida: false,
+      ingreso: null,
+      salida: null,
       mensaje: "No se ha registrado ingreso ni salida",
     };
+  }
+
+  async obtenerAsistenciaPorUsuarioYFecha(usuarioId, fecha) {
+    return await Asistencia.findOne({
+      where: {
+        usuario_id: usuarioId,
+        fecha: fecha,
+      },
+    });
   }
 }
 

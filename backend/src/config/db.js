@@ -13,6 +13,7 @@ const sequelize = new Sequelize(
       host: process.env.DB_HOST,
       dialect: process.env.DB_DIALECT || "mysql",
       logging: false, // Para evitar logs en la consola
+       timezone: "-05:00", // ⬅️ HORA PERUANA
       define: {
         charset: "utf8mb4",
         collate: "utf8mb4_general_ci" 

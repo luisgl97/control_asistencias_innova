@@ -13,7 +13,7 @@ module.exports = async (id, usuarioRepository) => {
     }
 
     const usuarioActivado = await usuarioRepository.activarUsuario(id);
-    console.log(usuarioActivado);
+ 
     return {
         codigo: 204,
         respuesta: {

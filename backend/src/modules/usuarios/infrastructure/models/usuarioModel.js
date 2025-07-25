@@ -69,6 +69,11 @@ Usuario.associate = (models) => {
       foreignKey: "usuario_id",
       as: "asistencias",
     });
+
+    Usuario.hasMany(models.permisos, {
+      foreignKey: "autorizado_por",
+      as: "permisos",
+    });
 };
 
 module.exports = { Usuario };

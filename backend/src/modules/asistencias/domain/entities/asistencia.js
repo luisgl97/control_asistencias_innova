@@ -67,13 +67,13 @@ class Asistencia {
           message: "Debe proporcionar al menos un campo válido para actualizar.",
         };
       }
+    }
 
+    
       return {
         success: true,
-        message: "No hay campos requeridos",
+        message: "Campos validados correctamente",
       };
-    
-    }
   }
 
   static validarRegistroIngreso(datos){
