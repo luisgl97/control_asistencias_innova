@@ -9,6 +9,8 @@ import {
    LogIn,
    Coffee,
    LogOut,
+   XCircle,
+   CheckCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -19,6 +21,8 @@ import HoraActual from "../components/horaActual";
 import { toast } from "sonner";
 import axios from "axios";
 import HorariosTrabajo from "../components/HorariosTrabajo";
+import { ModalFalta } from "../components/ModalFalta";
+import { diferenciaHoras } from "../libs/diferenciaHoras";
 
 export default function MarcarAsistencia() {
    const { user, loading } = useAuth();
@@ -29,15 +33,20 @@ export default function MarcarAsistencia() {
    const [ubicacion, setUbicacion] = useState(null);
    const [ubicacionLoading, setUbicacionLoading] = useState(true);
    const [ubicacionError, setUbicacionError] = useState(null);
+   const [asistencia, setAsistencia] = useState({});
 
    const fetchVerificarAsistencia = async () => {
       try {
          const res = await asistenciaService.verificaAsistencia({
             fecha: new Date(),
          });
-         
-         console.log("Verificación de asistencia response: ", res.data.datos);
-         setStatus(res.data.datos);
+         setStatus({
+            estadoIngreso: res.data.datos.ingreso.estado,
+            estadoSalida: res.data.datos.salida.estado,
+         });
+         console.log(res.data.datos);
+
+         setAsistencia(res.data.datos);
       } catch (error) {
          console.error(error);
       }
@@ -265,32 +274,56 @@ export default function MarcarAsistencia() {
                      )}
                   </CardHeader>
                   <CardContent className=" sm:p-6">
-                     {/* Botones responsivos */}
-                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                     <div className="grid grid-cols-2 gap-3">
                         <Button
-                           size="lg"
-                           className="bg-white text-innova-blue hover:bg-blue-50 h-14 sm:h-16 text-base sm:text-lg font-semibold shadow-md hover:shadow-lg transition-all duration-200"
-                           disabled={status.estadoIngreso || !ubicacion}
                            onClick={marcarAsistenciaIngreso}
+                           className="bg-green-600 hover:bg-green-500 text-white py-4 h-auto flex flex-col items-center gap-1 font-semibold text-base shadow-lg"
+                           disabled={status.estadoIngreso || !ubicacion}
                         >
-                           <MapPin className="w-5 h-5 mr-2" />
-                           Marcar Entrada
+                           <CheckCircle className="w-5 h-5" />
+                           <span className="text-sm">Marcar Entrada</span>
                         </Button>
+
                         <Button
-                           size="lg"
-                           variant="outline"
-                           className="bg-transparent border-2 border-white text-white hover:bg-white hover:text-blue-700 h-14 sm:h-16 text-base sm:text-lg font-semibold shadow-md hover:shadow-lg transition-all duration-200"
+                           className="bg-red-600 hover:bg-red-500 text-white py-4 h-auto flex flex-col items-center gap-1 font-semibold text-base shadow-lg"
+                           onClick={marcarAsistenciaSalida}
                            disabled={
                               !status.estadoIngreso ||
                               status.estadoSalida ||
                               !ubicacion
                            }
-                           onClick={marcarAsistenciaSalida}
                         >
-                           <MapPin className="w-5 h-5 mr-2" />
-                           Marcar Salida
+                           <LogOut className="w-5 h-5" />
+                           <span className="text-sm">Marcar Salida</span>
                         </Button>
                      </div>
+
+                     <div className="flex items-center gap-3 my-4">
+                        <div className="flex-1 h-px bg-gray-600"></div>
+                        <span className="text-xs text-gray-400">
+                           Permisos Especiales
+                        </span>
+                        <div className="flex-1 h-px bg-gray-600"></div>
+                     </div>
+
+                     {/* Botones de permisos especiales */}
+                     <div className="grid grid-cols-2 gap-3">
+                        <ModalFalta />
+
+                        <Button
+                           className="bg-gray-600 hover:bg-gray-500 text-gray-200 py-2 h-auto flex flex-col items-center gap-1 text-xs border border-gray-500"
+                           variant="outline"
+                           disabled={
+                              !status.estadoIngreso ||
+                              status.estadoSalida ||
+                              !ubicacion
+                           }
+                        >
+                           <AlertCircle className="w-5 h-5" />
+                           <span className="text-sm">Salida Anticipada</span>
+                        </Button>
+                     </div>
+
                      {/* Información adicional */}
                      <div className="mt-6 pt-4 border-t border-blue-500/30">
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-center text-white/90">
@@ -327,20 +360,31 @@ export default function MarcarAsistencia() {
                         <div className="flex justify-between items-center">
                            <span className="text-gray-600">Entrada:</span>
                            <span className="font-medium text-green-600">
-                              08:15 AM
+                              {asistencia.ingreso.hora
+                                 ? asistencia.ingreso.hora
+                                 : "Pendiente"}
                            </span>
                         </div>
                         <div className="flex justify-between items-center">
                            <span className="text-gray-600">Salida:</span>
                            <span className="font-medium text-gray-400">
-                              Pendiente
+                              {asistencia.salida.hora
+                                 ? asistencia.salida.hora
+                                 : "Pendiente"}
                            </span>
                         </div>
                         <div className="flex justify-between items-center">
                            <span className="text-gray-600">
                               Horas trabajadas:
                            </span>
-                           <span className="font-medium">7h 45m</span>
+                           <span className="font-medium">
+                              {asistencia.ingreso.hora && asistencia.salida.hora
+                                 ? diferenciaHoras(
+                                      asistencia.ingreso.hora,
+                                      asistencia.salida.hora
+                                   )
+                                 : "Pendiente"}
+                           </span>
                         </div>
                      </div>
                   </CardContent>

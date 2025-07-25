@@ -6,6 +6,7 @@ const asistenciaService = {
    registrarIngreso: (data) => api.post("/asistencias/registrar-ingreso", data),
    registrarSalida: (data) => api.post("/asistencias/registrar-salida", data),
    generarReporte: (data) => api.post("/asistencias/reporte", data),
+   registrarFalta:(data)=>api.post("/permisos/registrar-falta-justificada",data)
 
 };
 
