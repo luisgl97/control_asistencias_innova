@@ -193,10 +193,10 @@ class SequelizeAsistenciaRepository {
     } else {
       /* estadoSalida = ESTADO_SALIDA_ANTICIPADA; */
       return {
-      success: false,
-      message: "Aún no es la hora de salida.",
-      asistencia,
-    };
+        success: false,
+        message: "Aún no es la hora de salida.",
+        asistencia,
+      };
     }
 
     // Actualizar los campos de salida y horas extras
@@ -260,10 +260,7 @@ class SequelizeAsistenciaRepository {
       const usuarioData = usuariosMap.get(usuarioId);
       if (!usuarioData) return;
 
-      const diaSemana = moment(asistencia.fecha)
-        .locale("es")
-        .format("dddd")
-        .toLowerCase();
+      const fechaKey = moment(asistencia.fecha).format("YYYY-MM-DD");
 
       const entrada = asistencia.hora_ingreso
         ? moment(asistencia.hora_ingreso, "HH:mm:ss").format("HH:mm")
@@ -276,11 +273,11 @@ class SequelizeAsistenciaRepository {
 
       switch (asistencia.estado) {
         case "PRESENTE":
-          usuarioData.asistenciaPorDia[diaSemana] = `${label}`;
-      usuarioData.observados += 1;
-      break;
+          usuarioData.asistenciaPorDia[fechaKey] = `${label}`;
+          usuarioData.observados += 1;
+          break;
         case "ASISTIO":
-          usuarioData.asistenciaPorDia[diaSemana] = `${label} ✅`;
+          usuarioData.asistenciaPorDia[fechaKey] = `${label} ✅`;
           usuarioData.asistencias += 1;
           break;
 
@@ -290,12 +287,14 @@ class SequelizeAsistenciaRepository {
             fecha: asistencia.fecha,
             hora_ingreso: asistencia.hora_ingreso,
           });
-          usuarioData.asistenciaPorDia[diaSemana] = `${label} 🕒 (Tarde)`;
+          usuarioData.asistenciaPorDia[fechaKey] = `${label} 🕒 (Tarde)`;
           usuarioData.tardanzas += 1;
           break;
 
         case "SALIDA ANTICIPADA":
-          usuarioData.asistenciaPorDia[diaSemana] = `${label} ⚠️ (Salida anticipada)`;
+          usuarioData.asistenciaPorDia[
+            fechaKey
+          ] = `${label} ⚠️ (Salida anticipada)`;
 
           // Calcular estado de ingreso según la hora
           const [hi, mi] = asistencia.hora_ingreso.split(":").map(Number);
@@ -307,42 +306,51 @@ class SequelizeAsistenciaRepository {
               ? ESTADO_PRESENTE
               : ESTADO_TARDANZA;
 
-              console.log('estado', estado);
+          console.log("estado", estado);
 
           if (estado == ESTADO_PRESENTE) {
             usuarioData.asistencias += 1;
-            
           }
           if (estado == ESTADO_TARDANZA) {
             usuarioData.tardanzas += 1;
           }
           break;
 
-         case "FALTA JUSTIFICADA":
-      usuarioData.asistenciaPorDia[diaSemana] = "📄 Falta Justificada";
-      usuarioData.faltas += 1;
+        case "FALTA JUSTIFICADA":
+          usuarioData.asistenciaPorDia[fechaKey] = "📄 Falta Justificada";
+          usuarioData.faltas += 1;
 
         default:
-      usuarioData.asistenciaPorDia[diaSemana] = "🚫 Sin registro";
-      usuarioData.faltas += 1;
-      break;
+          usuarioData.asistenciaPorDia[fechaKey] = "🚫 Sin registro";
+          usuarioData.faltas += 1;
+          break;
       }
     });
 
-    // Generar reporte por día de semana
+    // Generar solo días hábiles en el rango: lunes a sábado
     const diasDelRango = [];
-let fecha = moment(fechaInicio);
-const fechaFinMoment = moment(fechaFin);
+    let fechaCursor = moment(fechaInicio);
+    const fechaFinMoment = moment(fechaFin);
 
-while (fecha.isSameOrBefore(fechaFinMoment, "day")) {
-  diasDelRango.push({
-    diaSemana: fecha.locale("es").format("dddd").toLowerCase(),
-    fecha: fecha.format("YYYY-MM-DD"),
-  });
-  fecha = fecha.add(1, "day");
-}
+    // Iterar desde la fecha de inicio hasta la fecha de fin
+    while (fechaCursor.isSameOrBefore(fechaFinMoment, "day")) {
+      const diaNumero = fechaCursor.day(); // 0 = domingo, 6 = sábado
+      if (diaNumero !== 0) {
+        // Excluir domingos
+        diasDelRango.push({
+          diaSemana: fechaCursor.locale("es").format("dddd").toLowerCase(),
+          fecha: fechaCursor.format("YYYY-MM-DD"), // clave interna
+          fechaBonita: fechaCursor.format("DD-MM-YYYY"), // formato bonito
+        });
+      }
+      fechaCursor = fechaCursor.add(1, "day");
+    }
 
 
+    // Convertir el mapa a un array de objetos para el resultado final
+    // Cada objeto contendrá el nombre del trabajador y sus asistencias por día
+    // y los totales de asistencias, tardanzas, observados y faltas
+    // Además, se agregan los días del rango con su estado correspondiente
     const resultado = Array.from(usuariosMap.values()).map((user) => {
       const fila = {
         trabajador: user.trabajador,
@@ -352,19 +360,19 @@ while (fecha.isSameOrBefore(fechaFinMoment, "day")) {
         faltas: user.faltas,
       };
 
-      diasDelRango.forEach(({ diaSemana, fecha }) => {
-  const hoy = moment();
+      diasDelRango.forEach(({ diaSemana, fecha, fechaBonita }) => {
+        const hoy = moment().format("YYYY-MM-DD");
 
-  if (moment(fecha).isAfter(hoy, "day")) {
-    fila[diaSemana] = "Pendiente";
-  } else {
-    fila[diaSemana] = user.asistenciaPorDia[diaSemana] || "Falta";
-    if (!user.asistenciaPorDia[diaSemana]) {
-      fila.faltas += 1;
-    }
-  }
-});
-
+        if (fecha > hoy) {
+          fila[`${diaSemana} (${fechaBonita})`] = "Pendiente";
+        } else {
+          fila[`${diaSemana} (${fechaBonita})`] =
+            user.asistenciaPorDia[fecha] || "Falta";
+          if (!user.asistenciaPorDia[fecha]) {
+            fila.faltas += 1;
+          }
+        }
+      });
       return fila;
     });
 
@@ -380,9 +388,10 @@ while (fecha.isSameOrBefore(fechaFinMoment, "day")) {
       },
     });
 
-    console.log('asistencia', asistencia);
+    console.log("asistencia", asistencia);
 
-    const faltaJustificada = asistencia && asistencia.estado === ESTADO_FALTA_JUSTIFICADA;
+    const faltaJustificada =
+      asistencia && asistencia.estado === ESTADO_FALTA_JUSTIFICADA;
 
     if (!asistencia) {
       return {
@@ -397,7 +406,7 @@ while (fecha.isSameOrBefore(fechaFinMoment, "day")) {
           hora: null,
         },
         asistencia_id: null,
-         falta_justificada: faltaJustificada,
+        falta_justificada: faltaJustificada,
         mensaje: "No se ha registrado ingreso ni salida",
       };
     }
@@ -414,8 +423,8 @@ while (fecha.isSameOrBefore(fechaFinMoment, "day")) {
           estado: false,
           hora: null,
         },
-         asistencia_id: asistencia.id,
-         falta_justificada: faltaJustificada,
+        asistencia_id: asistencia.id,
+        falta_justificada: faltaJustificada,
         mensaje: "Ingreso registrado, falta registrar salida",
       };
     }
@@ -433,7 +442,7 @@ while (fecha.isSameOrBefore(fechaFinMoment, "day")) {
           hora: asistencia.hora_salida,
         },
         asistencia_id: asistencia.id,
-         falta_justificada: faltaJustificada,
+        falta_justificada: faltaJustificada,
         mensaje: "Ingreso y salida registrados",
       };
     }
@@ -450,7 +459,7 @@ while (fecha.isSameOrBefore(fechaFinMoment, "day")) {
         hora: null,
       },
       asistencia_id: asistencia.id,
-       falta_justificada: faltaJustificada,
+      falta_justificada: faltaJustificada,
       mensaje: "No se ha registrado ingreso ni salida",
     };
   }
