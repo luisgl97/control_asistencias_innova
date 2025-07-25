@@ -57,7 +57,7 @@ class Usuario {
       return { success: false, message: "Formato de correo inválido" };
     }
 
-    const rolesPermitidos = ["GERENTE", "ADMINISTRADOR", "TRABAJADOR"];
+    const rolesPermitidos = ["GERENTE", "ADMINISTRADOR", "TRABAJADOR", "LIDER TRABAJADOR"];
 
     if (!rolesPermitidos.includes(rol)) {
       return { success: false, message: "Rol no permitido" };

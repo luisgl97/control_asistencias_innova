@@ -7,6 +7,7 @@ module.exports = async (usuario_id, salidaData, asistenciaRepository) => {
 
   const asistenciaSalida = await asistenciaRepository.registrarSalida(dataRegistroSalida);
 
+
    if(!asistenciaSalida.success){
     return {
       codigo: 400,

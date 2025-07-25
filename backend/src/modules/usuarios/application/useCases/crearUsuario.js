@@ -4,6 +4,8 @@ const {
 } = require("../../infrastructure/services/mapeoUsuarioPasswordEncriptado"); // Importamos la función para preparar el usuario para guardar
 
 module.exports = async (usuarioData, usuarioRepository) => {
+
+  console.log("Datos del usuario a crear:", usuarioData);
   const { success, message: error } = Usuario.validarCamposObligatorios(usuarioData, modo="crear");
   if (!success)
     return {
@@ -13,6 +15,8 @@ module.exports = async (usuarioData, usuarioRepository) => {
         estado: false,
       },
     };
+
+   
 
   // ?Verificar si el Correo o Dni ya está en us
 
