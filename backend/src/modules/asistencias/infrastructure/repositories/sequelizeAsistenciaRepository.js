@@ -171,7 +171,7 @@ class SequelizeAsistenciaRepository {
       // Solo se consideran horas extras si se cumplió el mínimo de jornada laboral
       if (minutosTrabajados >= minutosMinimos) {
         // Calcula cuántos minutos trabajó después de la hora de salida normal
-        const diferencia = minutosSalida - horaLimite;
+        const diferencia = minutosTrabajados - minutosMinimos;
 
         // Si se pasó al menos 30 minutos del límite, se computan como horas extras
         if (diferencia >= 30) {
@@ -191,7 +191,12 @@ class SequelizeAsistenciaRepository {
         estadoSalida = ESTADO_ASISTIO;
       }
     } else {
-      estadoSalida = ESTADO_SALIDA_ANTICIPADA;
+      /* estadoSalida = ESTADO_SALIDA_ANTICIPADA; */
+      return {
+      success: false,
+      message: "Aún no es la hora de salida.",
+      asistencia,
+    };
     }
 
     // Actualizar los campos de salida y horas extras
@@ -214,9 +219,9 @@ class SequelizeAsistenciaRepository {
   async obtenerReporteAsistencias(fechaInicio, fechaFin) {
     const usuarios = await Usuario.findAll({
       where: {
-        rol: "TRABAJADOR", // Filtrar solo usuarios con rol de trabajador
+        rol: ["TRABAJADOR", "LIDER TRABAJADOR"],
       },
-    }); // traer todos los usuarios
+    });
 
     const asistencias = await Asistencia.findAll({
       where: {
@@ -235,7 +240,7 @@ class SequelizeAsistenciaRepository {
 
     const usuariosMap = new Map();
 
-    // Inicializar todos los usuarios en el mapa, incluso si no tienen asistencias
+    // Inicializar estructura por usuario
     usuarios.forEach((usuario) => {
       usuariosMap.set(usuario.id, {
         trabajador: `${usuario.nombres} ${usuario.apellidos}`,
@@ -247,54 +252,96 @@ class SequelizeAsistenciaRepository {
       });
     });
 
-    // Procesar asistencias registradas
+    // Procesar cada asistencia según su estado
     asistencias.forEach((asistencia) => {
-      if (!asistencia.usuario) return; // Ignorar si no hay usuario relacionado
+      if (!asistencia.usuario) return;
 
       const usuarioId = asistencia.usuario.id;
       const usuarioData = usuariosMap.get(usuarioId);
-
-      if (!usuarioData) return; // Por si acaso no está en el mapa
+      if (!usuarioData) return;
 
       const diaSemana = moment(asistencia.fecha)
         .locale("es")
         .format("dddd")
         .toLowerCase();
+
       const entrada = asistencia.hora_ingreso
         ? moment(asistencia.hora_ingreso, "HH:mm:ss").format("HH:mm")
-        : null;
+        : "-";
       const salida = asistencia.hora_salida
         ? moment(asistencia.hora_salida, "HH:mm:ss").format("HH:mm")
-        : null;
+        : "-";
 
-      if (!entrada && !salida) {
-        usuarioData.asistenciaPorDia[diaSemana] = "Sin marcar";
-        usuarioData.faltas += 1;
-      } else if (entrada && !salida) {
-        usuarioData.asistenciaPorDia[
-          diaSemana
-        ] = `${entrada} - No marcado (Observado)`;
-        usuarioData.observados += 1;
-      } else {
-        let label = `${entrada} - ${salida}`;
-        if (asistencia.estado_entrada === "Tarde") {
-          label += " (Tarde)";
-          usuarioData.tardanzas += 1;
-        } else {
+      const label = `${entrada} - ${salida}`;
+
+      switch (asistencia.estado) {
+        case "PRESENTE":
+          usuarioData.asistenciaPorDia[diaSemana] = `${label}`;
+      usuarioData.observados += 1;
+      break;
+        case "ASISTIO":
+          usuarioData.asistenciaPorDia[diaSemana] = `${label} ✅`;
           usuarioData.asistencias += 1;
-        }
-        usuarioData.asistenciaPorDia[diaSemana] = label;
+          break;
+
+        case "TARDANZA":
+        case "ASISTIO TARDE":
+          console.log({
+            fecha: asistencia.fecha,
+            hora_ingreso: asistencia.hora_ingreso,
+          });
+          usuarioData.asistenciaPorDia[diaSemana] = `${label} 🕒 (Tarde)`;
+          usuarioData.tardanzas += 1;
+          break;
+
+        case "SALIDA ANTICIPADA":
+          usuarioData.asistenciaPorDia[diaSemana] = `${label} ⚠️ (Salida anticipada)`;
+
+          // Calcular estado de ingreso según la hora
+          const [hi, mi] = asistencia.hora_ingreso.split(":").map(Number);
+          const minutosIngreso = hi * 60 + mi;
+          const toleranciaMinutos = 466; // 7:46 AM (466 minutos = 7h × 60 + 46m.)
+
+          const estado =
+            minutosIngreso < toleranciaMinutos
+              ? ESTADO_PRESENTE
+              : ESTADO_TARDANZA;
+
+              console.log('estado', estado);
+
+          if (estado == ESTADO_PRESENTE) {
+            usuarioData.asistencias += 1;
+            
+          }
+          if (estado == ESTADO_TARDANZA) {
+            usuarioData.tardanzas += 1;
+          }
+          break;
+
+         case "FALTA JUSTIFICADA":
+      usuarioData.asistenciaPorDia[diaSemana] = "📄 Falta Justificada";
+      usuarioData.faltas += 1;
+
+        default:
+      usuarioData.asistenciaPorDia[diaSemana] = "🚫 Sin registro";
+      usuarioData.faltas += 1;
+      break;
       }
     });
 
-    const dias = [
-      "lunes",
-      "martes",
-      "miércoles",
-      "jueves",
-      "viernes",
-      "sábado",
-    ];
+    // Generar reporte por día de semana
+    const diasDelRango = [];
+let fecha = moment(fechaInicio);
+const fechaFinMoment = moment(fechaFin);
+
+while (fecha.isSameOrBefore(fechaFinMoment, "day")) {
+  diasDelRango.push({
+    diaSemana: fecha.locale("es").format("dddd").toLowerCase(),
+    fecha: fecha.format("YYYY-MM-DD"),
+  });
+  fecha = fecha.add(1, "day");
+}
+
 
     const resultado = Array.from(usuariosMap.values()).map((user) => {
       const fila = {
@@ -305,19 +352,18 @@ class SequelizeAsistenciaRepository {
         faltas: user.faltas,
       };
 
-      dias.forEach((dia, index) => {
-        const fechaDia = moment(fechaInicio).add(index, "days");
-        const hoy = moment();
+      diasDelRango.forEach(({ diaSemana, fecha }) => {
+  const hoy = moment();
 
-        if (fechaDia.isAfter(hoy, "day")) {
-          fila[dia] = "Pendiente";
-        } else {
-          fila[dia] = user.asistenciaPorDia[dia] || "Falta";
-          if (!user.asistenciaPorDia[dia]) {
-            fila.faltas += 1;
-          }
-        }
-      });
+  if (moment(fecha).isAfter(hoy, "day")) {
+    fila[diaSemana] = "Pendiente";
+  } else {
+    fila[diaSemana] = user.asistenciaPorDia[diaSemana] || "Falta";
+    if (!user.asistenciaPorDia[diaSemana]) {
+      fila.faltas += 1;
+    }
+  }
+});
 
       return fila;
     });
@@ -334,6 +380,10 @@ class SequelizeAsistenciaRepository {
       },
     });
 
+    console.log('asistencia', asistencia);
+
+    const faltaJustificada = asistencia && asistencia.estado === ESTADO_FALTA_JUSTIFICADA;
+
     if (!asistencia) {
       return {
         ingreso: {
@@ -346,6 +396,8 @@ class SequelizeAsistenciaRepository {
           estado: false,
           hora: null,
         },
+        asistencia_id: null,
+         falta_justificada: faltaJustificada,
         mensaje: "No se ha registrado ingreso ni salida",
       };
     }
@@ -362,6 +414,8 @@ class SequelizeAsistenciaRepository {
           estado: false,
           hora: null,
         },
+         asistencia_id: asistencia.id,
+         falta_justificada: faltaJustificada,
         mensaje: "Ingreso registrado, falta registrar salida",
       };
     }
@@ -378,6 +432,8 @@ class SequelizeAsistenciaRepository {
           estado: true,
           hora: asistencia.hora_salida,
         },
+        asistencia_id: asistencia.id,
+         falta_justificada: faltaJustificada,
         mensaje: "Ingreso y salida registrados",
       };
     }
@@ -393,6 +449,8 @@ class SequelizeAsistenciaRepository {
         estado: false,
         hora: null,
       },
+      asistencia_id: asistencia.id,
+       falta_justificada: faltaJustificada,
       mensaje: "No se ha registrado ingreso ni salida",
     };
   }

@@ -16,7 +16,7 @@ router.get("/", asistenciaController.obtenerAsistencias);
 
 // 🔒 Ruta protegida, solo para usuarios con rol de administrador o gerente
 router.get("/usuario/:id", autorizarRol(["GERENTE", "ADMINISTRADOR"]), asistenciaController.obtenerAsistenciasPorUsuario);
-router.post("/reporte", autorizarRol(["GERENTE", "ADMINISTRADOR"]), asistenciaController.obtenerReporteAsistencias);
+router.post("/reporte", autorizarRol(["GERENTE", "ADMINISTRADOR", "LIDER TRABAJADOR"]), asistenciaController.obtenerReporteAsistencias);
 router.post("/del-dia",autorizarRol(["GERENTE", "ADMINISTRADOR"]), asistenciaController.obtenerAsistenciasDelDia);
 
 // 🔓 Ruta accesible para cualquier usuario autenticado
