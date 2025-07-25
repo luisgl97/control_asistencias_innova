@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import SelectConEtiquetaFlotante from "@/shared/components/selectConEtiquetaFlotante";
-import { Loader2, XCircle } from "lucide-react";
+import { AlertCircle, Loader2, XCircle } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import asistenciaService from "../service/asistenciaService";
@@ -22,7 +22,13 @@ const initForm = {
    autorizado_por: "",
    observacion: "",
 };
-export function ModalFalta({ status, ubicacion, falta_justificada,fetchVerificarAsistencia }) {
+export function ModalSalidaAnticipada({
+   estado_ingreso,
+   estado_salida,
+   ubicacion,
+   id,
+   fetchVerificarAsistencia,
+}) {
    const [open, setOpen] = useState(false);
    const [isLoading, setLoading] = useState(false);
    const [form, setForm] = useState({ ...initForm });
@@ -39,25 +45,26 @@ export function ModalFalta({ status, ubicacion, falta_justificada,fetchVerificar
       setOpen(false);
    };
    const handleClick = async () => {
-      const fecha = new Intl.DateTimeFormat("es-PE", {
+      const hora = new Intl.DateTimeFormat("es-PE", {
          timeZone: "America/Lima",
-         year: "numeric",
-         month: "2-digit",
-         day: "2-digit",
+         hour: "2-digit",
+         minute: "2-digit",
+         second: "2-digit",
+         hour12: false,
       }).format(new Date());
-      const [dia, mes, anio] = fecha.split("/");
-      const fechaFormateada = `${anio}-${mes}-${dia}`;
       let data = {
          ...form,
-         fecha: fechaFormateada,
+         asistencia_id: id,
+         hora_salida: hora,
       };
       try {
          setLoading(true);
          console.log(data);
-         await asistenciaService.registrarFalta(data);
+         await asistenciaService.registrarSalidaAnticipada(data);
          fetchVerificarAsistencia();
-         toast.success("Falta registrada");
-         handleClose()
+         toast.success("Salida anticipada registrada");
+
+         handleClose();
       } catch (error) {
          toast.error("El registro a fallado");
       } finally {
@@ -68,17 +75,17 @@ export function ModalFalta({ status, ubicacion, falta_justificada,fetchVerificar
       <AlertDialog open={open} onOpenChange={setOpen}>
          <AlertDialogTrigger asChild>
             <Button
-               disabled={status || !ubicacion || falta_justificada}
                className="bg-gray-600 hover:bg-gray-500 text-gray-200 py-2 h-auto flex flex-col items-center gap-1 text-xs border border-gray-500"
                variant="outline"
+               disabled={!estado_ingreso || estado_salida || !ubicacion}
             >
-               <XCircle className="w-5 h-5" />
-               <span className="text-sm">Falta Justificada</span>
+               <AlertCircle className="w-5 h-5" />
+               <span className="text-sm">Salida Anticipada</span>
             </Button>
          </AlertDialogTrigger>
          <AlertDialogContent>
             <AlertDialogHeader className="text-start">
-               <AlertDialogTitle>Falta Justificada</AlertDialogTitle>
+               <AlertDialogTitle>Salida Anticipada</AlertDialogTitle>
                <AlertDialogDescription>
                   Ingrese los datos correctamente
                </AlertDialogDescription>

@@ -15,6 +15,7 @@ import usuarioSchema from "../schemas/registroUsuarioSchema";
 import usuarioService from "../services/usuarioService";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+import { Loader2 } from "lucide-react";
 
 const claves = {
    nombres: "",

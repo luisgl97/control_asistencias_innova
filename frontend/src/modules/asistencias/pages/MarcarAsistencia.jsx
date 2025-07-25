@@ -23,6 +23,7 @@ import axios from "axios";
 import HorariosTrabajo from "../components/HorariosTrabajo";
 import { ModalFalta } from "../components/ModalFalta";
 import { diferenciaHoras } from "../libs/diferenciaHoras";
+import { ModalSalidaAnticipada } from "../components/ModalSalidaAnticipada";
 
 export default function MarcarAsistencia() {
    const { user, loading } = useAuth();
@@ -253,7 +254,7 @@ export default function MarcarAsistencia() {
             <section className="w-full order-1 md:order-2 md:col-span-2 space-y-4">
                <HorariosTrabajo className={"md:hidden"} />
 
-               <Card className="bg-gradient-to-r from-innova-blue/95 to-innova-blue border-0 shadow-lg ">
+               <Card className="bg-gradient-to-r from-innova-blue/95 to-innova-blue border-0 shadow-lg gap-4">
                   <CardHeader className="text-white ">
                      <div className="flex items-center space-x-2 mb-2">
                         <Clock className="w-6 h-6" />
@@ -272,13 +273,23 @@ export default function MarcarAsistencia() {
                            </p>
                         </div>
                      )}
+                     {asistencia.falta_justificada && (
+                        <div className="text-sm bg-amber-500 text-white flex items-center rounded-lg p-2 gap-2 mt-2">
+                           <AlertCircle className="w-4 h-4" />
+                           <p>Usted a registrado una falta justificada</p>
+                        </div>
+                     )}
                   </CardHeader>
-                  <CardContent className=" sm:p-6">
+                  <CardContent className="sm:p-6 ">
                      <div className="grid grid-cols-2 gap-3">
                         <Button
                            onClick={marcarAsistenciaIngreso}
                            className="bg-green-600 hover:bg-green-500 text-white py-4 h-auto flex flex-col items-center gap-1 font-semibold text-base shadow-lg"
-                           disabled={status.estadoIngreso || !ubicacion}
+                           disabled={
+                              status.estadoIngreso ||
+                              !ubicacion ||
+                              asistencia.falta_justificada
+                           }
                         >
                            <CheckCircle className="w-5 h-5" />
                            <span className="text-sm">Marcar Entrada</span>
@@ -308,20 +319,21 @@ export default function MarcarAsistencia() {
 
                      {/* Botones de permisos especiales */}
                      <div className="grid grid-cols-2 gap-3">
-                        <ModalFalta />
+                        {/* disabled={status.estadoIngreso || !ubicacion||asistencia.falta_justificada} */}
 
-                        <Button
-                           className="bg-gray-600 hover:bg-gray-500 text-gray-200 py-2 h-auto flex flex-col items-center gap-1 text-xs border border-gray-500"
-                           variant="outline"
-                           disabled={
-                              !status.estadoIngreso ||
-                              status.estadoSalida ||
-                              !ubicacion
-                           }
-                        >
-                           <AlertCircle className="w-5 h-5" />
-                           <span className="text-sm">Salida Anticipada</span>
-                        </Button>
+                        <ModalFalta
+                           status={status.estadoIngreso}
+                           ubicacion={ubicacion}
+                           falta_justificada={asistencia.falta_justificada}
+                           fetchVerificarAsistencia={fetchVerificarAsistencia}
+                        />
+                        <ModalSalidaAnticipada
+                           estado_ingreso={status.estadoIngreso}
+                           estado_salida={status.estadoSalida}
+                           ubicacion={ubicacion}
+                           id={asistencia.asistencia_id}
+                           fetchVerificarAsistencia={fetchVerificarAsistencia}
+                        />
                      </div>
 
                      {/* Información adicional */}
