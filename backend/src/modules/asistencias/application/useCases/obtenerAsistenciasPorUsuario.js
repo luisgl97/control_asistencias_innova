@@ -25,6 +25,7 @@ module.exports = async (idUsuario, fecha_inicio, fecha_fin, asistenciaRepository
 
     switch (estado) {
       case "ASISTIO":
+      case "SALIDA ANTICIPADA":
         asistencias += 1;
         break;
       case "ASISTIO TARDE":
@@ -111,6 +112,7 @@ module.exports = async (idUsuario, fecha_inicio, fecha_fin, asistenciaRepository
     const respuesta = {
         usuario: {
             id: usuario.id,
+            dni: usuario.dni,
             nombres: usuario.nombres,
             apellidos: usuario.apellidos,
             correo: usuario.correo,

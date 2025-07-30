@@ -11,17 +11,20 @@ const {
 
 router.use(verificarToken); // Verifica token para todas las rutas
 
-// 🔓 Ruta accesible para cualquier usuario autenticado (ej: listar usuarios)
-router.get("/", asistenciaController.obtenerAsistencias);
 
-// 🔒 Ruta protegida, solo para usuarios con rol de administrador o gerente
-router.post("/usuario", autorizarRol(["GERENTE", "ADMINISTRADOR", "LIDER TRABAJADOR"]), asistenciaController.obtenerAsistenciasPorUsuario);
+// 🔒 Ruta protegida, solo para usuarios con rol de gerente, administrador o gerente
+router.get("/", autorizarRol(["GERENTE", "ADMINISTRADOR", "LIDER TRABAJADOR"]), asistenciaController.obtenerAsistencias);
+//router.post("/usuario", autorizarRol(["GERENTE", "ADMINISTRADOR", "LIDER TRABAJADOR"]), asistenciaController.obtenerAsistenciasPorUsuario);
 router.post("/reporte", autorizarRol(["GERENTE", "ADMINISTRADOR", "LIDER TRABAJADOR"]), asistenciaController.obtenerReporteAsistencias);
 router.post("/del-dia",autorizarRol(["GERENTE", "ADMINISTRADOR", "LIDER TRABAJADOR"]), asistenciaController.obtenerAsistenciasDelDia);
+router.post("/autorizar-horas-extras", autorizarRol(["GERENTE", "ADMINISTRADOR"]), asistenciaController.autorizarHorasExtras);
+router.post("/mapa-ubicaciones", autorizarRol(["GERENTE", "ADMINISTRADOR", "LIDER TRABAJADOR"]), asistenciaController.obtenerMapaUbicaciones);
 
 // 🔓 Ruta accesible para cualquier usuario autenticado
+router.post("/usuario", asistenciaController.obtenerAsistenciasPorUsuario);
 router.post("/registrar-ingreso", asistenciaController.registrarIngreso);
 router.post("/registrar-salida", asistenciaController.registrarSalida);
 router.post('/verificar-asistencia-del-dia', asistenciaController.verificarAsistenciaDelUsuarioDelDia);
+
 
 module.exports = router;

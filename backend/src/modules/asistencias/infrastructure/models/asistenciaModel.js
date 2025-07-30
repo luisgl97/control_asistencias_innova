@@ -37,7 +37,11 @@ const Asistencia = sequelize.define(
       type: DataTypes.FLOAT,
       defaultValue: 0.0,
     },
-
+      hizo_horas_extras: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+    defaultValue: false,
+  },
     estado: {
       type: DataTypes.ENUM("PRESENTE", "FALTA JUSTIFICADA", "TARDANZA", "SALIDA ANTICIPADA", "ASISTIO", "ASISTIO TARDE"),
       defaultValue: "PRESENTE",
