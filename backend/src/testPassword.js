@@ -7,7 +7,7 @@ async function encriptarPassword(password) {
 }
 
 async function main() {
-  const password = "Luis123456";
+  const password = "Pepe123456";
   const passwordEncriptado = await encriptarPassword(password);
   console.log("🔒 Password encriptado:", passwordEncriptado);
 }
