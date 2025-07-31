@@ -318,15 +318,7 @@ export default function MarcarAsistencia() {
                      </div>
 
                      {/* Botones de permisos especiales */}
-                     <div className="grid grid-cols-2 gap-3">
-                        {/* disabled={status.estadoIngreso || !ubicacion||asistencia.falta_justificada} */}
-
-                        <ModalFalta
-                           status={status.estadoIngreso}
-                           ubicacion={ubicacion}
-                           falta_justificada={asistencia.falta_justificada}
-                           fetchVerificarAsistencia={fetchVerificarAsistencia}
-                        />
+                     <div className="grid grid-cols-1 gap-3">
                         <ModalSalidaAnticipada
                            estado_ingreso={status.estadoIngreso}
                            estado_salida={status.estadoSalida}

@@ -13,30 +13,22 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import SelectConEtiquetaFlotante from "@/shared/components/selectConEtiquetaFlotante";
-import { AlertCircle, Loader2, XCircle } from "lucide-react";
+import { Loader2, XCircle } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import asistenciaService from "../service/asistenciaService";
+import { Badge } from "@/components/ui/badge";
 
-const initForm = {
-   autorizado_por: "",
-   observacion: "",
-};
-export function ModalSalidaAnticipada({
-   estado_ingreso,
-   estado_salida,
-   ubicacion,
-   id,
-   fetchVerificarAsistencia,
-}) {
+export function ModalJustificarFalta({ fecha_dia, id,cargarDatos }) {
+   const initForm = {
+      observacion: "",
+      fecha: fecha_dia,
+      usuario_id: id,
+   };
    const [open, setOpen] = useState(false);
    const [isLoading, setLoading] = useState(false);
    const [form, setForm] = useState({ ...initForm });
-   const opciones_autorizaciones = [
-      { value: "1", label: "Genaro" },
-      { value: "2", label: "Julio" },
-      { value: "3", label: "Pilar" },
-   ];
+
    const handleChange = (e) => {
       setForm((prevForm) => ({ ...prevForm, [e.target.name]: e.target.value }));
    };
@@ -45,25 +37,12 @@ export function ModalSalidaAnticipada({
       setOpen(false);
    };
    const handleClick = async () => {
-      const hora = new Intl.DateTimeFormat("es-PE", {
-         timeZone: "America/Lima",
-         hour: "2-digit",
-         minute: "2-digit",
-         second: "2-digit",
-         hour12: false,
-      }).format(new Date());
-      let data = {
-         ...form,
-         asistencia_id: id,
-         hora_salida: hora,
-      };
       try {
          setLoading(true);
-         console.log(data);
-         await asistenciaService.registrarSalidaAnticipada(data);
-         fetchVerificarAsistencia();
-         toast.success("Salida anticipada registrada");
-
+         console.log(form);
+         await asistenciaService.registrarFalta(form);
+         await cargarDatos()
+         toast.success("Falta Justificada registrada");
          handleClose();
       } catch (error) {
          toast.error("El registro a fallado");
@@ -74,32 +53,18 @@ export function ModalSalidaAnticipada({
    return (
       <AlertDialog open={open} onOpenChange={setOpen}>
          <AlertDialogTrigger asChild>
-            <Button
-               className="bg-gray-600 hover:bg-gray-500 text-gray-200 py-2 h-auto flex items-center justify-center gap-1 text-xs border border-gray-500"
+            <Badge
+               className="bg-red-50 text-red-700 border-red-200 cursor-pointer"
                variant="outline"
-               disabled={!estado_ingreso || estado_salida || !ubicacion}
             >
-               <AlertCircle className="w-5 h-5" />
-               <span className="text-sm">Salida Anticipada</span>
-            </Button>
+               <span className="text-xs">SIN REGISTRO</span>
+            </Badge>
          </AlertDialogTrigger>
          <AlertDialogContent>
             <AlertDialogHeader className="text-start">
-               <AlertDialogTitle>Salida Anticipada</AlertDialogTitle>
-               <AlertDialogDescription>
-                  Ingrese los datos correctamente
-               </AlertDialogDescription>
+               <AlertDialogTitle>Falta Justificada</AlertDialogTitle>
             </AlertDialogHeader>
             <article className="space-y-4">
-               <SelectConEtiquetaFlotante
-                  value={form.autorizado_por}
-                  onChange={(name, value) =>
-                     setForm({ ...form, [name]: value })
-                  }
-                  name="autorizado_por"
-                  label="Seleccione quien autorizo el permiso"
-                  opciones={opciones_autorizaciones}
-               />
                <Textarea
                   name="observacion"
                   value={form.observacion}
