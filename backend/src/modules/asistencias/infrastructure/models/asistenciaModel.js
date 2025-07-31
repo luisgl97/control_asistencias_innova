@@ -46,6 +46,12 @@ const Asistencia = sequelize.define(
       type: DataTypes.ENUM("PRESENTE", "FALTA JUSTIFICADA", "TARDANZA", "SALIDA ANTICIPADA", "ASISTIO", "ASISTIO TARDE"),
       defaultValue: "PRESENTE",
     },
+    hora_inicio_refrigerio: {
+      type: DataTypes.TIME,
+    },
+    hora_fin_refrigerio: {
+      type: DataTypes.TIME,
+    },
   },
   {
     tableName: "asistencias",

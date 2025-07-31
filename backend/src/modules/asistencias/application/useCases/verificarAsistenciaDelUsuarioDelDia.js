@@ -2,7 +2,7 @@ module.exports = async (idUsuario, dataAsistencia, asistenciaRepository) => {
 
     const { fecha } = dataAsistencia;
    
-    const { ingreso, salida, asistencia_id, falta_justificada, mensaje} = await  asistenciaRepository.verificarAsistenciaDelUsuarioDelDia(idUsuario, fecha);
+    const { ingreso, salida, asistencia_id, falta_justificada,hora_inicio_refrigerio, hora_fin_refrigerio, mensaje} = await  asistenciaRepository.verificarAsistenciaDelUsuarioDelDia(idUsuario, fecha);
 
      return {
         codigo: 200,
@@ -14,6 +14,8 @@ module.exports = async (idUsuario, dataAsistencia, asistenciaRepository) => {
                 salida,
                 asistencia_id,
                 falta_justificada,
+                hora_inicio_refrigerio,
+                hora_fin_refrigerio
             },
         },
     };

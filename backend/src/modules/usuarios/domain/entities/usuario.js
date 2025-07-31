@@ -1,5 +1,6 @@
 class Usuario {
   constructor({
+    tipo_documento,
     dni,
     nombres,
     apellidos,
@@ -10,6 +11,7 @@ class Usuario {
     estado,
     filial_id,
   }) {
+    this.tipo_documento = tipo_documento;
     this.dni = dni;
     this.nombres = nombres;
     this.apellidos = apellidos;
@@ -73,6 +75,7 @@ class Usuario {
     if (modo === "editar") {
 
       const tieneAlMenosUnCampoValido = [
+        "tipo_documento",
         "dni",
         "nombres",
         "apellidos",
