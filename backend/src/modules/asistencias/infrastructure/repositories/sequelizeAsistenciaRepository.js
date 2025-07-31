@@ -3,10 +3,10 @@ const { Asistencia } = require("../models/asistenciaModel");
 const {
   Usuario,
 } = require("../../../usuarios/infrastructure/models/usuarioModel");
-
-/*  const { DateTime } = require("luxon"); */
+const db = require("../../../../models");
 
 const moment = require("moment");
+const { CONST_HORA_INICIO, CONST_HORA_FIN_LV, CONST_HORA_FIN_SAB } = require("../../../../constants/horarios");
 require("moment/locale/es"); // importa el idioma español
 moment.locale("es"); // establece el idioma a español
 
@@ -36,23 +36,63 @@ class SequelizeAsistenciaRepository {
     return asistencia;
   }
 
-  async obtenerAsistenciasPorUsuario(idUsuario) {
+  async obtenerAsistenciasPorUsuario(idUsuario, fecha_inicio, fecha_fin) {
     return await Asistencia.findAll({
-      where: { usuario_id: idUsuario },
+      where: {
+        usuario_id: idUsuario,
+        fecha: {
+          [Op.between]: [fecha_inicio, fecha_fin],
+        },
+      },
     });
   }
 
   async obtenerAsistenciasDelDia(fecha) {
-    return await Asistencia.findAll({
-      where: { fecha: fecha },
+    // Obtener fecha actual en Lima para comparar
+    const hoy = moment().tz("America/Lima").format("YYYY-MM-DD");
+
+    const usuarios = await Usuario.findAll({
+      where: {
+        rol: ["TRABAJADOR", "LIDER TRABAJADOR"],
+      },
+      attributes: {
+        exclude: ["password"],
+      },
       include: [
         {
-          model: Usuario,
-          as: "usuario",
-          attributes: ["id", "nombres", "apellidos"],
+          model: db.asistencias,
+          as: "asistencias",
+          required: false, // LEFT JOIN
+          where: { fecha },
         },
       ],
     });
+
+    const listado = usuarios.map((usuario) => {
+      const asistencia = usuario.asistencias[0];
+
+      // ⚙️ Decidir estado según si hay o no asistencia
+      let estadoFinal = asistencia?.estado;
+
+      if (!asistencia) {
+        estadoFinal = fecha < hoy ? "FALTA" : "SIN REGISTRO";
+      }
+
+      return {
+        id: usuario.id,
+        asistencia_id: asistencia?.id || null,
+        trabajador: `${usuario.nombres} ${usuario.apellidos}`,
+        dni: usuario.dni,
+        fecha: fecha,
+        hora_ingreso: asistencia?.hora_ingreso || "--",
+        hora_salida: asistencia?.hora_salida || "--",
+        estado: estadoFinal,
+        horas_extras: asistencia?.horas_extras ?? "--",
+        hizo_horas_extras: asistencia?.hizo_horas_extras ?? false,
+      };
+    });
+
+    return listado;
   }
 
   async actualizarAsistencia(id, asistenciaData) {
@@ -134,52 +174,59 @@ class SequelizeAsistenciaRepository {
       };
     }
 
-    // Extraemos la hora de salida en formato string (ej. "17:45")
-    const horaSalida = dataSalida.hora_salida;
-
-    // Dividimos el string por ":" para separar hora y minutos, luego los convertimos a números
-    const [hs, ms] = horaSalida.split(":").map(Number);
-
-    // Calculamos la cantidad total de minutos desde las 00:00 hasta la hora de salida
-    const minutosSalida = hs * 60 + ms;
-
-    // Usa el día de la fecha de la asistencia, no el 'hoy' del servidor
-    const diaSemana = new Date(`${dataSalida.fecha}T00:00:00`).getDay(); // 0=dom, 6=sáb
-
-    // Jornada definida por la empresa
-    const HORA_INICIO = 7 * 60 + 30; // 07:30
-    const HORA_FIN_LV = 17 * 60; // 17:00
-    const HORA_FIN_SAB = 13 * 60; // 13:00
-    const horaLimite = diaSemana === 6 ? HORA_FIN_SAB : HORA_FIN_LV;
-    const minutosMinimos = horaLimite - HORA_INICIO; // 9.5h (570) L–V, 5.5h (330) sáb
-
     let horasExtras = 0;
 
-    // Verifica que la hora de ingreso exista antes de calcular
-    if (asistencia.hora_ingreso) {
-      // Divide la hora de ingreso en horas y minutos, y convierte a números
-      const [hIn, mIn] = asistencia.hora_ingreso.split(":").map(Number);
+      // Extraemos la hora de salida en formato string (ej. "17:45")
+      const horaSalida = dataSalida?.hora_salida;
 
-      // Convierte la hora de ingreso a minutos totales desde las 00:00
-      const minutosIngreso = hIn * 60 + mIn;
+      // Dividimos el string por ":" para separar hora y minutos, luego los convertimos a números
+      const [hs, ms] = horaSalida.split(":").map(Number);
 
-      // 👇 Clave: si ingresó antes de la hora de inicio, cuenta desde la hora de inicio
-      const minutosInicioEfectivo = Math.max(minutosIngreso, HORA_INICIO);
+      // Calculamos la cantidad total de minutos desde las 00:00 hasta la hora de salida
+      const minutosSalida = hs * 60 + ms;
 
-      const minutosTrabajados = minutosSalida - minutosInicioEfectivo;
+      // Usa el día de la fecha de la asistencia, no el 'hoy' del servidor
+      const diaSemana = moment
+        .tz(asistencia.fecha, "YYYY-MM-DD", "America/Lima")
+        .day(); // 0=domingo, 6=sábado
 
-      // Solo se consideran horas extras si se cumplió el mínimo de jornada laboral
-      if (minutosTrabajados >= minutosMinimos) {
-        // Calcula cuántos minutos trabajó después de la hora de salida normal
-        const diferencia = minutosTrabajados - minutosMinimos;
+      // Jornada definida por la empresa
+      const HORA_INICIO = CONST_HORA_INICIO; // 07:30
+      const HORA_FIN_LV = CONST_HORA_FIN_LV; // 17:00
+      const HORA_FIN_SAB = CONST_HORA_FIN_SAB; // 13:00
+      const horaLimite = diaSemana === 6 ? HORA_FIN_SAB : HORA_FIN_LV;
+      const minutosMinimos = horaLimite - HORA_INICIO; // 9.5h (570) L–V, 5.5h (330) sáb
 
-        // Si se pasó al menos 30 minutos del límite, se computan como horas extras
-        if (diferencia >= 30) {
-          // Cada bloque de 30 minutos se cuenta como 0.5 horas extras
-          horasExtras = Math.floor(diferencia / 30) * 0.5;
+    if (asistencia.hizo_horas_extras) {
+    
+
+      // Verifica que la hora de ingreso exista antes de calcular
+      if (asistencia.hora_ingreso) {
+        // Divide la hora de ingreso en horas y minutos, y convierte a números
+        const [hIn, mIn] = asistencia.hora_ingreso.split(":").map(Number);
+
+        // Convierte la hora de ingreso a minutos totales desde las 00:00
+        const minutosIngreso = hIn * 60 + mIn;
+
+        // 👇 Clave: si ingresó antes de la hora de inicio, cuenta desde la hora de inicio
+        const minutosInicioEfectivo = Math.max(minutosIngreso, HORA_INICIO);
+
+        const minutosTrabajados = minutosSalida - minutosInicioEfectivo;
+
+        // Solo se consideran horas extras si se cumplió el mínimo de jornada laboral
+        if (minutosTrabajados >= minutosMinimos) {
+          // Calcula cuántos minutos trabajó después de la hora de salida normal
+          const diferencia = minutosTrabajados - minutosMinimos;
+
+          // Si se pasó al menos 30 minutos del límite, se computan como horas extras
+          if (diferencia >= 30) {
+            // Cada bloque de 30 minutos se cuenta como 0.5 horas extras
+            horasExtras = Math.floor(diferencia / 30) * 0.5;
+          }
         }
       }
     }
+
     // Calcular estado_salida
 
     let estadoSalida = ESTADO_ASISTIO;
@@ -204,8 +251,8 @@ class SequelizeAsistenciaRepository {
       hora_salida: horaSalida,
       ubicacion_salida: dataSalida.ubicacion_salida,
       observacion_salida: dataSalida.observacion_salida || null,
-      horas_extras: horasExtras,
       estado: estadoSalida,
+      horas_extras: horasExtras,
     });
 
     return {
@@ -260,7 +307,9 @@ class SequelizeAsistenciaRepository {
       const usuarioData = usuariosMap.get(usuarioId);
       if (!usuarioData) return;
 
-      const fechaKey = moment(asistencia.fecha).format("YYYY-MM-DD");
+      const fechaKey = moment(asistencia.fecha)
+        .tz("America/Lima")
+        .format("YYYY-MM-DD");
 
       const entrada = asistencia.hora_ingreso
         ? moment(asistencia.hora_ingreso, "HH:mm:ss").format("HH:mm")
@@ -270,6 +319,8 @@ class SequelizeAsistenciaRepository {
         : "-";
 
       const label = `${entrada} - ${salida}`;
+
+      console.log("asistencia.estado", asistencia.estado);
 
       switch (asistencia.estado) {
         case "PRESENTE":
@@ -317,8 +368,10 @@ class SequelizeAsistenciaRepository {
           break;
 
         case "FALTA JUSTIFICADA":
+          console.log("faltaaaaaaa justificada");
           usuarioData.asistenciaPorDia[fechaKey] = "📄 Falta Justificada";
           usuarioData.faltas += 1;
+          break;
 
         default:
           usuarioData.asistenciaPorDia[fechaKey] = "🚫 Sin registro";
@@ -329,8 +382,8 @@ class SequelizeAsistenciaRepository {
 
     // Generar solo días hábiles en el rango: lunes a sábado
     const diasDelRango = [];
-    let fechaCursor = moment(fechaInicio);
-    const fechaFinMoment = moment(fechaFin);
+    let fechaCursor = moment(fechaInicio).tz("America/Lima");
+    const fechaFinMoment = moment(fechaFin).tz("America/Lima");
 
     // Iterar desde la fecha de inicio hasta la fecha de fin
     while (fechaCursor.isSameOrBefore(fechaFinMoment, "day")) {
@@ -338,14 +391,21 @@ class SequelizeAsistenciaRepository {
       if (diaNumero !== 0) {
         // Excluir domingos
         diasDelRango.push({
-          diaSemana: fechaCursor.locale("es").format("dddd").toLowerCase(),
-          fecha: fechaCursor.format("YYYY-MM-DD"), // clave interna
-          fechaBonita: fechaCursor.format("DD-MM-YYYY"), // formato bonito
+          diaSemana: fechaCursor
+            .clone()
+            .tz("America/Lima")
+            .locale("es")
+            .format("dddd")
+            .toLowerCase(),
+          fecha: fechaCursor.clone().tz("America/Lima").format("YYYY-MM-DD"),
+          fechaBonita: fechaCursor
+            .clone()
+            .tz("America/Lima")
+            .format("DD-MM-YYYY"),
         });
       }
       fechaCursor = fechaCursor.add(1, "day");
     }
-
 
     // Convertir el mapa a un array de objetos para el resultado final
     // Cada objeto contendrá el nombre del trabajador y sus asistencias por día
@@ -361,7 +421,8 @@ class SequelizeAsistenciaRepository {
       };
 
       diasDelRango.forEach(({ diaSemana, fecha, fechaBonita }) => {
-        const hoy = moment().format("YYYY-MM-DD");
+        // ✅ Fecha de hoy en Perú
+        const hoy = moment().tz("America/Lima").format("YYYY-MM-DD");
 
         if (fecha > hoy) {
           fila[`${diaSemana} (${fechaBonita})`] = "Pendiente";
@@ -471,6 +532,117 @@ class SequelizeAsistenciaRepository {
         fecha: fecha,
       },
     });
+  }
+
+  // Autorizar horas extras
+  async autorizarHorasExtras(asistenciaId) {
+    const asistencia = await Asistencia.findByPk(asistenciaId);
+    if (!asistencia) {
+      return {
+        success: false,
+        message: "Asistencia no encontrada",
+      };
+    }
+
+    if (!asistencia.hora_salida) {
+      // Actualizar las horas extras
+      asistencia.hizo_horas_extras = true;
+      await asistencia.save();
+      return {
+        success: true,
+        message: "Horas extras autorizadas correctamente",
+      };
+    }
+
+    // Extraemos la hora de salida en formato string (ej. "17:45")
+    const horaSalida = asistencia?.hora_salida;
+
+    // Dividimos el string por ":" para separar hora y minutos, luego los convertimos a números
+    const [hs, ms] = horaSalida.split(":").map(Number);
+
+    // Calculamos la cantidad total de minutos desde las 00:00 hasta la hora de salida
+    const minutosSalida = hs * 60 + ms;
+
+    // Usa el día de la fecha de la asistencia, no el 'hoy' del servidor
+    const diaSemana = moment
+      .tz(asistencia.fecha, "YYYY-MM-DD", "America/Lima")
+      .day(); // 0=domingo, 6=sábado
+
+    // Jornada definida por la empresa
+    const HORA_INICIO = CONST_HORA_INICIO // 07:30
+    const HORA_FIN_LV = CONST_HORA_FIN_LV; // 17:00
+    const HORA_FIN_SAB = CONST_HORA_FIN_SAB; // 13:00
+    const horaLimite = diaSemana === 6 ? HORA_FIN_SAB : HORA_FIN_LV;
+    const minutosMinimos = horaLimite - HORA_INICIO; // 9.5h (570) L–V, 5.5h (330) sáb
+
+    let horasExtras = 0;
+
+    // Verifica que la hora de ingreso exista antes de calcular
+    if (asistencia.hora_ingreso) {
+      // Divide la hora de ingreso en horas y minutos, y convierte a números
+      const [hIn, mIn] = asistencia.hora_ingreso.split(":").map(Number);
+
+      // Convierte la hora de ingreso a minutos totales desde las 00:00
+      const minutosIngreso = hIn * 60 + mIn;
+
+      // 👇 Clave: si ingresó antes de la hora de inicio, cuenta desde la hora de inicio
+      const minutosInicioEfectivo = Math.max(minutosIngreso, HORA_INICIO);
+
+      const minutosTrabajados = minutosSalida - minutosInicioEfectivo;
+
+      // Solo se consideran horas extras si se cumplió el mínimo de jornada laboral
+      if (minutosTrabajados >= minutosMinimos) {
+        // Calcula cuántos minutos trabajó después de la hora de salida normal
+        const diferencia = minutosTrabajados - minutosMinimos;
+
+        // Si se pasó al menos 30 minutos del límite, se computan como horas extras
+        if (diferencia >= 30) {
+          // Cada bloque de 30 minutos se cuenta como 0.5 horas extras
+          horasExtras = Math.floor(diferencia / 30) * 0.5;
+        }
+      }
+    }
+
+    // Actualizar las horas extras
+    asistencia.horas_extras = horasExtras;
+    asistencia.hizo_horas_extras = true; // Marcar que se autorizaron horas extras
+    await asistencia.save();
+
+    return {
+      success: true,
+      message: "Horas extras autorizadas correctamente",
+      asistencia,
+    };
+  }
+
+  // Obtener mapa de ubicaciones de ingreso y salida
+  async obtenerMapaUbicaciones(fecha) {
+    
+    console.log('fecha', fecha);
+    const asistencias = await Asistencia.findAll({
+      where: {
+        fecha: fecha,
+      },
+      include: [
+        {
+          model: Usuario,
+          as: "usuario",
+          attributes: ["id", "nombres", "apellidos", "dni"],
+        },
+      ],
+    })
+
+    const ubicaciones = asistencias.length > 0 && asistencias.map((asistencia) => {
+      return {
+        usuario_id: asistencia.usuario.id,
+        trabajador: `${asistencia.usuario.nombres} ${asistencia.usuario.apellidos}`,
+        dni: asistencia.usuario.dni,
+        ubicacion_ingreso: asistencia.ubicacion_ingreso,
+        ubicacion_salida: asistencia.ubicacion_salida,
+      };
+    })
+
+    return ubicaciones || [];
   }
 }
 

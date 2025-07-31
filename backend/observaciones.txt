@@ -1,0 +1,42 @@
+25 - 07 - 2025
+
+- Innova Pro
+
+Condiciones de alquiler
+    - tiempo
+    - cantidad de equipos : 10 cuerpos
+    - a donde va el equipo (obra)
+
+En formulario (Responder condiciones)
+    - LETRA DE GARANTIA 
+    - letra de pago
+    - cheque de GARANTIA
+    - cheque de pago 
+
+Valorizaciones:
+
+    Semanal, quincenal, 21 dias,30 dias
+
+    semanal: colgantes
+    
+- Marcate
+
+    - Falta justificada, autorizar por administrador o gerente
+    - Que plazo tiene un trabajador para justificar una falta (averiguar)
+    - Insertar un mapa con puntos de los trabajadores.
+
+- Planilla
+
+    Puedes vender la mitad de vacaciones
+
+    Vacaciones:
+        - Tomar 1 semana completa las vacaciones
+        - Tomar dias sueltos para la mitad de las vacaciones
+
+- Facturacion
+
+    
+
+    nombre 
+    direccion
+    

@@ -2,13 +2,13 @@ const Asistencia = require("../../../asistencias/domain/entities/asistencia");
 const Permiso = require("../../domain/entities/permiso"); // Importamos la entidad Permiso
 
 module.exports = async (
-  usuario_id,
+  autorizado_por, // ID del usuario que autoriza, viene del token JWT
   permisoData,
   permisoRepository,
   asistenciaRepository
 ) => {
   const dataRegistroAsistencia = {
-    usuario_id: usuario_id,
+    usuario_id: permisoData.usuario_id,
     fecha: permisoData.fecha,
     estado: "FALTA JUSTIFICADA",
   };
@@ -30,7 +30,7 @@ module.exports = async (
 
     // Verificar si ya existe una asistencia para esa fecha
     const asistenciaExistente = await asistenciaRepository.obtenerAsistenciaPorUsuarioYFecha(
-        usuario_id,
+        usuario_id = permisoData.usuario_id,
         dataRegistroAsistencia.fecha
         );
     
@@ -49,7 +49,7 @@ module.exports = async (
 
   const dataRegistroPermiso = {
     asistencia_id: asistencia.id,
-    autorizado_por: permisoData.autorizado_por,
+    autorizado_por: autorizado_por,
     observacion: permisoData.observacion,
   };
 
@@ -71,9 +71,9 @@ module.exports = async (
   const nuevoPermiso = await permisoRepository.crear(dataRegistroPermiso);
 
   return {
-    codigo: 201,
+    codigo: 200,
     respuesta: {
-      mensaje: "Permiso registrado exitosamente",
+      mensaje: "Permiso autorizado exitosamente",
       estado: true,
       permiso: nuevoPermiso,
     },

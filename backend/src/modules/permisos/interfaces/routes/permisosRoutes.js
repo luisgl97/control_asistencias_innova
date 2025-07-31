@@ -14,7 +14,8 @@ router.use(verificarToken); // Verifica token para todas las rutas
 router.get("/", permisoController.obtenerPermisos);
 router.get("/usuario/:id", permisoController.obtenerPermisosPorUsuarioId);
 router.post("/registrar-salida-anticipada", permisoController.registrarPermisoSalidaAnticipada);
-router.post('/registrar-falta-justificada', permisoController.registrarPermisoFaltaJustificada);
 
+// 🔒 Ruta protegida, solo para usuarios con rol de gerente o administrador
+router.post('/autorizar-falta-justificada', autorizarRol(["GERENTE", "ADMINISTRADOR", "LIDER TRABAJADOR"]), permisoController.autorizarPermisoFaltaJustificada);
 
 module.exports = router;

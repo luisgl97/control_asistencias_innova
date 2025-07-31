@@ -4,7 +4,8 @@ const sequelizeAsistenciaRepository = require("../../../asistencias/infrastructu
 const obtenerPermisos = require("../../application/useCases/obtenerPermisos");
 const registrarPermisoSalidaAnticipada = require("../../application/useCases/registrarPermisoSalidaAnticipada");
 const obtenerPermisosPorUsuarioId = require("../../application/useCases/obtenerPermisosPorUsuarioId");
-const registrarPermisoFaltaJustificada = require("../../application/useCases/registrarPermisoFaltaJustificada");
+const registrarPermisoFaltaJustificada = require("../../application/useCases/autorizarPermisoFaltaJustificada");
+const autorizarPermisoFaltaJustificada = require("../../application/useCases/autorizarPermisoFaltaJustificada");
 
 const permisoRepository = new sequelizePermisoRepository(); // Instancia del repositorio de permiso
 const asistenciaRepository = new sequelizeAsistenciaRepository(); // Instancia del repositorio de asistencia
@@ -51,12 +52,12 @@ const PermisoController = {
     }
   },
 
-  async registrarPermisoFaltaJustificada(req, res) {
+  async autorizarPermisoFaltaJustificada(req, res) {
     try {
       const usuario_id = req.usuario.id; // Asumiendo que el ID del usuario está en el token JWT
 
-      const { codigo, respuesta } = await registrarPermisoFaltaJustificada(
-        usuario_id,
+      const { codigo, respuesta } = await autorizarPermisoFaltaJustificada(
+        autorizado_por = usuario_id,
         req.body,
         permisoRepository,
         asistenciaRepository
