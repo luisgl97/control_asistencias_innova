@@ -20,7 +20,7 @@ export default function GestionAsistencias() {
    return (
       <div className="flex w-full justify-center my-8">
          <Tabs defaultValue="dia" className="w-full max-w-7xl flex items-start space-y-2">
-            <TabsList className="grid grid-cols-2  w-full h-auto bg-white">
+            <TabsList className="grid grid-cols-2 md:grid-none md:flex  w-full md:w-auto h-auto bg-neutral-50">
                <TabsTrigger className="w-full bg-neutral-200/40" value="dia" >Asistencia Diaria</TabsTrigger>
                <TabsTrigger className="w-full bg-neutral-200/40" value="semanal">Asistencia Semanal</TabsTrigger>
                <TabsTrigger className="w-full bg-neutral-200/40" value="mapa">Mapa de trabajadores</TabsTrigger>
