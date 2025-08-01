@@ -267,178 +267,165 @@ class SequelizeAsistenciaRepository {
     };
   }
 
-  // Obtiene el reporte de asistencias por fecha
-  async obtenerReporteAsistencias(fechaInicio, fechaFin) {
-    const usuarios = await Usuario.findAll({
-      where: {
-        rol: ["TRABAJADOR", "LIDER TRABAJADOR"],
+ // Obtiene el reporte de asistencias por fecha
+async obtenerReporteAsistencias(fechaInicio, fechaFin) {
+  const usuarios = await Usuario.findAll({
+    where: {
+      rol: ["TRABAJADOR", "LIDER TRABAJADOR"],
+    },
+  });
+
+  const asistencias = await Asistencia.findAll({
+    where: {
+      fecha: {
+        [Op.between]: [fechaInicio, fechaFin],
       },
-    });
-
-    const asistencias = await Asistencia.findAll({
-      where: {
-        fecha: {
-          [Op.between]: [fechaInicio, fechaFin],
-        },
+    },
+    include: [
+      {
+        model: Usuario,
+        as: "usuario",
       },
-      include: [
-        {
-          model: Usuario,
-          as: "usuario",
-        },
-      ],
-      order: [["fecha", "ASC"]],
-    });
+    ],
+    order: [["fecha", "ASC"]],
+  });
 
-    const usuariosMap = new Map();
+  const usuariosMap = new Map();
+  const ultimaAsistenciaPorUsuario = new Map();
 
-    // Inicializar estructura por usuario
-    usuarios.forEach((usuario) => {
-      usuariosMap.set(usuario.id, {
-        trabajador: `${usuario.nombres} ${usuario.apellidos}`,
-        asistenciaPorDia: {},
-        asistencias: 0,
-        tardanzas: 0,
-        faltas: 0,
-        observados: 0,
-      });
-    });
+  // Agrupar asistencias por usuario y registrar la última fecha
+  asistencias.forEach((asistencia) => {
+    if (!asistencia.usuario) return;
+    const usuarioId = asistencia.usuario.id;
 
-    // Procesar cada asistencia según su estado
-    asistencias.forEach((asistencia) => {
-      if (!asistencia.usuario) return;
-
-      const usuarioId = asistencia.usuario.id;
-      const usuarioData = usuariosMap.get(usuarioId);
-      if (!usuarioData) return;
-
-      const fechaKey = moment(asistencia.fecha)
-        .tz("America/Lima")
-        .format("YYYY-MM-DD");
-
-      const entrada = asistencia.hora_ingreso
-        ? moment(asistencia.hora_ingreso, "HH:mm:ss").format("HH:mm")
-        : "-";
-      const salida = asistencia.hora_salida
-        ? moment(asistencia.hora_salida, "HH:mm:ss").format("HH:mm")
-        : "-";
-
-      const label = `${entrada} - ${salida}`;
-
-      switch (asistencia.estado) {
-        case "PRESENTE":
-          usuarioData.asistenciaPorDia[fechaKey] = `${label}`;
-          usuarioData.observados += 1;
-          break;
-        case "ASISTIO":
-          usuarioData.asistenciaPorDia[fechaKey] = `${label} ✅`;
-          usuarioData.asistencias += 1;
-          break;
-
-        case "TARDANZA":
-        case "ASISTIO TARDE":
-
-          usuarioData.asistenciaPorDia[fechaKey] = `${label} 🕒 (Tarde)`;
-          usuarioData.tardanzas += 1;
-          break;
-
-        case "SALIDA ANTICIPADA":
-          usuarioData.asistenciaPorDia[
-            fechaKey
-          ] = `${label} ⚠️ (Salida anticipada)`;
-
-          // Calcular estado de ingreso según la hora
-          const [hi, mi] = asistencia.hora_ingreso.split(":").map(Number);
-          const minutosIngreso = hi * 60 + mi;
-          const toleranciaMinutos = 466; // 7:46 AM (466 minutos = 7h × 60 + 46m.)
-
-          const estado =
-            minutosIngreso < toleranciaMinutos
-              ? ESTADO_PRESENTE
-              : ESTADO_TARDANZA;
-
-          if (estado == ESTADO_PRESENTE) {
-            usuarioData.asistencias += 1;
-          }
-          if (estado == ESTADO_TARDANZA) {
-            usuarioData.tardanzas += 1;
-          }
-          break;
-
-        case "FALTA JUSTIFICADA":
-
-          usuarioData.asistenciaPorDia[fechaKey] = "📄 Falta Justificada";
-          usuarioData.faltas += 1;
-          break;
-
-        default:
-          usuarioData.asistenciaPorDia[fechaKey] = "🚫 Sin registro";
-          usuarioData.faltas += 1;
-          break;
+    if (!ultimaAsistenciaPorUsuario.has(usuarioId)) {
+      ultimaAsistenciaPorUsuario.set(usuarioId, asistencia.fecha);
+    } else {
+      const fechaGuardada = moment(ultimaAsistenciaPorUsuario.get(usuarioId));
+      const fechaActual = moment(asistencia.fecha);
+      if (fechaActual.isAfter(fechaGuardada)) {
+        ultimaAsistenciaPorUsuario.set(usuarioId, asistencia.fecha);
       }
-    });
-
-    // Generar solo días hábiles en el rango: lunes a sábado
-    const diasDelRango = [];
-    let fechaCursor = moment(fechaInicio).tz("America/Lima");
-    const fechaFinMoment = moment(fechaFin).tz("America/Lima");
-
-    // Iterar desde la fecha de inicio hasta la fecha de fin
-    while (fechaCursor.isSameOrBefore(fechaFinMoment, "day")) {
-      const diaNumero = fechaCursor.day(); // 0 = domingo, 6 = sábado
-      const fechaFormateada = fechaCursor.format("YYYY-MM-DD")
-
-      if (diaNumero !== 0 && !CONST_FERIADOS_PERU.includes(fechaFormateada)) {
-        // Excluir domingos
-        diasDelRango.push({
-          diaSemana: fechaCursor
-            .clone()
-            .tz("America/Lima")
-            .locale("es")
-            .format("dddd")
-            .toLowerCase(),
-          fecha: fechaCursor.clone().tz("America/Lima").format("YYYY-MM-DD"),
-          fechaBonita: fechaCursor
-            .clone()
-            .tz("America/Lima")
-            .format("DD-MM-YYYY"),
-        });
-      }
-      fechaCursor = fechaCursor.add(1, "day");
     }
+  });
 
-    // Convertir el mapa a un array de objetos para el resultado final
-    // Cada objeto contendrá el nombre del trabajador y sus asistencias por día
-    // y los totales de asistencias, tardanzas, observados y faltas
-    // Además, se agregan los días del rango con su estado correspondiente
-    const resultado = Array.from(usuariosMap.values()).map((user) => {
-      const fila = {
-        trabajador: user.trabajador,
-        asistencias: user.asistencias,
-        tardanzas: user.tardanzas,
-        observados: user.observados,
-        faltas: user.faltas,
-      };
+  // Inicializar estructura por usuario
+  usuarios.forEach((usuario) => {
+    // Si el usuario está inactivo y no tiene asistencias dentro del rango, ignorarlo
+    const ultima = ultimaAsistenciaPorUsuario.get(usuario.id);
+    if (usuario.estado === false && (!ultima || moment(ultima).isBefore(fechaInicio))) return;
 
-      diasDelRango.forEach(({ diaSemana, fecha, fechaBonita }) => {
-        // ✅ Fecha de hoy en Perú
-        const hoy = moment().tz("America/Lima").format("YYYY-MM-DD");
+    usuariosMap.set(usuario.id, {
+      trabajador: `${usuario.nombres} ${usuario.apellidos}`,
+      estado: usuario.estado,
+      asistenciaPorDia: {},
+      asistencias: 0,
+      tardanzas: 0,
+      faltas: 0,
+      observados: 0,
+      ultimaFechaAsistencia: ultimaAsistenciaPorUsuario.get(usuario.id) || null,
+    });
+  });
 
-        if (fecha > hoy) {
-          fila[`${diaSemana} (${fechaBonita})`] = "Pendiente";
-        } else {
-          fila[`${diaSemana} (${fechaBonita})`] =
-            user.asistenciaPorDia[fecha] || "Falta";
-          if (!user.asistenciaPorDia[fecha]) {
-            fila.faltas += 1;
-          }
-        }
+  // Procesar asistencias
+  asistencias.forEach((asistencia) => {
+    const usuarioId = asistencia.usuario?.id;
+    if (!usuariosMap.has(usuarioId)) return;
+
+    const usuarioData = usuariosMap.get(usuarioId);
+    const fechaKey = moment(asistencia.fecha).tz("America/Lima").format("YYYY-MM-DD");
+
+    const entrada = asistencia.hora_ingreso
+      ? moment(asistencia.hora_ingreso, "HH:mm:ss").format("HH:mm")
+      : "-";
+    const salida = asistencia.hora_salida
+      ? moment(asistencia.hora_salida, "HH:mm:ss").format("HH:mm")
+      : "-";
+
+    const label = `${entrada} - ${salida}`;
+
+    switch (asistencia.estado) {
+      case "PRESENTE":
+        usuarioData.asistenciaPorDia[fechaKey] = `${label}`;
+        usuarioData.observados += 1;
+        break;
+      case "ASISTIO":
+        usuarioData.asistenciaPorDia[fechaKey] = `${label} ✅`;
+        usuarioData.asistencias += 1;
+        break;
+      case "TARDANZA":
+      case "ASISTIO TARDE":
+        usuarioData.asistenciaPorDia[fechaKey] = `${label} 🕒 (Tarde)`;
+        usuarioData.tardanzas += 1;
+        break;
+      case "SALIDA ANTICIPADA":
+        usuarioData.asistenciaPorDia[fechaKey] = `${label} ⚠️ (Salida anticipada)`;
+        const [hi, mi] = asistencia.hora_ingreso.split(":" ).map(Number);
+        const minutosIngreso = hi * 60 + mi;
+        const toleranciaMinutos = 466;
+        const estado = minutosIngreso < toleranciaMinutos ? "PRESENTE" : "TARDANZA";
+        estado === "PRESENTE" ? usuarioData.asistencias++ : usuarioData.tardanzas++;
+        break;
+      case "FALTA JUSTIFICADA":
+        usuarioData.asistenciaPorDia[fechaKey] = "📄 Falta Justificada";
+        usuarioData.faltas += 1;
+        break;
+      default:
+        usuarioData.asistenciaPorDia[fechaKey] = "🚫 Sin registro";
+        usuarioData.faltas += 1;
+        break;
+    }
+  });
+
+  const diasDelRango = [];
+  let fechaCursor = moment(fechaInicio).tz("America/Lima");
+  const fechaFinMoment = moment(fechaFin).tz("America/Lima");
+
+  while (fechaCursor.isSameOrBefore(fechaFinMoment, "day")) {
+    const diaNumero = fechaCursor.day();
+    const fechaFormateada = fechaCursor.format("YYYY-MM-DD");
+    if (diaNumero !== 0 && !CONST_FERIADOS_PERU.includes(fechaFormateada)) {
+      diasDelRango.push({
+        diaSemana: fechaCursor.clone().locale("es").format("dddd").toLowerCase(),
+        fecha: fechaCursor.format("YYYY-MM-DD"),
+        fechaBonita: fechaCursor.format("DD-MM-YYYY"),
       });
-      return fila;
+    }
+    fechaCursor = fechaCursor.add(1, "day");
+  }
+
+  const resultado = Array.from(usuariosMap.values()).map((user) => {
+    const fila = {
+      trabajador: user.trabajador,
+      asistencias: user.asistencias,
+      tardanzas: user.tardanzas,
+      observados: user.observados,
+      faltas: 0,
+    };
+
+    diasDelRango.forEach(({ diaSemana, fecha, fechaBonita }) => {
+      const hoy = moment().tz("America/Lima").format("YYYY-MM-DD");
+      const fechaReporte = moment(fecha, "YYYY-MM-DD");
+      const ultimaFechaAsistencia = user.ultimaFechaAsistencia ? moment(user.ultimaFechaAsistencia, "YYYY-MM-DD") : null;
+
+      if (fecha > hoy) {
+        fila[`${diaSemana} (${fechaBonita})`] = "Pendiente";
+      } else if (!user.estado && ultimaFechaAsistencia && fechaReporte.isAfter(ultimaFechaAsistencia, "day")) {
+        fila[`${diaSemana} (${fechaBonita})`] = "No aplica";
+      } else {
+        const valor = user.asistenciaPorDia[fecha] || "Falta";
+        fila[`${diaSemana} (${fechaBonita})`] = valor;
+        if (valor === "Falta" || valor === "🚫 Sin registro") {
+          fila.faltas += 1;
+        }
+      }
     });
 
-    return resultado;
-  }
+    return fila;
+  });
+
+  return resultado;
+}
 
   // Verificar asistencia del usuario parar mostrar el boton de ingreso o salida en el frontend
   async verificarAsistenciaDelUsuarioDelDia(usuarioId, fecha) {
