@@ -13,8 +13,8 @@ const asistenciaService = {
       api.post("/permisos/registrar-salida-anticipada", data),
    habilitarHorasExtras: (data) =>
       api.post("/asistencias/autorizar-horas-extras", data),
-   mapaTrabajadores: (data) =>
-      api.post("/asistencias/mapa-ubicaciones", data),
+   mapaTrabajadores: (data) => api.post("/asistencias/mapa-ubicaciones", data),
+   asistenciaPorUsuario: (data) => api.post("/asistencias/usuario", data),
    // permisos/registrar-salida-anticipada
 };
 

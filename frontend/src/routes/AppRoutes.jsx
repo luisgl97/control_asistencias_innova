@@ -15,6 +15,7 @@ import HeaderAsistencias from "@/shared/components/HeaderAsistencias";
 import GestionAsistencias from "@/modules/asistencias/pages/GestionAsistencias";
 import RegistrarUsuario from "@/modules/usuarios/pages/RegistrarUsuario";
 import GestionUsuarios from "@/modules/usuarios/pages/GestionUsuarios";
+import RoleGuard from "./rol.guard";
 
 // Lazy load components
 const Login = lazy(() => import("@/modules/auth/pages/Login"));
@@ -32,13 +33,27 @@ export default function AppRoutes() {
                <Route path="/login" element={<Login />} />
                <Route path="/" element={<AuthGuard />}>
                   <Route element={<HeaderAsistencias />}>
-                     <Route index element={<MarcarAsistencia />} />
-                      <Route path="/asistencias" element={<GestionAsistencias />} />
-                      <Route path="/usuarios/registrar" element={<RegistrarUsuario />} />
-                      <Route path="/usuarios" element={<GestionUsuarios />} />
+                     <Route element={<RoleGuard roles={["TRABAJADOR"]} />}>
+                        <Route index element={<MarcarAsistencia />} />
+                     </Route>
+                     <Route
+                        element={
+                           <RoleGuard roles={["GERENTE", "ADMINISTRADOR"]} />
+                        }
+                     >
+                        <Route
+                           path="/asistencias"
+                           element={<GestionAsistencias />}
+                        />
+                        <Route
+                           path="/usuarios/registrar"
+                           element={<RegistrarUsuario />}
+                        />
+                        <Route path="/usuarios" element={<GestionUsuarios />} />
+                     </Route>
                   </Route>
                </Route>
-               
+
                {/* Catch-all */}
                <Route path="*" element={<Navigate to={"/"} replace />} />
             </Routes>

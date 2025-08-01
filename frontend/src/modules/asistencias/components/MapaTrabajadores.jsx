@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { CalendarIcon, MapPin } from "lucide-react";
+import { CalendarIcon, LogIn, LogOut, MapPin } from "lucide-react";
 import ReactDOMServer from "react-dom/server";
 import asistenciaService from "../service/asistenciaService";
 import {
@@ -181,6 +181,8 @@ const MapaTrabajadores = () => {
    const [trabajadoresRespaldo, setTrabajadoresRespaldo] = useState([]);
    const [date, setDate] = useState(new Date());
    const [filtroTipo, setFiltroTipo] = useState("todas");
+   const [trabajadorSeleccionado, setTrabajadorSeleccionado] =
+      useState("todos");
 
    const fetchTrabajadores = async (fecha) => {
       try {
@@ -219,9 +221,27 @@ const MapaTrabajadores = () => {
       }));
    }, [trabajadores]);
 
+   const trabajadoresUnicos = useMemo(() => {
+      const nombres = new Set();
+      trabajadores.forEach((t) => {
+         nombres.add(t.trabajador);
+      });
+      return Array.from(nombres);
+   }, [trabajadores]);
+
+   const trabajadoresFiltrados = useMemo(() => {
+      return trabajadoresConColores.filter((t) => {
+         return (
+            trabajadorSeleccionado === "todos" ||
+            t.trabajador === trabajadorSeleccionado
+         );
+      });
+   }, [trabajadoresConColores, trabajadorSeleccionado]);
+
    return (
       <article>
-         <section className="w-full flex gap-4 mb-8">
+         <section className="w-full flex flex-wrap gap-4 mb-8">
+            {/* Fecha */}
             <Popover>
                <PopoverTrigger asChild>
                   <Button
@@ -248,7 +268,9 @@ const MapaTrabajadores = () => {
                   />
                </PopoverContent>
             </Popover>
-            <Select onValueChange={setFiltroTipo}>
+
+            {/* Filtro tipo de ubicación */}
+            <Select onValueChange={setFiltroTipo} defaultValue="todas">
                <SelectTrigger className="w-[200px]">
                   <SelectValue placeholder="Tipo de ubicación" />
                </SelectTrigger>
@@ -256,6 +278,24 @@ const MapaTrabajadores = () => {
                   <SelectItem value="todas">Todas</SelectItem>
                   <SelectItem value="entrada">Solo entradas</SelectItem>
                   <SelectItem value="salida">Solo salidas</SelectItem>
+               </SelectContent>
+            </Select>
+
+            {/* Filtro por trabajador */}
+            <Select
+               onValueChange={setTrabajadorSeleccionado}
+               defaultValue="todos"
+            >
+               <SelectTrigger className="w-[200px]">
+                  <SelectValue placeholder="Trabajador" />
+               </SelectTrigger>
+               <SelectContent className="max-h-[450px]">
+                  <SelectItem value="todos">Todos</SelectItem>
+                  {trabajadoresUnicos.map((nombre, idx) => (
+                     <SelectItem key={idx} value={nombre}>
+                        {nombre}
+                     </SelectItem>
+                  ))}
                </SelectContent>
             </Select>
          </section>
@@ -272,7 +312,7 @@ const MapaTrabajadores = () => {
                />
 
                {agruparTrabajadoresPorUbicacion(
-                  trabajadoresConColores,
+                  trabajadoresFiltrados,
                   filtroTipo
                ).map((grupo, i) => {
                   const esUnico = grupo.trabajadores.length === 1;
@@ -293,7 +333,7 @@ const MapaTrabajadores = () => {
                         html: ReactDOMServer.renderToString(
                            <div className="flex flex-col items-center">
                               <MapPin color="white" fill="#4ade80" size={36} />
-                              <div className="text-xs font-semibold text-gray-800 -mt-1 truncate">
+                              <div className="text-xs font-semibold truncate text-gray-800 -mt-1">
                                  {grupo.trabajadores.length} Trab.
                               </div>
                            </div>
@@ -312,27 +352,86 @@ const MapaTrabajadores = () => {
                         icon={icon}
                      >
                         <Popup>
-                           {grupo.trabajadores.map((t, idx) => (
-                              <div key={idx} className="mb-2">
-                                 <strong>
-                                    {t.tipo === "combinado"
-                                       ? `${t.trabajador}`
-                                       : `${t.tipo.toUpperCase()} / ${
-                                            t.trabajador
-                                         }`}
-                                 </strong>
-                                 <br />
-                                 {t.tipo === "combinado" ? (
-                                    <>
-                                       Entrada: {t.direccion_entrada}
-                                       <br />
-                                       Salida: {t.direccion_salida}
-                                    </>
-                                 ) : (
-                                    t.direccion
-                                 )}
-                              </div>
-                           ))}
+                           <div className="max-w-xs space-y-2">
+                              {grupo.trabajadores.map((t, idx) => (
+                                 <div
+                                    key={idx}
+                                    className="flex items-start gap-2"
+                                 >
+                                    <div className="flex-1 min-w-0">
+                                       <div className="flex items-center gap-2 text-sm font-semibold text-gray-900 truncate">
+                                          {t.trabajador}
+                                       </div>
+
+                                       {t.tipo === "combinado" ? (
+                                          <div className="flex items-center gap-2 text-xs text-gray-600 mt-1">
+                                             <LogIn
+                                                size={14}
+                                                className="text-green-600"
+                                             />
+                                             <span
+                                                className="truncate"
+                                                title={t.direccion_entrada}
+                                             >
+                                                {t.direccion_entrada?.length >
+                                                50
+                                                   ? t.direccion_entrada.substring(
+                                                        0,
+                                                        50
+                                                     ) + "..."
+                                                   : t.direccion_entrada}
+                                             </span>
+                                          </div>
+                                       ) : null}
+
+                                       {t.tipo === "combinado" ? (
+                                          <div className="flex items-center gap-2 text-xs text-gray-600">
+                                             <LogOut
+                                                size={14}
+                                                className="text-red-600"
+                                             />
+                                             <span
+                                                className="truncate"
+                                                title={t.direccion_salida}
+                                             >
+                                                {t.direccion_salida?.length > 50
+                                                   ? t.direccion_salida.substring(
+                                                        0,
+                                                        50
+                                                     ) + "..."
+                                                   : t.direccion_salida}
+                                             </span>
+                                          </div>
+                                       ) : (
+                                          <div className="flex items-center gap-2 text-xs text-gray-600 mt-1">
+                                             {t.tipo === "entrada" ? (
+                                                <LogIn
+                                                   size={14}
+                                                   className="text-green-600"
+                                                />
+                                             ) : (
+                                                <LogOut
+                                                   size={14}
+                                                   className="text-red-600"
+                                                />
+                                             )}
+                                             <span
+                                                className="truncate"
+                                                title={t.direccion}
+                                             >
+                                                {t.direccion?.length > 50
+                                                   ? t.direccion.substring(
+                                                        0,
+                                                        50
+                                                     ) + "..."
+                                                   : t.direccion}
+                                             </span>
+                                          </div>
+                                       )}
+                                    </div>
+                                 </div>
+                              ))}
+                           </div>
                         </Popup>
                      </Marker>
                   );

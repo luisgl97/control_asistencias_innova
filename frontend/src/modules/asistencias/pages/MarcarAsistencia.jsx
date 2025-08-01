@@ -11,6 +11,7 @@ import {
    LogOut,
    XCircle,
    CheckCircle,
+   CoffeeIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -309,16 +310,30 @@ export default function MarcarAsistencia() {
                         </Button>
                      </div>
 
-                     <div className="flex items-center gap-3 my-4">
+                     {/* <div className="flex items-center gap-3 my-4">
                         <div className="flex-1 h-px bg-gray-600"></div>
                         <span className="text-xs text-gray-400">
                            Permisos Especiales
                         </span>
                         <div className="flex-1 h-px bg-gray-600"></div>
-                     </div>
+                     </div> */}
 
                      {/* Botones de permisos especiales */}
-                     <div className="grid grid-cols-1 gap-3">
+                     <div className="grid grid-cols-2 gap-3 mt-6">
+                        <Button
+                           className="bg-amber-600 hover:bg-amber-500 text-white py-2 h-auto flex items-center justify-center gap-1 text-xs border border-amber-500 cursor-pointer"
+                           variant="outline"
+                        >
+                           <Coffee className="w-5 h-5" />
+                           <span className="text-sm">Iniciar Break</span>
+                        </Button>
+                        {/* <Button
+                           className="bg-amber-600 hover:bg-amber-500 text-white py-2 h-auto flex items-center justify-center gap-1 text-xs border border-amber-500 cursor-pointer"
+                           variant="outline"
+                        >
+                           <CoffeeIcon className="w-5 h-5" />
+                           <span className="text-sm">Terminar Break</span>
+                        </Button> */}
                         <ModalSalidaAnticipada
                            estado_ingreso={status.estadoIngreso}
                            estado_salida={status.estadoSalida}
