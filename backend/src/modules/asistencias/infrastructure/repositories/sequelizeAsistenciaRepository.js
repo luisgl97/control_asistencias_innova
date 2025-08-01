@@ -56,6 +56,7 @@ class SequelizeAsistenciaRepository {
     const usuarios = await Usuario.findAll({
       where: {
         rol: ["TRABAJADOR", "LIDER TRABAJADOR"],
+        estado: true
       },
       attributes: {
         exclude: ["password"],

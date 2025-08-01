@@ -58,6 +58,7 @@ module.exports = async (permisoData, permisoRepository,asistenciaRepository) => 
   const dataActualizarAsistencia = {
     estado: "SALIDA ANTICIPADA",
     hora_salida: permisoData.hora_salida,
+    ubicacion_salida: permisoData.ubicacion_salida
   };
   // Actualizar la asistencia con el permiso registrado
     await asistenciaRepository.actualizarAsistencia(
