@@ -2,11 +2,7 @@ const moment = require("moment");
 const { CONST_FERIADOS_PERU } = require("../../../../constants/feriadosPeru");
 
 module.exports = async (idUsuario, fecha_inicio, fecha_fin, asistenciaRepository, usuarioRepository) => {
-    
-    console.log({
-        fecha_inicio,
-        fecha_fin
-    });
+   
     const usuario = await usuarioRepository.obtenerPorId(idUsuario);
     if (!usuario) {
         return {
@@ -19,8 +15,6 @@ module.exports = async (idUsuario, fecha_inicio, fecha_fin, asistenciaRepository
     }
 
     const asistenciasDelUsuario = await asistenciaRepository.obtenerAsistenciasPorUsuario(idUsuario, fecha_inicio, fecha_fin);
-
-    console.log('asistenciasDelUsuario', asistenciasDelUsuario);
 
   let asistencias = 0;
   let tardanzas = 0;
@@ -143,7 +137,7 @@ module.exports = async (idUsuario, fecha_inicio, fecha_fin, asistenciaRepository
         asistencias: listadoAsistenciaDelUsuario,
         resumen
     }
-    console.log("*****************************")
+    /* console.log("*****************************")
     console.log("Informacion del usuario:");
     console.log("Nombres y apellidos:", usuario.nombres, usuario.apellidos);
     console.log("Rol:", usuario.rol);
@@ -153,7 +147,7 @@ module.exports = async (idUsuario, fecha_inicio, fecha_fin, asistenciaRepository
     console.log("Total de asistencias:", resumen.asistencias);
     console.log("Total de tardanzas:", resumen.tardanzas);
     console.log("Total de observados:", resumen.observados);
-    console.log("Total de faltas:", resumen.faltas);
+    console.log("Total de faltas:", resumen.faltas); */
 
     return {
         codigo: 200,

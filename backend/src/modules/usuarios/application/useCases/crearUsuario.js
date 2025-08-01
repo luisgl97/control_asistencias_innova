@@ -5,7 +5,6 @@ const {
 
 module.exports = async (usuarioData, usuarioRepository) => {
 
-  console.log("Datos del usuario a crear:", usuarioData);
   const { success, message: error } = Usuario.validarCamposObligatorios(usuarioData, modo="crear");
   if (!success)
     return {

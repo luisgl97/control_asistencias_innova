@@ -183,6 +183,7 @@ const AsistenciaController = {
 
     async registrarFinRefrigerio(req, res) {
     try {
+     
       const {asistencia_id, hora_fin_refrigerio} = req.body; 
 
       

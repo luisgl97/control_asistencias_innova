@@ -12,9 +12,18 @@ class SequelizeUsuarioRepository {
 
   async obtenerUsuarios() {
     const usuarios = await Usuario.findAll({
+      where: {
+        estado: true // Solo usuarios activos
+      },
       attributes: {
         exclude: ["password"],
       },
+      include: [
+        {
+          model: db.filiales,
+          as: "filial",
+        }
+      ]
     });
     return usuarios;
   }
