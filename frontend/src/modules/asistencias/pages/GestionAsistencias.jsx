@@ -26,33 +26,33 @@ export default function GestionAsistencias() {
             defaultValue="dia"
             className="w-full max-w-7xl flex items-start space-y-2"
          >
-            <TabsList className="grid grid-cols-2 md:grid-none md:flex  w-full md:w-auto h-auto bg-neutral-50">
+            <TabsList className="grid grid-cols-2 md:grid-none md:flex  w-full md:w-auto h-auto space-x-2 bg-white">
                <TabsTrigger
-                  className="w-full bg-neutral-200/40"
+                  className="w-full bg-neutral-200/80  data-[state=active]:bg-innova-blue data-[state=active]:text-white"
                   disabled={isLoading}
                   value="dia"
                >
                   Asistencia Diaria
                </TabsTrigger>
                <TabsTrigger
-                  className="w-full bg-neutral-200/40"
+                  className="w-full bg-neutral-200/80 data-[state=active]:bg-innova-blue data-[state=active]:text-white"
                   disabled={isLoading}
                   value="semanal"
                >
                   Asistencia Semanal
                </TabsTrigger>
                <TabsTrigger
-                  className="w-full bg-neutral-200/40"
+                  className="w-full bg-neutral-200/80  data-[state=active]:bg-innova-blue data-[state=active]:text-white"
                   disabled={isLoading}
                   value="mapa"
                >
                   Mapa de trabajadores
                </TabsTrigger>
                <TabsTrigger
-                  className="w-full bg-neutral-200/40"
+                  className="w-full bg-neutral-200/80  data-[state=active]:bg-innova-blue data-[state=active]:text-white"
                   value="reportes"
                >
-                  Reportes PDF.
+                  Reporte PDF
                </TabsTrigger>
             </TabsList>
             <TabsContent value="dia" className="w-full p-2">
@@ -65,7 +65,7 @@ export default function GestionAsistencias() {
                <MapaTrabajadores />
             </TabsContent>
             <TabsContent value="reportes" className="w-full p-2">
-               <Reportes/>
+               <Reportes />
             </TabsContent>
          </Tabs>
       </div>

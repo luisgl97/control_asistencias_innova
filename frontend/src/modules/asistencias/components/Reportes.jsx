@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import usuarioService from "@/modules/usuarios/services/usuarioService";
 import asistenciaService from "../service/asistenciaService";
 import { generarPDF } from "../libs/generarPDF";
+import { Loader2 } from "lucide-react";
 
 const Reportes = () => {
    const [isLoading, setIsLoading] = useState(false);
@@ -21,8 +22,14 @@ const Reportes = () => {
    const [mes, setMes] = useState("");
 
    const anioActual = new Date().getFullYear();
-   const anios = Array.from({ length: 5 }, (_, i) =>
-      (anioActual - i).toString()
+   const anioInicio = 2025;
+
+   const diferencia = anioActual - anioInicio;
+   const cantidadAnios = Math.min(diferencia + 1, 5);
+   const primerAnio = anioInicio + Math.max(0, diferencia - 4);
+
+   const anios = Array.from({ length: cantidadAnios }, (_, i) =>
+      (primerAnio + i).toString()
    );
 
    const meses = [
@@ -45,19 +52,19 @@ const Reportes = () => {
          toast.error("Por favor selecciona un año y un mes");
          return;
       }
-      console.log(mes);
-      
+
       const fechaInicio = `${anio}-${mes}-01`;
       const ultimoDia = new Date(anio, mes, 0).getDate(); // mes +1, día 0 da último día del mes
       const fechaFin = `${anio}-${mes
          .toString()
          .padStart(2, "0")}-${ultimoDia}`;
-      console.log(fechaInicio, fechaFin);
 
       try {
          setIsLoading(true);
          const resT = await usuarioService.getUsuarios();
-         const trabajadores = resT.data.datos;
+         const trabajadores = resT.data.datos.filter(
+            (t) => t.rol !== "GERENTE" && t.rol !== "ADMINISTRADOR"
+         );
          let asistencias = [];
          for (const trabajador of trabajadores) {
             const res = await asistenciaService.asistenciaPorUsuario({
@@ -67,7 +74,6 @@ const Reportes = () => {
             });
             asistencias.push(res.data.datos);
          }
-         console.log(asistencias);
 
          await generarPDF(asistencias);
          toast.success("Reporte generado con éxito");
@@ -125,7 +131,14 @@ const Reportes = () => {
             onClick={generarReporte}
             disabled={isLoading}
          >
-            Generar reporte
+            {isLoading ? (
+               <span className="flex items-center gap-2 ">
+                  <Loader2 className="animate-spin h-4 w-4" />
+                  Cargando...
+               </span>
+            ) : (
+               "Generar Reporte"
+            )}
          </Button>
       </div>
    );

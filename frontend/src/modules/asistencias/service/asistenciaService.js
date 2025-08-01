@@ -15,7 +15,10 @@ const asistenciaService = {
       api.post("/asistencias/autorizar-horas-extras", data),
    mapaTrabajadores: (data) => api.post("/asistencias/mapa-ubicaciones", data),
    asistenciaPorUsuario: (data) => api.post("/asistencias/usuario", data),
-   // permisos/registrar-salida-anticipada
+   registrarInicioRefrigerio: (data) =>
+      api.post("/asistencias/registrar-inicio-refrigerio", data),
+   registrarFinRefrigerio: (data) =>
+      api.post("/asistencias/registrar-fin-refrigerio", data),
 };
 
 export default asistenciaService;

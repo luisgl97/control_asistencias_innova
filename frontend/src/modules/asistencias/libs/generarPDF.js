@@ -3,8 +3,11 @@ import { es } from "date-fns/locale";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 
+
+
 export const generarPDF = async (asistenciasPorTrabajador) => {
    const doc = new jsPDF();
+
    const imageUrl = `/images/logo_azul.png`;
    const toBase64 = async (url) => {
       const res = await fetch(url);
@@ -42,10 +45,10 @@ export const generarPDF = async (asistenciasPorTrabajador) => {
          const fecha = parseISO(a.fecha);
          return [
             format(fecha, "EEEE d 'de' MMMM yyyy", { locale: es }),
-            a.hora_ingreso || "-",
+            a.hora_ingreso || "FALTA",
             a.hora_inicio_refrigerio || "-",
             a.hora_fin_refrigerio || "-",
-            a.hora_salida || "-",
+            a.hora_salida || "FALTA",
             a.horas_extras?.toString() || "0",
          ];
       });
@@ -65,7 +68,7 @@ export const generarPDF = async (asistenciasPorTrabajador) => {
          body: tableData,
          styles: {
             fontSize: 8,
-            cellPadding: 1.5, // menor padding = tabla más compacta
+            cellPadding: 1.5,
          },
          headStyles: {
             fontSize: 8,
@@ -79,8 +82,13 @@ export const generarPDF = async (asistenciasPorTrabajador) => {
             3: { halign: "center", valign: "middle" },
             4: { halign: "center", valign: "middle" },
             5: { halign: "center", valign: "middle" },
-            6: { halign: "center", valign: "middle" },
-            7: { halign: "center", valign: "middle" },
+         },
+         didParseCell: function (data) {
+            // Marcar en rojo si hay "FALTA"
+            if (data.cell.raw === "FALTA") {
+               data.cell.styles.textColor = [255, 0, 0];
+               data.cell.styles.fontStyle = "bold";
+            }
          },
       });
 

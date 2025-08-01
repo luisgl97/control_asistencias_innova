@@ -7,6 +7,7 @@ const InputConEtiquetaFlotante = ({
    name,
    label,
    icono: Icono,
+   disabled = false,
 }) => {
    const tieneIcono = !!Icono;
 
@@ -19,6 +20,7 @@ const InputConEtiquetaFlotante = ({
             className={`peer focus-visible:ring-0 focus-visible:ring-offset-0 text-sm text-neutral-700 ${
                tieneIcono ? "pl-6" : ""
             }`}
+            disabled={disabled}
          />
 
          <Label

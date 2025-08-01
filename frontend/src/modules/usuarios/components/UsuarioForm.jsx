@@ -8,16 +8,23 @@ import {
    CardTitle,
 } from "@/components/ui/card";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import InputConEtiquetaFlotante from "../../../shared/components/InputConEtiquetaFlotante";
 import SelectConEtiquetaFlotante from "../../../shared/components/selectConEtiquetaFlotante";
 import usuarioSchema from "../schemas/registroUsuarioSchema";
 import usuarioService from "../services/usuarioService";
 import { toast } from "sonner";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Loader2 } from "lucide-react";
+import {
+   opciones_cargo,
+   opciones_documento,
+   opciones_filiales,
+   opciones_roles,
+} from "../utils/optionsUsuarioForm";
 
 const claves = {
+   id: null,
    nombres: "",
    apellidos: "",
    email: "",
@@ -25,59 +32,89 @@ const claves = {
    password: "",
    rol: "",
    cargo: "",
-   filial: "",
+   filial_id: "",
+   tipo_documento: "",
 };
 const UsuarioForm = () => {
-   const navigate=useNavigate()
+   const [searchParams] = useSearchParams();
+   const id = searchParams.get("id"); // "asc"
+   const navigate = useNavigate();
    const [errores, setErrores] = useState({ ...claves });
    const [form, setForm] = useState({ ...claves });
-   const [isLoading, setIsLoading] = useState(false);
+
+   const [isLoading, setIsLoading] = useState(true);
+
+   const fetchTrabajador = async () => {
+      try {
+         const res = await usuarioService.getUsuario(id);
+         const usuario = res.data.usuario;
+         setForm({
+            nombres: usuario.nombres,
+            apellidos: usuario.apellidos,
+            dni: usuario.dni,
+            rol: usuario.rol,
+            email: usuario.email,
+            filial_id: usuario.filial.id.toString(),
+            id: usuario.id,
+            cargo: usuario.cargo,
+            tipo_documento: usuario.tipo_documento,
+         });
+      } catch (error) {
+      } finally {
+         setIsLoading(false);
+      }
+   };
+
    const handleSubmit = async (e) => {
       e.preventDefault();
       try {
-         await usuarioSchema.validate(form, {
+         const res = await usuarioSchema(!!form.id).validate(form, {
             abortEarly: false,
          });
+
          setIsLoading(true);
-         await usuarioService.crear(form);
-         navigate('/usuarios')
-         toast.success("Se creó el usuario exitosamente");
+         if (form.id) {
+            const datos = {
+               ...res,
+               cargo: res.rol === "GERENTE" ? null : res.cargo,
+            };
+            await usuarioService.editar(datos, form.id);
+            toast.success("Se Edito el usuario exitosamente");
+            fetchTrabajador();
+         } else {
+
+            await usuarioService.crear(form);
+            navigate("/usuarios");
+            toast.success("Se creó el usuario exitosamente");
+         }
       } catch (error) {
+
          if (error.name === "ValidationError") {
             const errors = {};
             error.inner.forEach((err) => {
                errors[err.path] = err.message;
             });
-            console.log("Errores de validación:", errors);
             setErrores(errors);
+         } else if (error.response.data.mensaje) {
+            toast.error(error.response.data.mensaje);
          } else {
-            console.error("Error desconocido:", error);
+            toast.error("Error Desconocido:");
          }
       } finally {
          setIsLoading(false);
       }
    };
 
+   useEffect(() => {
+      if (id) {
+         fetchTrabajador();
+      } else {
+         setIsLoading(false);
+      }
+   }, []);
    const handleChange = (e) => {
       setForm((prevForm) => ({ ...prevForm, [e.target.name]: e.target.value }));
    };
-
-   const opciones_filiales = [
-      { value: "1", label: "ENCOFRADOS INNOVA S.A.C." },
-      { value: "2", label: "ANDAMIOS ELECTRICOS INNOVA S.A.C." },
-      { value: "3", label: "INDEK ANDINA E.I.R.L" },
-      { value: "4", label: "INNOVA RENTAL MAQUINARIA SAC" },
-   ];
-   const opciones_roles = [
-      { value: "GERENTE", label: "Gerente" },
-      { value: "ADMINISTRADOR", label: "Administrador" },
-      { value: "TRABAJADOR", label: "Trabajador" },
-      { value: "LIDER TRABAJADOR", label: "Lider de trabajadores" },
-   ];
-   const opciones_cargo = [
-      { value: "MONTADOR", label: "Montador" },
-      { value: "ALMACEN", label: "Almacen" },
-   ];
 
    return (
       <Card className="max-w-2xl mx-auto mt-8">
@@ -101,6 +138,7 @@ const UsuarioForm = () => {
                         label={"Nombres del usuario"}
                         name={"nombres"}
                         value={form.nombres}
+                        disabled={isLoading}
                      />
                      {errores.nombres && (
                         <p className="text-red-500 text-xs pl-2">
@@ -115,6 +153,7 @@ const UsuarioForm = () => {
                         label={"Apellidos del usuario"}
                         name={"apellidos"}
                         value={form.apellidos}
+                        disabled={isLoading}
                      />
                      {errores.apellidos && (
                         <p className="text-red-500 text-xs pl-2">
@@ -122,13 +161,32 @@ const UsuarioForm = () => {
                         </p>
                      )}
                   </section>
+                  {/* tipo_documento */}
+                  <section className="w-full">
+                     <SelectConEtiquetaFlotante
+                        value={form.tipo_documento}
+                        onChange={(name, value) =>
+                           setForm({ ...form, [name]: value })
+                        }
+                        name="tipo_documento"
+                        label="Tipo de documento"
+                        opciones={opciones_documento}
+                        disabled={isLoading}
+                     />
+                     {errores.tipo_documento && (
+                        <p className="text-red-500 text-xs pl-2">
+                           * {errores.tipo_documento}
+                        </p>
+                     )}
+                  </section>
 
                   <section className="w-full">
                      <InputConEtiquetaFlotante
                         handleChange={handleChange}
-                        label={"D.N.I del usuario"}
+                        label={"Numero de Documento"}
                         name={"dni"}
                         value={form.dni}
+                        disabled={isLoading}
                      />
                      {errores.dni && (
                         <p className="text-red-500 text-xs pl-2">
@@ -143,6 +201,7 @@ const UsuarioForm = () => {
                         label={"Ingrese el email"}
                         name={"email"}
                         value={form.email}
+                        disabled={isLoading}
                      />
                      {errores.email && (
                         <p className="text-red-500 text-xs pl-2">
@@ -150,34 +209,37 @@ const UsuarioForm = () => {
                         </p>
                      )}
                   </section>
-
-                  <section className="w-full">
-                     <InputConEtiquetaFlotante
-                        handleChange={handleChange}
-                        label={"Ingrese la contraseña"}
-                        name={"password"}
-                        value={form.password}
-                     />
-                     {errores.password && (
-                        <p className="text-red-500 text-xs pl-2">
-                           * {errores.password}
-                        </p>
-                     )}
-                  </section>
+                  {!form.id && (
+                     <section className="w-full">
+                        <InputConEtiquetaFlotante
+                           handleChange={handleChange}
+                           label={"Ingrese la contraseña"}
+                           name={"password"}
+                           value={form.password}
+                           disabled={isLoading}
+                        />
+                        {errores.password && (
+                           <p className="text-red-500 text-xs pl-2">
+                              * {errores.password}
+                           </p>
+                        )}
+                     </section>
+                  )}
 
                   <section className="w-full">
                      <SelectConEtiquetaFlotante
-                        value={form.filial}
+                        value={form.filial_id}
                         onChange={(name, value) =>
                            setForm({ ...form, [name]: value })
                         }
-                        name="filial"
+                        name="filial_id"
                         label="Ingrese la filial"
                         opciones={opciones_filiales}
+                        disabled={isLoading}
                      />
-                     {errores.filial && (
+                     {errores.filial_id && (
                         <p className="text-red-500 text-xs pl-2">
-                           * {errores.filial}
+                           * {errores.filial_id}
                         </p>
                      )}
                   </section>
@@ -195,6 +257,7 @@ const UsuarioForm = () => {
                         name="rol"
                         label="Ingrese el rol"
                         opciones={opciones_roles}
+                        disabled={isLoading}
                      />
                      {errores.rol && (
                         <p className="text-red-500 text-xs pl-2">
@@ -213,6 +276,7 @@ const UsuarioForm = () => {
                            name="cargo"
                            label="Ingrese el cargo"
                            opciones={opciones_cargo}
+                           disabled={isLoading}
                         />
                         {errores.cargo && (
                            <p className="text-red-500 text-xs pl-2">
@@ -225,7 +289,11 @@ const UsuarioForm = () => {
             </form>
          </CardContent>
          <CardFooter className="justify-end gap-8">
-            <Button variant="outline" disabled={isLoading} onClick={()=>navigate('/usuarios')}>
+            <Button
+               variant="outline"
+               disabled={isLoading}
+               onClick={() => navigate("/usuarios")}
+            >
                {" "}
                Cancelar
             </Button>
@@ -239,8 +307,10 @@ const UsuarioForm = () => {
                   <span className="flex items-center gap-2">
                      <Loader2 className="animate-spin h-4 w-4" />
                   </span>
+               ) : form.id ? (
+                  "Actualizar"
                ) : (
-                  "Aceptar"
+                  "Guardar"
                )}
             </Button>
          </CardFooter>

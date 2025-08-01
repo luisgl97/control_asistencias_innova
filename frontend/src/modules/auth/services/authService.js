@@ -6,13 +6,9 @@ export async function loginService(email, password) {
          email,
          password,
       });
-      console.log(response);
-      
 
       return response.data;
    } catch (error) {
-      console.log(error);
-      
       console.error(
          "❌ Error en loginService:",
          error.response?.data || error.message

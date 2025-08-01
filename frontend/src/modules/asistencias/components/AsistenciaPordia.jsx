@@ -37,15 +37,12 @@ const AsistenciaPordia = () => {
          const day = String(date.getDate()).padStart(2, "0");
 
          const formattedDate = `${year}-${month}-${day}`;
-         console.log(formattedDate); // Resultado: 2025-07-30
-
          setError(null);
 
          const res = await asistenciaService.asistenciasDelDia({
             fecha: formattedDate,
          });
 
-         console.log(res.data);
 
          setDatosAsistencia(res.data.datos);
       } catch (err) {

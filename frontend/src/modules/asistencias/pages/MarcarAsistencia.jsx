@@ -25,12 +25,15 @@ import HorariosTrabajo from "../components/HorariosTrabajo";
 import { ModalFalta } from "../components/ModalFalta";
 import { diferenciaHoras } from "../libs/diferenciaHoras";
 import { ModalSalidaAnticipada } from "../components/ModalSalidaAnticipada";
+import { fecha_hora_asistencia } from "../libs/fecha_hora_asistencia";
 
 export default function MarcarAsistencia() {
    const { user, loading } = useAuth();
    const [status, setStatus] = useState({
       estadoIngreso: true,
       estadoSalida: true,
+      hora_inicio_refrigerio: null,
+      hora_fin_refrigerio: null,
    });
    const [ubicacion, setUbicacion] = useState(null);
    const [ubicacionLoading, setUbicacionLoading] = useState(true);
@@ -43,10 +46,12 @@ export default function MarcarAsistencia() {
             fecha: new Date(),
          });
          setStatus({
+            ...status,
             estadoIngreso: res.data.datos.ingreso.estado,
             estadoSalida: res.data.datos.salida.estado,
+            hora_inicio_refrigerio: res.data.datos.hora_inicio_refrigerio,
+            hora_fin_refrigerio: res.data.datos.hora_fin_refrigerio,
          });
-         console.log(res.data.datos);
 
          setAsistencia(res.data.datos);
       } catch (error) {
@@ -124,37 +129,19 @@ export default function MarcarAsistencia() {
          toast.error("Ubicación no disponible");
          return;
       }
-
-      const fecha = new Intl.DateTimeFormat("es-PE", {
-         timeZone: "America/Lima",
-         year: "numeric",
-         month: "2-digit",
-         day: "2-digit",
-      }).format(new Date());
-      const [dia, mes, anio] = fecha.split("/");
-      const fechaFormateada = `${anio}-${mes}-${dia}`;
-      const hora = new Intl.DateTimeFormat("es-PE", {
-         timeZone: "America/Lima",
-         hour: "2-digit",
-         minute: "2-digit",
-         second: "2-digit",
-         hour12: false,
-      }).format(new Date());
-
       const ubicacion_ingreso = {
          lat: ubicacion.latitude,
          lng: ubicacion.longitude,
          direccion: ubicacion.display_name,
       };
-
+      const { fecha_a, hora_a } = fecha_hora_asistencia();
       try {
          const response = await asistenciaService.registrarIngreso({
-            fecha: fechaFormateada,
-            hora_ingreso: hora,
+            fecha: fecha_a,
+            hora_ingreso: hora_a,
             ubicacion_ingreso,
             observacion_ingreso: "",
          });
-         console.log(response);
          toast.success("Asistencia guardada con éxito");
          fetchVerificarAsistencia(); // Actualizar estado
       } catch (error) {
@@ -168,23 +155,7 @@ export default function MarcarAsistencia() {
          toast.error("Ubicación no disponible");
          return;
       }
-
-      const fecha = new Intl.DateTimeFormat("es-PE", {
-         timeZone: "America/Lima",
-         year: "numeric",
-         month: "2-digit",
-         day: "2-digit",
-      }).format(new Date());
-      const [dia, mes, anio] = fecha.split("/");
-      const fechaFormateada = `${anio}-${mes}-${dia}`;
-      const hora = new Intl.DateTimeFormat("es-PE", {
-         timeZone: "America/Lima",
-         hour: "2-digit",
-         minute: "2-digit",
-         second: "2-digit",
-         hour12: false,
-      }).format(new Date());
-
+      const { fecha_a, hora_a } = fecha_hora_asistencia();
       const ubicacion_salida = {
          lat: ubicacion.latitude,
          lng: ubicacion.longitude,
@@ -193,12 +164,11 @@ export default function MarcarAsistencia() {
 
       try {
          const response = await asistenciaService.registrarSalida({
-            fecha: fechaFormateada,
-            hora_salida: hora,
+            fecha: fecha_a,
+            hora_salida: hora_a,
             ubicacion_salida,
             observacion_salida: "",
          });
-         console.log(response);
          toast.success("Asistencia guardada con éxito");
          fetchVerificarAsistencia(); // Actualizar estado
       } catch (error) {
@@ -206,8 +176,47 @@ export default function MarcarAsistencia() {
          toast.error("Error al guardar la asistencia");
       }
    };
+   const marcarInicioRefrigerio = async () => {
+      const hora = new Intl.DateTimeFormat("es-PE", {
+         timeZone: "America/Lima",
+         hour: "2-digit",
+         minute: "2-digit",
+         second: "2-digit",
+         hour12: false,
+      }).format(new Date());
+      try {
+         const res = await asistenciaService.registrarInicioRefrigerio({
+            asistencia_id: asistencia.asistencia_id,
+            hora_inicio_refrigerio: hora,
+         });
 
-   // Mostrar loader mientras se obtiene la ubicación
+         toast.success("Inicio de refrigerio guardado con éxito");
+         fetchVerificarAsistencia();
+      } catch (error) {
+         console.log(error);
+         toast.error("Se produjo un error");
+      }
+   };
+   const marcarFinRefrigerio = async () => {
+      const hora = new Intl.DateTimeFormat("es-PE", {
+         timeZone: "America/Lima",
+         hour: "2-digit",
+         minute: "2-digit",
+         second: "2-digit",
+         hour12: false,
+      }).format(new Date());
+      try {
+         const res = await asistenciaService.registrarFinRefrigerio({
+            asistencia_id: asistencia.asistencia_id,
+            hora_fin_refrigerio: hora,
+         });
+         toast.success("Fin de refrigerio guardado con éxito");
+         fetchVerificarAsistencia();
+      } catch (error) {
+         console.log(error);
+         toast.error("Se produjo un error");
+      }
+   };
    if (ubicacionLoading) {
       return (
          <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -302,7 +311,8 @@ export default function MarcarAsistencia() {
                            disabled={
                               !status.estadoIngreso ||
                               status.estadoSalida ||
-                              !ubicacion
+                              !ubicacion ||
+                              !status.hora_fin_refrigerio
                            }
                         >
                            <LogOut className="w-5 h-5" />
@@ -320,23 +330,31 @@ export default function MarcarAsistencia() {
 
                      {/* Botones de permisos especiales */}
                      <div className="grid grid-cols-2 gap-3 mt-6">
-                        <Button
-                           className="bg-amber-600 hover:bg-amber-500 text-white py-2 h-auto flex items-center justify-center gap-1 text-xs border border-amber-500 cursor-pointer"
-                           variant="outline"
-                        >
-                           <Coffee className="w-5 h-5" />
-                           <span className="text-sm">Iniciar Break</span>
-                        </Button>
-                        {/* <Button
-                           className="bg-amber-600 hover:bg-amber-500 text-white py-2 h-auto flex items-center justify-center gap-1 text-xs border border-amber-500 cursor-pointer"
-                           variant="outline"
-                        >
-                           <CoffeeIcon className="w-5 h-5" />
-                           <span className="text-sm">Terminar Break</span>
-                        </Button> */}
+                        {status.hora_inicio_refrigerio ? (
+                           <Button
+                              className="bg-amber-600 hover:bg-amber-500 text-white py-2 h-auto flex items-center justify-center gap-1 text-xs border border-amber-500 cursor-pointer"
+                              variant="outline"
+                              disabled={status.hora_fin_refrigerio}
+                              onClick={marcarFinRefrigerio}
+                           >
+                              <CoffeeIcon className="w-5 h-5" />
+                              <span className="text-sm">Terminar Break</span>
+                           </Button>
+                        ) : (
+                           <Button
+                              className="bg-amber-600 hover:bg-amber-500 text-white py-2 h-auto flex items-center justify-center gap-1 text-xs border border-amber-500 cursor-pointer"
+                              variant="outline"
+                              disabled={!status.estadoIngreso}
+                              onClick={marcarInicioRefrigerio}
+                           >
+                              <Coffee className="w-5 h-5" />
+                              <span className="text-sm">Iniciar Break</span>
+                           </Button>
+                        )}
                         <ModalSalidaAnticipada
                            estado_ingreso={status.estadoIngreso}
                            estado_salida={status.estadoSalida}
+                           estado_fin_refrigerio={status.hora_fin_refrigerio}
                            ubicacion={ubicacion}
                            id={asistencia.asistencia_id}
                            fetchVerificarAsistencia={fetchVerificarAsistencia}
@@ -385,8 +403,28 @@ export default function MarcarAsistencia() {
                            </span>
                         </div>
                         <div className="flex justify-between items-center">
+                           <span className="text-gray-600">
+                              Inicio refrigerio:
+                           </span>
+                           <span className="font-medium text-amber-600">
+                              {asistencia.hora_inicio_refrigerio
+                                 ? asistencia.hora_inicio_refrigerio
+                                 : "Pendiente"}
+                           </span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                           <span className="text-gray-600">
+                              Fin refrigerio:
+                           </span>
+                           <span className="font-medium text-amber-600">
+                              {asistencia.hora_fin_refrigerio
+                                 ? asistencia.hora_fin_refrigerio
+                                 : "Pendiente"}
+                           </span>
+                        </div>
+                        <div className="flex justify-between items-center">
                            <span className="text-gray-600">Salida:</span>
-                           <span className="font-medium text-gray-400">
+                           <span className="font-medium text-red-600">
                               {asistencia.salida.hora
                                  ? asistencia.salida.hora
                                  : "Pendiente"}
@@ -396,7 +434,7 @@ export default function MarcarAsistencia() {
                            <span className="text-gray-600">
                               Horas trabajadas:
                            </span>
-                           <span className="font-medium">
+                           <span className="font-medium text-innova-blue">
                               {asistencia.ingreso.hora && asistencia.salida.hora
                                  ? diferenciaHoras(
                                       asistencia.ingreso.hora,
