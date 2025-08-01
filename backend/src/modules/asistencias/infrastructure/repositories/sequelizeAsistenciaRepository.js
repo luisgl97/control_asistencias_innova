@@ -38,10 +38,7 @@ class SequelizeAsistenciaRepository {
   }
 
   async obtenerAsistenciasPorUsuario(idUsuario, fecha_inicio, fecha_fin) {
-    console.log({
-      fecha_inicio,
-      fecha_fin
-    });
+    
     return await Asistencia.findAll({
       where: {
         usuario_id: idUsuario,
@@ -327,8 +324,6 @@ class SequelizeAsistenciaRepository {
 
       const label = `${entrada} - ${salida}`;
 
-      console.log("asistencia.estado", asistencia.estado);
-
       switch (asistencia.estado) {
         case "PRESENTE":
           usuarioData.asistenciaPorDia[fechaKey] = `${label}`;
@@ -341,10 +336,7 @@ class SequelizeAsistenciaRepository {
 
         case "TARDANZA":
         case "ASISTIO TARDE":
-          console.log({
-            fecha: asistencia.fecha,
-            hora_ingreso: asistencia.hora_ingreso,
-          });
+
           usuarioData.asistenciaPorDia[fechaKey] = `${label} 🕒 (Tarde)`;
           usuarioData.tardanzas += 1;
           break;
@@ -364,8 +356,6 @@ class SequelizeAsistenciaRepository {
               ? ESTADO_PRESENTE
               : ESTADO_TARDANZA;
 
-          console.log("estado", estado);
-
           if (estado == ESTADO_PRESENTE) {
             usuarioData.asistencias += 1;
           }
@@ -375,7 +365,7 @@ class SequelizeAsistenciaRepository {
           break;
 
         case "FALTA JUSTIFICADA":
-          console.log("faltaaaaaaa justificada");
+
           usuarioData.asistenciaPorDia[fechaKey] = "📄 Falta Justificada";
           usuarioData.faltas += 1;
           break;
@@ -457,8 +447,6 @@ class SequelizeAsistenciaRepository {
         fecha: fecha,
       },
     });
-
-    console.log("asistencia", asistencia);
 
     const faltaJustificada =
       asistencia && asistencia.estado === ESTADO_FALTA_JUSTIFICADA;
@@ -635,7 +623,6 @@ class SequelizeAsistenciaRepository {
   // Obtener mapa de ubicaciones de ingreso y salida
   async obtenerMapaUbicaciones(fecha) {
     
-    console.log('fecha', fecha);
     const asistencias = await Asistencia.findAll({
       where: {
         fecha: fecha,

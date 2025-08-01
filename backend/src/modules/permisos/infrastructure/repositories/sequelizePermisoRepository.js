@@ -47,7 +47,6 @@ class SequelizePermisoRepository {
       ],
     });
 
-    console.log("PERMISOSSSSSSS", permisos);
     return permisos;
   }
 }

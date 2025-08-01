@@ -2,7 +2,6 @@ module.exports = async (fecha, asistenciaRepository) => {
    
     const ubicaciones = await asistenciaRepository.obtenerMapaUbicaciones(fecha);
 
-    console.log('ubicaciones', ubicaciones);
     return {
         codigo: 200,
         respuesta: {
