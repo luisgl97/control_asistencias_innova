@@ -15,6 +15,12 @@ class SequelizeUsuarioRepository {
       attributes: {
         exclude: ["password"],
       },
+      include: [
+        {
+          model: db.filiales,
+          as: "filial",
+        }
+      ]
     });
     return usuarios;
   }
