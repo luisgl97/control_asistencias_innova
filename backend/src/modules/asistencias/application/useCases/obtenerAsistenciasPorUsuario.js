@@ -1,7 +1,12 @@
 const moment = require("moment");
+const { CONST_FERIADOS_PERU } = require("../../../../constants/feriadosPeru");
 
 module.exports = async (idUsuario, fecha_inicio, fecha_fin, asistenciaRepository, usuarioRepository) => {
     
+    console.log({
+        fecha_inicio,
+        fecha_fin
+    });
     const usuario = await usuarioRepository.obtenerPorId(idUsuario);
     if (!usuario) {
         return {
@@ -14,6 +19,8 @@ module.exports = async (idUsuario, fecha_inicio, fecha_fin, asistenciaRepository
     }
 
     const asistenciasDelUsuario = await asistenciaRepository.obtenerAsistenciasPorUsuario(idUsuario, fecha_inicio, fecha_fin);
+
+    console.log('asistenciasDelUsuario', asistenciasDelUsuario);
 
   let asistencias = 0;
   let tardanzas = 0;
@@ -49,6 +56,8 @@ module.exports = async (idUsuario, fecha_inicio, fecha_fin, asistenciaRepository
       fecha: asistencia.fecha || "",
       hora_ingreso: asistencia.hora_ingreso || "",
       hora_salida: asistencia.hora_salida || "",
+      hora_inicio_refrigerio: asistencia.hora_inicio_refrigerio || "",
+      hora_fin_refrigerio: asistencia.hora_fin_refrigerio || "",
       ubicacion_ingreso: asistencia.ubicacion_ingreso?.direccion || "",
       ubicacion_salida: asistencia.ubicacion_salida?.direccion || "",
       horas_extras: asistencia.horas_extras,
@@ -76,9 +85,14 @@ module.exports = async (idUsuario, fecha_inicio, fecha_fin, asistenciaRepository
 
   while (cursor.isSameOrBefore(fin, "day")) {
     const dia = cursor.day(); // 0 = domingo, 6 = sábado
-    if (dia >= 1 && dia <= 6) {
-      fechas.push(cursor.format("YYYY-MM-DD"));
-    }
+  const fechaStr = cursor.format("YYYY-MM-DD");
+
+  const esHabil = dia >= 1 && dia <= 6; // Lunes a sábado
+  const esFeriado = CONST_FERIADOS_PERU.includes(fechaStr);
+
+  if (esHabil && !esFeriado) {
+    fechas.push(fechaStr);
+  }
     cursor = cursor.add(1, "day");
   }
 
@@ -90,6 +104,8 @@ module.exports = async (idUsuario, fecha_inicio, fecha_fin, asistenciaRepository
         fecha,
         hora_ingreso: asistencia.hora_ingreso,
         hora_salida: asistencia.hora_salida,
+        hora_inicio_refrigerio: asistencia.hora_inicio_refrigerio,
+        hora_fin_refrigerio: asistencia.hora_fin_refrigerio,
         estado: asistencia.estado,
         ubicacion_ingreso: asistencia.ubicacion_ingreso?.direccion || null,
         ubicacion_salida: asistencia.ubicacion_salida?.direccion || null,
@@ -101,6 +117,8 @@ module.exports = async (idUsuario, fecha_inicio, fecha_fin, asistenciaRepository
         estado: "SIN REGISTRO",
         hora_ingreso: null,
         hora_salida: null,
+        hora_inicio_refrigerio: null,
+        hora_fin_refrigerio: null,
         ubicacion_ingreso: null,
         ubicacion_salida: null,
         horas_extras: 0,
@@ -112,12 +130,15 @@ module.exports = async (idUsuario, fecha_inicio, fecha_fin, asistenciaRepository
     const respuesta = {
         usuario: {
             id: usuario.id,
+            tipo_documento: usuario.tipo_documento,
             dni: usuario.dni,
             nombres: usuario.nombres,
             apellidos: usuario.apellidos,
             correo: usuario.correo,
             rol: usuario.rol,
             cargo: usuario.cargo,
+            filial_ruc: usuario.filial.ruc,
+            filial_razon_social: usuario.filial.razon_social
         },
         asistencias: listadoAsistenciaDelUsuario,
         resumen

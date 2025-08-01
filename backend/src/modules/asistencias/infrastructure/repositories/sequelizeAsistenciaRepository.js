@@ -7,6 +7,7 @@ const db = require("../../../../models");
 
 const moment = require("moment");
 const { CONST_HORA_INICIO, CONST_HORA_FIN_LV, CONST_HORA_FIN_SAB } = require("../../../../constants/horarios");
+const { CONST_FERIADOS_PERU } = require("../../../../constants/feriadosPeru");
 require("moment/locale/es"); // importa el idioma español
 moment.locale("es"); // establece el idioma a español
 
@@ -37,6 +38,10 @@ class SequelizeAsistenciaRepository {
   }
 
   async obtenerAsistenciasPorUsuario(idUsuario, fecha_inicio, fecha_fin) {
+    console.log({
+      fecha_inicio,
+      fecha_fin
+    });
     return await Asistencia.findAll({
       where: {
         usuario_id: idUsuario,
@@ -86,6 +91,8 @@ class SequelizeAsistenciaRepository {
         fecha: fecha,
         hora_ingreso: asistencia?.hora_ingreso || "--",
         hora_salida: asistencia?.hora_salida || "--",
+        hora_inicio_refrigerio: asistencia?.hora_inicio_refrigerio || "--",
+        hora_fin_refrigerio: asistencia?.hora_fin_refrigerio || "--",
         estado: estadoFinal,
         horas_extras: asistencia?.horas_extras ?? "--",
         hizo_horas_extras: asistencia?.hizo_horas_extras ?? false,
@@ -388,7 +395,9 @@ class SequelizeAsistenciaRepository {
     // Iterar desde la fecha de inicio hasta la fecha de fin
     while (fechaCursor.isSameOrBefore(fechaFinMoment, "day")) {
       const diaNumero = fechaCursor.day(); // 0 = domingo, 6 = sábado
-      if (diaNumero !== 0) {
+      const fechaFormateada = fechaCursor.format("YYYY-MM-DD")
+
+      if (diaNumero !== 0 && !CONST_FERIADOS_PERU.includes(fechaFormateada)) {
         // Excluir domingos
         diasDelRango.push({
           diaSemana: fechaCursor
@@ -466,6 +475,8 @@ class SequelizeAsistenciaRepository {
           estado: false,
           hora: null,
         },
+        hora_inicio_refrigerio: null,
+        hora_fin_refrigerio: null,
         asistencia_id: null,
         falta_justificada: faltaJustificada,
         mensaje: "No se ha registrado ingreso ni salida",
@@ -484,6 +495,8 @@ class SequelizeAsistenciaRepository {
           estado: false,
           hora: null,
         },
+        hora_inicio_refrigerio: asistencia.hora_inicio_refrigerio,
+        hora_fin_refrigerio: asistencia.hora_fin_refrigerio,
         asistencia_id: asistencia.id,
         falta_justificada: faltaJustificada,
         mensaje: "Ingreso registrado, falta registrar salida",
@@ -502,6 +515,8 @@ class SequelizeAsistenciaRepository {
           estado: true,
           hora: asistencia.hora_salida,
         },
+        hora_inicio_refrigerio: asistencia.hora_inicio_refrigerio,
+        hora_fin_refrigerio: asistencia.hora_fin_refrigerio,
         asistencia_id: asistencia.id,
         falta_justificada: faltaJustificada,
         mensaje: "Ingreso y salida registrados",
@@ -519,6 +534,8 @@ class SequelizeAsistenciaRepository {
         estado: false,
         hora: null,
       },
+      hora_inicio_refrigerio: asistencia.hora_inicio_refrigerio,
+      hora_fin_refrigerio: asistencia.hora_fin_refrigerio,
       asistencia_id: asistencia.id,
       falta_justificada: faltaJustificada,
       mensaje: "No se ha registrado ingreso ni salida",

@@ -10,6 +10,8 @@ const obtenerAsistenciasDelDia = require("../../application/useCases/obtenerAsis
 const verificarAsistenciaDelUsuarioDelDia = require("../../application/useCases/verificarAsistenciaDelUsuarioDelDia");
 const autorizarHorasExtras = require("../../application/useCases/autorizarHorasExtras");
 const obtenerMapaUbicaciones = require("../../application/useCases/obtenerMapaUbicaciones");
+const registrarInicioRefrigerio = require("../../application/useCases/registrarInicioRefrigerio")
+const registrarFinRefrigerio = require("../../application/useCases/registrarFinRefrigerio")
 
 const asistenciaRepository = new sequelizeAsistenciaRepository(); // Instancia del repositorio de usuario
 const usuarioRepository = new sequelizeUsuarioRepository(); // Instancia del repositorio de asistencia
@@ -152,6 +154,41 @@ const AsistenciaController = {
       
       const { codigo, respuesta } = await obtenerMapaUbicaciones(
         fecha,
+        asistenciaRepository
+      );
+
+      res.status(codigo).json(respuesta);
+    } catch (error) {
+      console.log('error', error);
+      res.status(500).json({ error: error.message, estado: false });
+    }
+  },
+
+  async registrarInicioRefrigerio(req, res) {
+    try {
+      const {asistencia_id, hora_inicio_refrigerio} = req.body; 
+
+      const { codigo, respuesta } = await registrarInicioRefrigerio(
+        asistencia_id,
+        hora_inicio_refrigerio,
+        asistenciaRepository
+      );
+
+      res.status(codigo).json(respuesta);
+    } catch (error) {
+      console.log('error', error);
+      res.status(500).json({ error: error.message, estado: false });
+    }
+  },
+
+    async registrarFinRefrigerio(req, res) {
+    try {
+      const {asistencia_id, hora_fin_refrigerio} = req.body; 
+
+      
+      const { codigo, respuesta } = await registrarFinRefrigerio(
+        asistencia_id,
+        hora_fin_refrigerio,
         asistenciaRepository
       );
 

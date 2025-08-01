@@ -9,6 +9,8 @@ class Asistencia {
     horas_extras,
     observaciones_ingreso,
     observaciones_salida,
+    hora_inicio_refrigerio,
+    hora_fin_refrigerio
   }) {
     this.usuario_id = usuario_id;
     this.fecha = fecha;
@@ -19,6 +21,8 @@ class Asistencia {
     this.horas_extras = horas_extras;
     this.observaciones_ingreso = observaciones_ingreso;
     this.observaciones_salida = observaciones_salida;
+    this.hora_inicio_refrigerio = hora_inicio_refrigerio;
+    this.hora_fin_refrigerio = hora_fin_refrigerio;
   }
 
   static validarCamposObligatorios(datos, modo = "crear") {

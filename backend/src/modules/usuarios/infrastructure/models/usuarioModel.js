@@ -51,6 +51,10 @@ const Usuario = sequelize.define(
       allowNull: false,
       defaultValue: true,
     },
+        tipo_documento: {
+      type: DataTypes.ENUM("DNI", "C.E."),
+      defaultValue: "DNI"
+    }
   },
   {
     tableName: "usuarios",

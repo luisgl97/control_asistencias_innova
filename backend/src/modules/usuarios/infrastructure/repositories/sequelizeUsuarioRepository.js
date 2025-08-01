@@ -1,3 +1,4 @@
+const db = require("../../../../models");
 const { Usuario } = require("../models/usuarioModel");
 
 class SequelizeUsuarioRepository {
@@ -23,6 +24,12 @@ class SequelizeUsuarioRepository {
       attributes: {
         exclude: ["password"],
       },
+      include: [
+        {
+          model: db.filiales,
+          as: "filial"
+        }
+      ]
     });
   }
 
@@ -39,6 +46,7 @@ class SequelizeUsuarioRepository {
         exclude: ["password"],
       },
     });
+    delete usuarioData.password; // Si no quieres permitir su actualización
     await usuario.update(usuarioData);
     return usuario;
   }
