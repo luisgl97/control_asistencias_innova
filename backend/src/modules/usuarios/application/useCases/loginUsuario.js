@@ -6,7 +6,7 @@ module.exports = async (datosDeUsuario, usuarioRepository) => {
     const {
         success,
         message
-    } = await Usuario.login(datosDeUsuario);
+    } = Usuario.login(datosDeUsuario);
   
     if (!success) {
         return {
@@ -34,7 +34,7 @@ module.exports = async (datosDeUsuario, usuarioRepository) => {
         return {
             codigo: 401,
             respuesta: {
-                mensaje: "El usuario no esta activo",
+                mensaje: "El usuario no existe",
                 estado: false,
             },
         };

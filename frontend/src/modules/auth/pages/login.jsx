@@ -49,7 +49,6 @@ export default function LoginPage() {
          if (!res.estado) {
             throw new Error("Fallo el inicio de sessión");
          }
-         console.log(res);
          if (res.rol === "GERENTE" || res.rol === "ADMINISTRADOR") {
             navigate("/asistencias");
          }

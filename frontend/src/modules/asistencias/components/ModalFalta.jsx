@@ -53,7 +53,6 @@ export function ModalFalta({ status, ubicacion, falta_justificada,fetchVerificar
       };
       try {
          setLoading(true);
-         console.log(data);
          await asistenciaService.registrarFalta(data);
          fetchVerificarAsistencia();
          toast.success("Falta registrada");

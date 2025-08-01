@@ -26,8 +26,6 @@ const HeaderAsistencias = () => {
 
    const { user, loading, logout } = useAuth();
    const navigate = useNavigate();
-   console.log("valor: ", isPathActive(location.pathname, "/asistencias"));
-
    return (
       <>
          <header className="bg-white shadow-sm border-b">
@@ -53,34 +51,37 @@ const HeaderAsistencias = () => {
                            </h1>
                         </div>
                      </div>
-                     <section className="hidden md:flex gap-4 ">
-                        <Button
-                           variant="ghost "
-                           className={`font-semibold text-base ${
-                              isPathActive(location.pathname, "/asistencias")
-                                 ? "text-neutral-800"
-                                 : "text-neutral-500"
-                           }  hover:text-neutral-800`}
-                           onClick={() => {
-                              navigate("/asistencias");
-                           }}
-                        >
-                           Asistencias
-                        </Button>
-                        <Button
-                           variant="ghost "
-                           className={`font-semibold text-base ${
-                              isPathActive(location.pathname, "/usuarios")
-                                 ? "text-neutral-800"
-                                 : "text-neutral-500"
-                           }  hover:text-neutral-800`}
-                           onClick={() => {
-                              navigate("/usuarios");
-                           }}
-                        >
-                           Trabajadores
-                        </Button>
-                     </section>
+                     {(user.rol === "GERENTE" ||
+                        user.rol === "ADMINISTRADOR") && (
+                        <section className="hidden md:flex gap-4 ">
+                           <Button
+                              variant="ghost "
+                              className={`font-semibold text-base ${
+                                 isPathActive(location.pathname, "/asistencias")
+                                    ? "text-neutral-800"
+                                    : "text-neutral-500"
+                              }  hover:text-neutral-800`}
+                              onClick={() => {
+                                 navigate("/asistencias");
+                              }}
+                           >
+                              Asistencias
+                           </Button>
+                           <Button
+                              variant="ghost "
+                              className={`font-semibold text-base ${
+                                 isPathActive(location.pathname, "/usuarios")
+                                    ? "text-neutral-800"
+                                    : "text-neutral-500"
+                              }  hover:text-neutral-800`}
+                              onClick={() => {
+                                 navigate("/usuarios");
+                              }}
+                           >
+                              Trabajadores
+                           </Button>
+                        </section>
+                     )}
                   </article>
 
                   {/* Desktop - Info del usuario */}
@@ -115,7 +116,10 @@ const HeaderAsistencias = () => {
          </header>
 
          {/* Mobile Menu Component */}
-         {user.rol === "GERENTE" && <MobileMenu user={user} logout={logout} />}
+         {user.rol === "GERENTE" ||
+            (user.rol === "ADMINISTRADOR" && (
+               <MobileMenu user={user} logout={logout} />
+            ))}
 
          <Outlet />
       </>

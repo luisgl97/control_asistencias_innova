@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -23,6 +22,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Search, UserPlus, Edit, Trash2, Mail } from "lucide-react";
 import usuarioService from "../services/usuarioService";
 import { useNavigate } from "react-router-dom";
+import ModalEliminarUsuario from "../components/ModalEliminarUsuario";
 
 // Tipo para el usuario basado en la estructura proporcionada
 
@@ -32,7 +32,7 @@ const GestionUsuarios = () => {
    const [error, setError] = useState(null);
    const [searchTerm, setSearchTerm] = useState("");
    const [filteredUsuarios, setFilteredUsuarios] = useState([]);
-   const navigate=useNavigate()
+   const navigate = useNavigate();
 
    const fetchUsuarios = async () => {
       try {
@@ -86,12 +86,13 @@ const GestionUsuarios = () => {
       }
    };
 
-
    if (loading) {
       return (
          <Card className="w-full max-w-7xl mx-auto space-y-6 shadow-none outline-none border-none">
             <CardHeader>
-               <CardTitle className="text-2xl font-bold">Gestión de Usuarios</CardTitle>
+               <CardTitle className="text-2xl font-bold">
+                  Gestión de Usuarios
+               </CardTitle>
                <CardDescription>Cargando usuarios...</CardDescription>
             </CardHeader>
             <CardContent>
@@ -115,7 +116,9 @@ const GestionUsuarios = () => {
       return (
          <Card className="w-full max-w-7xl mx-auto space-y-6 shadow-none outline-none border-non">
             <CardHeader>
-               <CardTitle className="text-2xl font-bold">Gestión de Usuarios</CardTitle>
+               <CardTitle className="text-2xl font-bold">
+                  Gestión de Usuarios
+               </CardTitle>
             </CardHeader>
             <CardContent>
                <Alert variant="destructive">
@@ -143,7 +146,10 @@ const GestionUsuarios = () => {
                         usuarios registrados)
                      </CardDescription>
                   </div>
-                  <Button className="gap-2 bg-innova-blue hover:bg-innova-blue/90" onClick={()=>navigate('/usuarios/registrar')}>
+                  <Button
+                     className="gap-2 bg-innova-blue hover:bg-innova-blue/90"
+                     onClick={() => navigate("/usuarios/registrar")}
+                  >
                      <UserPlus className="h-4 w-4" />
                      Nuevo Usuario
                   </Button>
@@ -168,14 +174,19 @@ const GestionUsuarios = () => {
 
                {/* Tabla de usuarios */}
                <div className="rounded-md border">
-                  <Table>
-                     <TableHeader>
+                  <Table className={"rounded-md overflow-hidden"}>
+                     <TableHeader className="bg-innova-blue">
                         <TableRow>
-                           <TableHead>Usuario</TableHead>
-                           <TableHead>DNI</TableHead>
-                           <TableHead>Email</TableHead>
-                           <TableHead>Rol</TableHead>
-                           <TableHead>Cargo</TableHead>
+                           <TableHead className={"text-white"}>
+                              Usuario
+                           </TableHead>
+                           <TableHead className={"text-white"}>DNI</TableHead>
+                           <TableHead className={"text-white"}>Email</TableHead>
+                           <TableHead className={"text-white"}>Rol</TableHead>
+                           <TableHead className={"text-white"}>Cargo</TableHead>
+                           <TableHead className={"text-white"}>
+                              Acciones
+                           </TableHead>
                         </TableRow>
                      </TableHeader>
                      <TableBody>
@@ -230,6 +241,25 @@ const GestionUsuarios = () => {
                                           ----
                                        </span>
                                     )}
+                                 </TableCell>
+                                 <TableCell className={"flex gap-3"}>
+                                    <Button
+                                       variant="outline"
+                                       size={"icon"}
+                                       className="size-7"
+                                       onClick={() =>
+                                          navigate(
+                                             `/usuarios/registrar?id=${usuario.id}`
+                                          )
+                                       }
+                                    >
+                                       <Edit className="size-3.5 text-innova-orange" />
+                                    </Button>
+                                    <ModalEliminarUsuario
+                                       id={usuario.id}
+                                       nombres={`${usuario.nombres} ${usuario.apellidos}`}
+                                       cargarDatos={fetchUsuarios}
+                                    />
                                  </TableCell>
                               </TableRow>
                            ))

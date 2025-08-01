@@ -17,6 +17,7 @@ import { AlertCircle, Loader2, XCircle } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import asistenciaService from "../service/asistenciaService";
+import { fecha_hora_asistencia } from "../libs/fecha_hora_asistencia";
 
 const initForm = {
    autorizado_por: "",
@@ -28,6 +29,7 @@ export function ModalSalidaAnticipada({
    ubicacion,
    id,
    fetchVerificarAsistencia,
+   estado_fin_refrigerio,
 }) {
    const [open, setOpen] = useState(false);
    const [isLoading, setLoading] = useState(false);
@@ -45,21 +47,21 @@ export function ModalSalidaAnticipada({
       setOpen(false);
    };
    const handleClick = async () => {
-      const hora = new Intl.DateTimeFormat("es-PE", {
-         timeZone: "America/Lima",
-         hour: "2-digit",
-         minute: "2-digit",
-         second: "2-digit",
-         hour12: false,
-      }).format(new Date());
+      const { hora_a } = fecha_hora_asistencia();
+
+      const ubicacion_salida = {
+         lat: ubicacion.latitude,
+         lng: ubicacion.longitude,
+         direccion: ubicacion.display_name,
+      };
       let data = {
          ...form,
          asistencia_id: id,
-         hora_salida: hora,
+         hora_salida: hora_a,
+         ubicacion_salida,
       };
       try {
          setLoading(true);
-         console.log(data);
          await asistenciaService.registrarSalidaAnticipada(data);
          fetchVerificarAsistencia();
          toast.success("Salida anticipada registrada");
@@ -77,7 +79,12 @@ export function ModalSalidaAnticipada({
             <Button
                className="bg-gray-600 hover:bg-gray-500 text-gray-200 py-2 h-auto flex items-center justify-center gap-1 text-xs border border-gray-500"
                variant="outline"
-               disabled={!estado_ingreso || estado_salida || !ubicacion}
+               disabled={
+                  !estado_ingreso ||
+                  estado_salida ||
+                  !ubicacion ||
+                  !estado_fin_refrigerio
+               }
             >
                <AlertCircle className="w-5 h-5" />
                <span className="text-sm">Salida Anticipada</span>

@@ -54,17 +54,12 @@ export function AuthProvider({ children }) {
       }
 
       if (data && data.token && data.usuario) {
-         console.log("All Data: ", data);
-         console.log("Token Data: ", data.token);
-         console.log("Usuario Data: ", data.usuario);
-
          localStorage.setItem("token", data.token);
          localStorage.setItem("user", JSON.stringify(data.usuario));
          axios.defaults.headers.common[
             "Authorization"
          ] = `Bearer ${data.token}`;
          setUser(data.usuario);
-         console.log(data.usuario);
 
          if (navigate) navigate("/", { replace: true });
          return { estado: true, rol: data.usuario.rol };
