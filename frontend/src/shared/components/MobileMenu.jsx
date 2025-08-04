@@ -2,7 +2,7 @@
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ClipboardList, Menu, User, Users2, X } from "lucide-react";
+import { ClipboardList, Clock, Menu, User, Users2, X } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -79,18 +79,35 @@ const MobileMenu = ({ user, logout }) => {
 
                {/* Menu Actions */}
                <div className="space-y-4">
-                  <Button
-                     variant="outline"
-                     className="w-full justify-start bg-transparent"
-                     onClick={() => {
-                        // Aquí puedes agregar navegación a perfil
-                        navigate("/usuarios");
-                        closeMobileMenu();
-                     }}
-                  >
-                     <Users2 className="w-4 h-4 mr-2" />
-                     Trabajadores
-                  </Button>
+                  {user.rol !== "LIDER TRABAJADOR" && (
+                     <Button
+                        variant="outline"
+                        className="w-full justify-start bg-transparent"
+                        onClick={() => {
+                           // Aquí puedes agregar navegación a perfil
+                           navigate("/usuarios");
+                           closeMobileMenu();
+                        }}
+                     >
+                        <Users2 className="w-4 h-4 mr-2" />
+                        Trabajadores
+                     </Button>
+                  )}
+                  {user.rol === "LIDER TRABAJADOR" && (
+                     <Button
+                        variant="outline"
+                        className="w-full justify-start bg-transparent"
+                        onClick={() => {
+                           // Aquí puedes agregar navegación a perfil
+                           navigate("/");
+                           closeMobileMenu();
+                        }}
+                     >
+                        <Clock className="w-4 h-4 mr-2" />
+                        Mi asistencia
+                     </Button>
+                  )}
+
                   <Button
                      variant="outline"
                      className="w-full justify-start bg-transparent"

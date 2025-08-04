@@ -81,6 +81,9 @@ const GestionUsuarios = () => {
             return "secondary";
          case "TRABAJADOR":
             return "outline";
+         case "LIDER TRABAJADOR":
+            return "outline";
+
          default:
             return "outline";
       }

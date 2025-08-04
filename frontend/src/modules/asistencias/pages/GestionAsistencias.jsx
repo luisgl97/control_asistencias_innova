@@ -17,9 +17,12 @@ import AsistenciaPordia from "../components/AsistenciaPordia";
 import MapaTrabajadores from "../components/MapaTrabajadores";
 import { useState } from "react";
 import Reportes from "../components/Reportes";
+import { useAuth } from "@/context/AuthContext";
 
 export default function GestionAsistencias() {
    const [isLoading, setIsLoading] = useState(false);
+   const { user, loading, logout } = useAuth();
+
    return (
       <div className="flex w-full justify-center my-8">
          <Tabs
@@ -34,39 +37,47 @@ export default function GestionAsistencias() {
                >
                   Asistencia Diaria
                </TabsTrigger>
-               <TabsTrigger
-                  className="w-full bg-neutral-200/80 data-[state=active]:bg-innova-blue data-[state=active]:text-white"
-                  disabled={isLoading}
-                  value="semanal"
-               >
-                  Asistencia Semanal
-               </TabsTrigger>
-               <TabsTrigger
-                  className="w-full bg-neutral-200/80  data-[state=active]:bg-innova-blue data-[state=active]:text-white"
-                  disabled={isLoading}
-                  value="mapa"
-               >
-                  Mapa de trabajadores
-               </TabsTrigger>
-               <TabsTrigger
-                  className="w-full bg-neutral-200/80  data-[state=active]:bg-innova-blue data-[state=active]:text-white"
-                  value="reportes"
-               >
-                  Reporte PDF
-               </TabsTrigger>
+               {user.rol !== "LIDER TRABAJADOR" && (
+                  <>
+                     <TabsTrigger
+                        className="w-full bg-neutral-200/80 data-[state=active]:bg-innova-blue data-[state=active]:text-white"
+                        disabled={isLoading}
+                        value="semanal"
+                     >
+                        Asistencia Semanal
+                     </TabsTrigger>
+                     <TabsTrigger
+                        className="w-full bg-neutral-200/80  data-[state=active]:bg-innova-blue data-[state=active]:text-white"
+                        disabled={isLoading}
+                        value="mapa"
+                     >
+                        Mapa de trabajadores
+                     </TabsTrigger>
+                     <TabsTrigger
+                        className="w-full bg-neutral-200/80  data-[state=active]:bg-innova-blue data-[state=active]:text-white"
+                        value="reportes"
+                     >
+                        Reporte PDF
+                     </TabsTrigger>
+                  </>
+               )}
             </TabsList>
             <TabsContent value="dia" className="w-full p-2">
                <AsistenciaPordia />
             </TabsContent>
-            <TabsContent value="semanal" className="w-full p-2">
-               <AsistenciaSemanal />
-            </TabsContent>
-            <TabsContent value="mapa" className="w-full p-2">
-               <MapaTrabajadores />
-            </TabsContent>
-            <TabsContent value="reportes" className="w-full p-2">
-               <Reportes />
-            </TabsContent>
+            {user.rol !== "LIDER TRABAJADOR" && (
+               <>
+                  <TabsContent value="semanal" className="w-full p-2">
+                     <AsistenciaSemanal />
+                  </TabsContent>
+                  <TabsContent value="mapa" className="w-full p-2">
+                     <MapaTrabajadores />
+                  </TabsContent>
+                  <TabsContent value="reportes" className="w-full p-2">
+                     <Reportes />
+                  </TabsContent>
+               </>
+            )}
          </Tabs>
       </div>
    );
