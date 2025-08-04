@@ -26,13 +26,13 @@ class Usuario {
   static validarCamposObligatorios(datos, modo = "crear") {
 
     if(modo === "crear") {
-     const { dni, nombres, apellidos, email, password, rol } = datos;
+     const { dni, nombres, apellidos, email, password, rol, filial_id } = datos;
 
-    if (!dni || !nombres || !apellidos || !email || !password || !rol ) {
+    if (!dni || !nombres || !apellidos || !email || !password || !rol || !filial_id ) {
       return {
         success: false,
         message:
-          "Los campos dni, nombres, apellidos, email, password y rol son requeridos",
+          "Los campos dni, nombres, apellidos, email, password, filial y rol son requeridos",
       };
     }
 
