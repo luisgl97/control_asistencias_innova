@@ -18,9 +18,14 @@ import {
 import { Button } from "@/components/ui/button";
 
 const isPathActive = (currentPath, itemPath) => {
-   const itemUrl = new URL(itemPath, window.location.origin); // para extraer pathname de itemPath
-   return currentPath.startsWith(itemUrl.pathname);
+   const itemUrl = new URL(itemPath, window.location.origin);
+   const itemPathname = itemUrl.pathname;
+
+   return (
+      currentPath === itemPathname || currentPath.startsWith(itemPathname + "/")
+   );
 };
+
 const HeaderAsistencias = () => {
    const location = useLocation();
 

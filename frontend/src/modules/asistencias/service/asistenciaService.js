@@ -21,6 +21,7 @@ const asistenciaService = {
       api.post("/asistencias/registrar-inicio-refrigerio", data),
    registrarFinRefrigerio: (data) =>
       api.post("/asistencias/registrar-fin-refrigerio", data),
+   getAutorizadores:()=>api.get("/usuarios/autorizan-permiso")
 };
 
 export default asistenciaService;

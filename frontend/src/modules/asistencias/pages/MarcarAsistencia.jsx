@@ -41,6 +41,7 @@ export default function MarcarAsistencia() {
    const [ubicacionLoading, setUbicacionLoading] = useState(true);
    const [ubicacionError, setUbicacionError] = useState(null);
    const [asistencia, setAsistencia] = useState({});
+   
    const fecha_active = new Date(); // o la que venga del backend
    const esSabado =
       fecha_active.toLocaleDateString("es-PE", {
