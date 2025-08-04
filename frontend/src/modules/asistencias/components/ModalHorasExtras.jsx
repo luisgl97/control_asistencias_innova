@@ -32,7 +32,7 @@ const ModalHorasExtras = ({ nombres, id, cargarDatos,hizo_horas_extras }) => {
                variant="outline"
                disabled={hizo_horas_extras}
             >
-               <span className="text-xs">Horas Extras</span>
+               <span className="text-xs">H Extras</span>
             </Button>
          </AlertDialogTrigger>
          <AlertDialogContent>
