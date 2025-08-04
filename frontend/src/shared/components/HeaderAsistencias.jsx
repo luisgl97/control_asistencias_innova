@@ -88,10 +88,7 @@ const HeaderAsistencias = () => {
                               <Button
                                  variant="ghost "
                                  className={`font-semibold text-base ${
-                                    isPathActive(
-                                       location.pathname,
-                                       "/"
-                                    )
+                                    isPathActive(location.pathname, "/")
                                        ? "text-neutral-800"
                                        : "text-neutral-500"
                                  }  hover:text-neutral-800`}
@@ -156,11 +153,11 @@ const HeaderAsistencias = () => {
          </header>
 
          {/* Mobile Menu Component */}
-         {user.rol === "GERENTE" ||
+         {(user.rol === "GERENTE" ||
             user.rol === "ADMINISTRADOR" ||
-            (user.rol === "LIDER TRABAJADOR" && (
-               <MobileMenu user={user} logout={logout} />
-            ))}
+            user.rol === "LIDER TRABAJADOR") && (
+            <MobileMenu user={user} logout={logout} />
+         )}
 
          <Outlet />
       </>
