@@ -33,18 +33,36 @@ export default function AppRoutes() {
                <Route path="/login" element={<Login />} />
                <Route path="/" element={<AuthGuard />}>
                   <Route element={<HeaderAsistencias />}>
-                     <Route element={<RoleGuard roles={["TRABAJADOR"]} />}>
+                     <Route
+                        element={
+                           <RoleGuard
+                              roles={["TRABAJADOR", "LIDER TRABAJADOR"]}
+                           />
+                        }
+                     >
                         <Route index element={<MarcarAsistencia />} />
                      </Route>
                      <Route
                         element={
-                           <RoleGuard roles={["GERENTE", "ADMINISTRADOR"]} />
+                           <RoleGuard
+                              roles={[
+                                 "GERENTE",
+                                 "ADMINISTRADOR",
+                                 "LIDER TRABAJADOR",
+                              ]}
+                           />
                         }
                      >
                         <Route
                            path="/asistencias"
                            element={<GestionAsistencias />}
                         />
+                     </Route>
+                     <Route
+                        element={
+                           <RoleGuard roles={["GERENTE", "ADMINISTRADOR"]} />
+                        }
+                     >
                         <Route
                            path="/usuarios/registrar"
                            element={<RegistrarUsuario />}

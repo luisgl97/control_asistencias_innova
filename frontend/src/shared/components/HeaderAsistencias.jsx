@@ -82,6 +82,43 @@ const HeaderAsistencias = () => {
                            </Button>
                         </section>
                      )}
+                     {user.rol === "LIDER TRABAJADOR" && (
+                        <>
+                           <section className="hidden md:flex gap-4 ">
+                              <Button
+                                 variant="ghost "
+                                 className={`font-semibold text-base ${
+                                    isPathActive(location.pathname, "/")
+                                       ? "text-neutral-800"
+                                       : "text-neutral-500"
+                                 }  hover:text-neutral-800`}
+                                 onClick={() => {
+                                    navigate("/");
+                                 }}
+                              >
+                                 Mi asistencia
+                              </Button>
+                           </section>
+                           <section className="hidden md:flex gap-4 ">
+                              <Button
+                                 variant="ghost "
+                                 className={`font-semibold text-base ${
+                                    isPathActive(
+                                       location.pathname,
+                                       "/asistencias"
+                                    )
+                                       ? "text-neutral-800"
+                                       : "text-neutral-500"
+                                 }  hover:text-neutral-800`}
+                                 onClick={() => {
+                                    navigate("/asistencias");
+                                 }}
+                              >
+                                 Asistencias
+                              </Button>
+                           </section>
+                        </>
+                     )}
                   </article>
 
                   {/* Desktop - Info del usuario */}
@@ -116,7 +153,9 @@ const HeaderAsistencias = () => {
          </header>
 
          {/* Mobile Menu Component */}
-         {(user.rol === "GERENTE" || user.rol === "ADMINISTRADOR") && (
+         {(user.rol === "GERENTE" ||
+            user.rol === "ADMINISTRADOR" ||
+            user.rol === "LIDER TRABAJADOR") && (
             <MobileMenu user={user} logout={logout} />
          )}
 

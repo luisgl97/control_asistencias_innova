@@ -52,7 +52,7 @@ export default function LoginPage() {
          if (res.rol === "GERENTE" || res.rol === "ADMINISTRADOR") {
             navigate("/asistencias");
          }
-         if (res.rol === "TRABAJADOR") {
+         if (res.rol === "TRABAJADOR"||res.rol=== "LIDER TRABAJADOR") {
             navigate("/");
          }
          toast.success("Inicio de sessión exitóso.");
