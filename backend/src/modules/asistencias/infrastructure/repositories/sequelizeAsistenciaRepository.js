@@ -6,7 +6,11 @@ const {
 const db = require("../../../../models");
 
 const moment = require("moment");
-const { CONST_HORA_INICIO, CONST_HORA_FIN_LV, CONST_HORA_FIN_SAB } = require("../../../../constants/horarios");
+const {
+  CONST_HORA_INICIO,
+  CONST_HORA_FIN_LV,
+  CONST_HORA_FIN_SAB,
+} = require("../../../../constants/horarios");
 const { CONST_FERIADOS_PERU } = require("../../../../constants/feriadosPeru");
 require("moment/locale/es"); // importa el idioma español
 moment.locale("es"); // establece el idioma a español
@@ -38,7 +42,6 @@ class SequelizeAsistenciaRepository {
   }
 
   async obtenerAsistenciasPorUsuario(idUsuario, fecha_inicio, fecha_fin) {
-    
     return await Asistencia.findAll({
       where: {
         usuario_id: idUsuario,
@@ -56,7 +59,7 @@ class SequelizeAsistenciaRepository {
     const usuarios = await Usuario.findAll({
       where: {
         rol: ["TRABAJADOR", "LIDER TRABAJADOR"],
-        estado: true
+        estado: true,
       },
       attributes: {
         exclude: ["password"],
@@ -181,30 +184,28 @@ class SequelizeAsistenciaRepository {
 
     let horasExtras = 0;
 
-      // Extraemos la hora de salida en formato string (ej. "17:45")
-      const horaSalida = dataSalida?.hora_salida;
+    // Extraemos la hora de salida en formato string (ej. "17:45")
+    const horaSalida = dataSalida?.hora_salida;
 
-      // Dividimos el string por ":" para separar hora y minutos, luego los convertimos a números
-      const [hs, ms] = horaSalida.split(":").map(Number);
+    // Dividimos el string por ":" para separar hora y minutos, luego los convertimos a números
+    const [hs, ms] = horaSalida.split(":").map(Number);
 
-      // Calculamos la cantidad total de minutos desde las 00:00 hasta la hora de salida
-      const minutosSalida = hs * 60 + ms;
+    // Calculamos la cantidad total de minutos desde las 00:00 hasta la hora de salida
+    const minutosSalida = hs * 60 + ms;
 
-      // Usa el día de la fecha de la asistencia, no el 'hoy' del servidor
-      const diaSemana = moment
-        .tz(asistencia.fecha, "YYYY-MM-DD", "America/Lima")
-        .day(); // 0=domingo, 6=sábado
+    // Usa el día de la fecha de la asistencia, no el 'hoy' del servidor
+    const diaSemana = moment
+      .tz(asistencia.fecha, "YYYY-MM-DD", "America/Lima")
+      .day(); // 0=domingo, 6=sábado
 
-      // Jornada definida por la empresa
-      const HORA_INICIO = CONST_HORA_INICIO; // 07:30
-      const HORA_FIN_LV = CONST_HORA_FIN_LV; // 17:00
-      const HORA_FIN_SAB = CONST_HORA_FIN_SAB; // 13:00
-      const horaLimite = diaSemana === 6 ? HORA_FIN_SAB : HORA_FIN_LV;
-      const minutosMinimos = horaLimite - HORA_INICIO; // 9.5h (570) L–V, 5.5h (330) sáb
+    // Jornada definida por la empresa
+    const HORA_INICIO = CONST_HORA_INICIO; // 07:30
+    const HORA_FIN_LV = CONST_HORA_FIN_LV; // 17:00
+    const HORA_FIN_SAB = CONST_HORA_FIN_SAB; // 13:00
+    const horaLimite = diaSemana === 6 ? HORA_FIN_SAB : HORA_FIN_LV;
+    const minutosMinimos = horaLimite - HORA_INICIO; // 9.5h (570) L–V, 5.5h (330) sáb
 
     if (asistencia.hizo_horas_extras) {
-    
-
       // Verifica que la hora de ingreso exista antes de calcular
       if (asistencia.hora_ingreso) {
         // Divide la hora de ingreso en horas y minutos, y convierte a números
@@ -267,165 +268,187 @@ class SequelizeAsistenciaRepository {
     };
   }
 
- // Obtiene el reporte de asistencias por fecha
-async obtenerReporteAsistencias(fechaInicio, fechaFin) {
-  const usuarios = await Usuario.findAll({
-    where: {
-      rol: ["TRABAJADOR", "LIDER TRABAJADOR"],
-    },
-  });
-
-  const asistencias = await Asistencia.findAll({
-    where: {
-      fecha: {
-        [Op.between]: [fechaInicio, fechaFin],
+  // Obtiene el reporte de asistencias por fecha
+  async obtenerReporteAsistencias(fechaInicio, fechaFin) {
+    const usuarios = await Usuario.findAll({
+      where: {
+        rol: ["TRABAJADOR", "LIDER TRABAJADOR"],
       },
-    },
-    include: [
-      {
-        model: Usuario,
-        as: "usuario",
-      },
-    ],
-    order: [["fecha", "ASC"]],
-  });
-
-  const usuariosMap = new Map();
-  const ultimaAsistenciaPorUsuario = new Map();
-
-  // Agrupar asistencias por usuario y registrar la última fecha
-  asistencias.forEach((asistencia) => {
-    if (!asistencia.usuario) return;
-    const usuarioId = asistencia.usuario.id;
-
-    if (!ultimaAsistenciaPorUsuario.has(usuarioId)) {
-      ultimaAsistenciaPorUsuario.set(usuarioId, asistencia.fecha);
-    } else {
-      const fechaGuardada = moment(ultimaAsistenciaPorUsuario.get(usuarioId));
-      const fechaActual = moment(asistencia.fecha);
-      if (fechaActual.isAfter(fechaGuardada)) {
-        ultimaAsistenciaPorUsuario.set(usuarioId, asistencia.fecha);
-      }
-    }
-  });
-
-  // Inicializar estructura por usuario
-  usuarios.forEach((usuario) => {
-    // Si el usuario está inactivo y no tiene asistencias dentro del rango, ignorarlo
-    const ultima = ultimaAsistenciaPorUsuario.get(usuario.id);
-    if (usuario.estado === false && (!ultima || moment(ultima).isBefore(fechaInicio))) return;
-
-    usuariosMap.set(usuario.id, {
-      trabajador: `${usuario.nombres} ${usuario.apellidos}`,
-      estado: usuario.estado,
-      asistenciaPorDia: {},
-      asistencias: 0,
-      tardanzas: 0,
-      faltas: 0,
-      observados: 0,
-      ultimaFechaAsistencia: ultimaAsistenciaPorUsuario.get(usuario.id) || null,
     });
-  });
 
-  // Procesar asistencias
-  asistencias.forEach((asistencia) => {
-    const usuarioId = asistencia.usuario?.id;
-    if (!usuariosMap.has(usuarioId)) return;
+    const asistencias = await Asistencia.findAll({
+      where: {
+        fecha: {
+          [Op.between]: [fechaInicio, fechaFin],
+        },
+      },
+      include: [
+        {
+          model: Usuario,
+          as: "usuario",
+        },
+      ],
+      order: [["fecha", "ASC"]],
+    });
 
-    const usuarioData = usuariosMap.get(usuarioId);
-    const fechaKey = moment(asistencia.fecha).tz("America/Lima").format("YYYY-MM-DD");
+    const usuariosMap = new Map();
+    const ultimaAsistenciaPorUsuario = new Map();
 
-    const entrada = asistencia.hora_ingreso
-      ? moment(asistencia.hora_ingreso, "HH:mm:ss").format("HH:mm")
-      : "-";
-    const salida = asistencia.hora_salida
-      ? moment(asistencia.hora_salida, "HH:mm:ss").format("HH:mm")
-      : "-";
+    // Agrupar asistencias por usuario y registrar la última fecha
+    asistencias.forEach((asistencia) => {
+      if (!asistencia.usuario) return;
+      const usuarioId = asistencia.usuario.id;
 
-    const label = `${entrada} - ${salida}`;
-
-    switch (asistencia.estado) {
-      case "PRESENTE":
-        usuarioData.asistenciaPorDia[fechaKey] = `${label}`;
-        usuarioData.observados += 1;
-        break;
-      case "ASISTIO":
-        usuarioData.asistenciaPorDia[fechaKey] = `${label} ✅`;
-        usuarioData.asistencias += 1;
-        break;
-      case "TARDANZA":
-      case "ASISTIO TARDE":
-        usuarioData.asistenciaPorDia[fechaKey] = `${label} 🕒 (Tarde)`;
-        usuarioData.tardanzas += 1;
-        break;
-      case "SALIDA ANTICIPADA":
-        usuarioData.asistenciaPorDia[fechaKey] = `${label} ⚠️ (Salida anticipada)`;
-        const [hi, mi] = asistencia.hora_ingreso.split(":" ).map(Number);
-        const minutosIngreso = hi * 60 + mi;
-        const toleranciaMinutos = 466;
-        const estado = minutosIngreso < toleranciaMinutos ? "PRESENTE" : "TARDANZA";
-        estado === "PRESENTE" ? usuarioData.asistencias++ : usuarioData.tardanzas++;
-        break;
-      case "FALTA JUSTIFICADA":
-        usuarioData.asistenciaPorDia[fechaKey] = "📄 Falta Justificada";
-        usuarioData.faltas += 1;
-        break;
-      default:
-        usuarioData.asistenciaPorDia[fechaKey] = "🚫 Sin registro";
-        usuarioData.faltas += 1;
-        break;
-    }
-  });
-
-  const diasDelRango = [];
-  let fechaCursor = moment(fechaInicio).tz("America/Lima");
-  const fechaFinMoment = moment(fechaFin).tz("America/Lima");
-
-  while (fechaCursor.isSameOrBefore(fechaFinMoment, "day")) {
-    const diaNumero = fechaCursor.day();
-    const fechaFormateada = fechaCursor.format("YYYY-MM-DD");
-    if (diaNumero !== 0 && !CONST_FERIADOS_PERU.includes(fechaFormateada)) {
-      diasDelRango.push({
-        diaSemana: fechaCursor.clone().locale("es").format("dddd").toLowerCase(),
-        fecha: fechaCursor.format("YYYY-MM-DD"),
-        fechaBonita: fechaCursor.format("DD-MM-YYYY"),
-      });
-    }
-    fechaCursor = fechaCursor.add(1, "day");
-  }
-
-  const resultado = Array.from(usuariosMap.values()).map((user) => {
-    const fila = {
-      trabajador: user.trabajador,
-      asistencias: user.asistencias,
-      tardanzas: user.tardanzas,
-      observados: user.observados,
-      faltas: 0,
-    };
-
-    diasDelRango.forEach(({ diaSemana, fecha, fechaBonita }) => {
-      const hoy = moment().tz("America/Lima").format("YYYY-MM-DD");
-      const fechaReporte = moment(fecha, "YYYY-MM-DD");
-      const ultimaFechaAsistencia = user.ultimaFechaAsistencia ? moment(user.ultimaFechaAsistencia, "YYYY-MM-DD") : null;
-
-      if (fecha > hoy) {
-        fila[`${diaSemana} (${fechaBonita})`] = "Pendiente";
-      } else if (!user.estado && ultimaFechaAsistencia && fechaReporte.isAfter(ultimaFechaAsistencia, "day")) {
-        fila[`${diaSemana} (${fechaBonita})`] = "No aplica";
+      if (!ultimaAsistenciaPorUsuario.has(usuarioId)) {
+        ultimaAsistenciaPorUsuario.set(usuarioId, asistencia.fecha);
       } else {
-        const valor = user.asistenciaPorDia[fecha] || "Falta";
-        fila[`${diaSemana} (${fechaBonita})`] = valor;
-        if (valor === "Falta" || valor === "🚫 Sin registro") {
-          fila.faltas += 1;
+        const fechaGuardada = moment(ultimaAsistenciaPorUsuario.get(usuarioId));
+        const fechaActual = moment(asistencia.fecha);
+        if (fechaActual.isAfter(fechaGuardada)) {
+          ultimaAsistenciaPorUsuario.set(usuarioId, asistencia.fecha);
         }
       }
     });
 
-    return fila;
-  });
+    // Inicializar estructura por usuario
+    usuarios.forEach((usuario) => {
+      // Si el usuario está inactivo y no tiene asistencias dentro del rango, ignorarlo
+      const ultima = ultimaAsistenciaPorUsuario.get(usuario.id);
+      if (
+        usuario.estado === false &&
+        (!ultima || moment(ultima).isBefore(fechaInicio))
+      )
+        return;
 
-  return resultado;
-}
+      usuariosMap.set(usuario.id, {
+        trabajador: `${usuario.nombres} ${usuario.apellidos}`,
+        estado: usuario.estado,
+        asistenciaPorDia: {},
+        asistencias: 0,
+        tardanzas: 0,
+        faltas: 0,
+        observados: 0,
+        ultimaFechaAsistencia:
+          ultimaAsistenciaPorUsuario.get(usuario.id) || null,
+      });
+    });
+
+    // Procesar asistencias
+    asistencias.forEach((asistencia) => {
+      const usuarioId = asistencia.usuario?.id;
+      if (!usuariosMap.has(usuarioId)) return;
+
+      const usuarioData = usuariosMap.get(usuarioId);
+      const fechaKey = moment(asistencia.fecha)
+        .tz("America/Lima")
+        .format("YYYY-MM-DD");
+
+      const entrada = asistencia.hora_ingreso
+        ? moment(asistencia.hora_ingreso, "HH:mm:ss").format("HH:mm")
+        : "-";
+      const salida = asistencia.hora_salida
+        ? moment(asistencia.hora_salida, "HH:mm:ss").format("HH:mm")
+        : "-";
+
+      const label = `${entrada} - ${salida}`;
+
+      switch (asistencia.estado) {
+        case "PRESENTE":
+          usuarioData.asistenciaPorDia[fechaKey] = `${label}`;
+          usuarioData.observados += 1;
+          break;
+        case "ASISTIO":
+          usuarioData.asistenciaPorDia[fechaKey] = `${label} ✅`;
+          usuarioData.asistencias += 1;
+          break;
+        case "TARDANZA":
+        case "ASISTIO TARDE":
+          usuarioData.asistenciaPorDia[fechaKey] = `${label} 🕒 (Tarde)`;
+          usuarioData.tardanzas += 1;
+          break;
+        case "SALIDA ANTICIPADA":
+          usuarioData.asistenciaPorDia[
+            fechaKey
+          ] = `${label} ⚠️ (Salida anticipada)`;
+          const [hi, mi] = asistencia.hora_ingreso.split(":").map(Number);
+          const minutosIngreso = hi * 60 + mi;
+          const toleranciaMinutos = 466;
+          const estado =
+            minutosIngreso < toleranciaMinutos ? "PRESENTE" : "TARDANZA";
+          estado === "PRESENTE"
+            ? usuarioData.asistencias++
+            : usuarioData.tardanzas++;
+          break;
+        case "FALTA JUSTIFICADA":
+          usuarioData.asistenciaPorDia[fechaKey] = "📄 Falta Justificada";
+          usuarioData.faltas += 1;
+          break;
+        default:
+          usuarioData.asistenciaPorDia[fechaKey] = "🚫 Sin registro";
+          usuarioData.faltas += 1;
+          break;
+      }
+    });
+
+    const diasDelRango = [];
+    let fechaCursor = moment(fechaInicio).tz("America/Lima");
+    const fechaFinMoment = moment(fechaFin).tz("America/Lima");
+
+    while (fechaCursor.isSameOrBefore(fechaFinMoment, "day")) {
+      const diaNumero = fechaCursor.day();
+      const fechaFormateada = fechaCursor.format("YYYY-MM-DD");
+      if (diaNumero !== 0 && !CONST_FERIADOS_PERU.includes(fechaFormateada)) {
+        diasDelRango.push({
+          diaSemana: fechaCursor
+            .clone()
+            .locale("es")
+            .format("dddd")
+            .toLowerCase(),
+          fecha: fechaCursor.format("YYYY-MM-DD"),
+          fechaBonita: fechaCursor.format("DD-MM-YYYY"),
+        });
+      }
+      fechaCursor = fechaCursor.add(1, "day");
+    }
+
+    const resultado = Array.from(usuariosMap.values()).map((user) => {
+      const fila = {
+        trabajador: user.trabajador,
+        asistencias: user.asistencias,
+        tardanzas: user.tardanzas,
+        observados: user.observados,
+        faltas: 0,
+      };
+
+      diasDelRango.forEach(({ diaSemana, fecha, fechaBonita }) => {
+        const hoy = moment().tz("America/Lima").format("YYYY-MM-DD");
+        const fechaReporte = moment(fecha, "YYYY-MM-DD");
+        const ultimaFechaAsistencia = user.ultimaFechaAsistencia
+          ? moment(user.ultimaFechaAsistencia, "YYYY-MM-DD")
+          : null;
+
+        if (fecha > hoy) {
+          fila[`${diaSemana} (${fechaBonita})`] = "Pendiente";
+        } else if (
+          !user.estado &&
+          ultimaFechaAsistencia &&
+          fechaReporte.isAfter(ultimaFechaAsistencia, "day")
+        ) {
+          fila[`${diaSemana} (${fechaBonita})`] = "No aplica";
+        } else {
+          const valor = user.asistenciaPorDia[fecha] || "Falta";
+          fila[`${diaSemana} (${fechaBonita})`] = valor;
+          if (valor === "Falta" || valor === "🚫 Sin registro") {
+            fila.faltas += 1;
+          }
+        }
+      });
+
+      return fila;
+    });
+
+    return resultado;
+  }
 
   // Verificar asistencia del usuario parar mostrar el boton de ingreso o salida en el frontend
   async verificarAsistenciaDelUsuarioDelDia(usuarioId, fecha) {
@@ -562,7 +585,7 @@ async obtenerReporteAsistencias(fechaInicio, fechaFin) {
       .day(); // 0=domingo, 6=sábado
 
     // Jornada definida por la empresa
-    const HORA_INICIO = CONST_HORA_INICIO // 07:30
+    const HORA_INICIO = CONST_HORA_INICIO; // 07:30
     const HORA_FIN_LV = CONST_HORA_FIN_LV; // 17:00
     const HORA_FIN_SAB = CONST_HORA_FIN_SAB; // 13:00
     const horaLimite = diaSemana === 6 ? HORA_FIN_SAB : HORA_FIN_LV;
@@ -610,7 +633,6 @@ async obtenerReporteAsistencias(fechaInicio, fechaFin) {
 
   // Obtener mapa de ubicaciones de ingreso y salida
   async obtenerMapaUbicaciones(fecha) {
-    
     const asistencias = await Asistencia.findAll({
       where: {
         fecha: fecha,
@@ -622,19 +644,91 @@ async obtenerReporteAsistencias(fechaInicio, fechaFin) {
           attributes: ["id", "nombres", "apellidos", "dni"],
         },
       ],
-    })
+    });
 
-    const ubicaciones = asistencias.length > 0 && asistencias.map((asistencia) => {
-      return {
-        usuario_id: asistencia.usuario.id,
-        trabajador: `${asistencia.usuario.nombres} ${asistencia.usuario.apellidos}`,
-        dni: asistencia.usuario.dni,
-        ubicacion_ingreso: asistencia.ubicacion_ingreso,
-        ubicacion_salida: asistencia.ubicacion_salida,
-      };
-    })
+    const ubicaciones =
+      asistencias.length > 0 &&
+      asistencias.map((asistencia) => {
+        return {
+          usuario_id: asistencia.usuario.id,
+          trabajador: `${asistencia.usuario.nombres} ${asistencia.usuario.apellidos}`,
+          dni: asistencia.usuario.dni,
+          ubicacion_ingreso: asistencia.ubicacion_ingreso,
+          ubicacion_salida: asistencia.ubicacion_salida,
+        };
+      });
 
     return ubicaciones || [];
+  }
+
+  // Obtener detalle asistencia del dia
+  async obtenerDetalleAsistencia(asistencia_id) {
+ 
+    const asistencia = await Asistencia.findByPk(asistencia_id, {
+      include: [
+        {
+          model: db.usuarios,
+          as: "usuario",
+          attributes: ["id", "nombres", "apellidos", "rol", "cargo"],
+        },
+      ],
+    });
+
+    if (!asistencia) {
+      return {
+        mensaje: "No registro su asistencia",
+        datos: null,
+      };
+    }
+
+    const permiso = await db.permisos.findOne({
+      where: {
+        asistencia_id: asistencia.id,
+      },
+      include: [
+        {
+          model: db.usuarios,
+          as: "autorizado_por_usuario",
+          attributes: { exclude: ["password"] }, // ❌ Excluir password
+        },
+      ],
+    });
+
+    const asistenciaData = asistencia.get({ plain: true });
+
+    if (!permiso) {
+      return {
+        mensaje: `Informacion detallada de su asistencia del usuario de la fecha: ${asistencia.fecha}`,
+
+        asistencia: {
+          asistencia: {
+            ...asistenciaData,
+          },
+          permiso: null,
+        },
+      };
+    }
+
+    const permisoData = permiso.get({ plain: true });
+
+    console.log({
+      asistenciaData,
+      permisoData,
+    });
+
+    const resultado = {
+      asistencia: {
+        ...asistenciaData,
+      },
+      permiso: {
+        ...permisoData,
+      },
+    };
+
+    return {
+      mensaje: `Informacion detallada de su asistencia del usuario de la fecha: ${asistencia.fecha}`,
+      asistencia: resultado,
+    };
   }
 }
 
