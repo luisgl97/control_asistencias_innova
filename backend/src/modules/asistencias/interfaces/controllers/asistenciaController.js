@@ -1,6 +1,7 @@
 const sequelizeAsistenciaRepository = require("../../infrastructure/repositories/sequelizeAsistenciaRepository");
 const sequelizeUsuarioRepository = require("../../../usuarios/infrastructure/repositories/sequelizeUsuarioRepository");
 
+
 const obtenerAsistencias = require("../../application/useCases/obtenerAsistencias");
 const obtenerAsistenciasPorUsuario = require("../../application/useCases/obtenerAsistenciasPorUsuario");
 const registrarIngreso = require("../../application/useCases/registrarIngreso");
@@ -11,7 +12,8 @@ const verificarAsistenciaDelUsuarioDelDia = require("../../application/useCases/
 const autorizarHorasExtras = require("../../application/useCases/autorizarHorasExtras");
 const obtenerMapaUbicaciones = require("../../application/useCases/obtenerMapaUbicaciones");
 const registrarInicioRefrigerio = require("../../application/useCases/registrarInicioRefrigerio")
-const registrarFinRefrigerio = require("../../application/useCases/registrarFinRefrigerio")
+const registrarFinRefrigerio = require("../../application/useCases/registrarFinRefrigerio");
+const obtenerDetalleAsistencia = require("../../application/useCases/obtenerDetalleAsistencia");
 
 const asistenciaRepository = new sequelizeAsistenciaRepository(); // Instancia del repositorio de usuario
 const usuarioRepository = new sequelizeUsuarioRepository(); // Instancia del repositorio de asistencia
@@ -190,6 +192,23 @@ const AsistenciaController = {
       const { codigo, respuesta } = await registrarFinRefrigerio(
         asistencia_id,
         hora_fin_refrigerio,
+        asistenciaRepository
+      );
+
+      res.status(codigo).json(respuesta);
+    } catch (error) {
+      console.log('error', error);
+      res.status(500).json({ error: error.message, estado: false });
+    }
+  },
+
+  async obtenerDetalleAsistencia(req, res) {
+    try {
+     
+      const {asistencia_id} = req.body; 
+
+      const { codigo, respuesta } = await obtenerDetalleAsistencia(
+        asistencia_id,
         asistenciaRepository
       );
 

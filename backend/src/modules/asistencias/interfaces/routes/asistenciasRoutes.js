@@ -27,5 +27,6 @@ router.post("/registrar-salida", asistenciaController.registrarSalida);
 router.post('/verificar-asistencia-del-dia', asistenciaController.verificarAsistenciaDelUsuarioDelDia);
 router.post("/registrar-inicio-refrigerio", asistenciaController.registrarInicioRefrigerio)
 router.post("/registrar-fin-refrigerio", asistenciaController.registrarFinRefrigerio)
+router.post("/detalle", asistenciaController.obtenerDetalleAsistencia)
 
 module.exports = router;
