@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Coffee, LogIn, LogOut } from "lucide-react";
 
-const HorariosTrabajo = ({ className }) => {
+const HorariosTrabajo = ({ className, esSabado = false }) => {
    return (
       <Card className={` ${className} gap-0`}>
          <CardHeader className="pb-3">
@@ -22,17 +22,18 @@ const HorariosTrabajo = ({ className }) => {
                   </div>
                </div>
             </div>
-
-            <div className="flex justify-between items-center">
-               <div className="flex items-center gap-1">
-                  <Coffee className="h-3 w-3 text-blue-500" />
-                  <span className="text-sm text-gray-600">Refrigerio</span>
+            {!esSabado && (
+               <div className="flex justify-between items-center">
+                  <div className="flex items-center gap-1">
+                     <Coffee className="h-3 w-3 text-blue-500" />
+                     <span className="text-sm text-gray-600">Refrigerio</span>
+                  </div>
+                  <div className="text-right">
+                     <div className="font-semibold">12:00 PM -</div>
+                     <div className="text-blue-600 text-sm">1:00 PM</div>
+                  </div>
                </div>
-               <div className="text-right">
-                  <div className="font-semibold">12:00 PM -</div>
-                  <div className="text-blue-600 text-sm">1:00 PM</div>
-               </div>
-            </div>
+            )}
 
             <div className="flex justify-between items-center">
                <div className="flex items-center gap-1">
@@ -40,7 +41,9 @@ const HorariosTrabajo = ({ className }) => {
 
                   <span className="text-sm text-gray-600">Salida</span>
                </div>
-               <div className="font-semibold">05:00 PM</div>
+               <div className="font-semibold">
+                  {esSabado ? "01:00 PM" : "05:00 PM"}
+               </div>
             </div>
          </CardContent>
       </Card>

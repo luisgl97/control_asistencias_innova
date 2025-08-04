@@ -116,10 +116,9 @@ const HeaderAsistencias = () => {
          </header>
 
          {/* Mobile Menu Component */}
-         {user.rol === "GERENTE" ||
-            (user.rol === "ADMINISTRADOR" && (
-               <MobileMenu user={user} logout={logout} />
-            ))}
+         {(user.rol === "GERENTE" || user.rol === "ADMINISTRADOR") && (
+            <MobileMenu user={user} logout={logout} />
+         )}
 
          <Outlet />
       </>

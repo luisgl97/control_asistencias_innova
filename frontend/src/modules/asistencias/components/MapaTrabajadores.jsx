@@ -22,6 +22,7 @@ import {
    SelectTrigger,
    SelectValue,
 } from "@/components/ui/select";
+import { parseUbicacion } from "../libs/parseUbicacion";
 
 // ================== UTILS ==================
 
@@ -187,8 +188,13 @@ const MapaTrabajadores = () => {
    const fetchTrabajadores = async (fecha) => {
       try {
          const res = await asistenciaService.mapaTrabajadores({ fecha });
-         setTrabajadores(res.data.datos || []);
-         setTrabajadoresRespaldo(res.data.datos || []);
+         const trabajadoresNormalizados = res.data.datos.map((t) => ({
+            ...t,
+            ubicacion_ingreso: parseUbicacion(t.ubicacion_ingreso),
+            ubicacion_salida: parseUbicacion(t.ubicacion_salida),
+         }));
+         setTrabajadores(trabajadoresNormalizados || []);
+         setTrabajadoresRespaldo(trabajadoresNormalizados || []);
       } catch (error) {
          console.error("Error al cargar trabajadores:", error);
       }
