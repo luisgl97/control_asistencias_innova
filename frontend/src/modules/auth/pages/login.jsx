@@ -18,12 +18,15 @@ import {
    Eye,
    EyeClosed,
    User2Icon,
+   Lock,
 } from "lucide-react";
 import { toast } from "sonner";
 import { loginSchema } from "../schemas/usuarioSchema";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useAuth } from "@/context/AuthContext";
 import { useNavigate } from "react-router-dom";
+
+import logotipo from "../../../assets/png/logov1-removebg-preview.png"
 
 export default function LoginPage() {
    const navigate = useNavigate();
@@ -72,19 +75,21 @@ export default function LoginPage() {
    };
 
    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-100 via-purple-50 to-slate-200 flex flex-col">
+      <div className="min-h-[100dvh] bg-gradient-to-br from-[#1b274a] to-[#1b274a] flex flex-col">
          {/* Main content */}
          <div className="flex-1 flex items-center justify-center p-4">
-            <Card className="w-full max-w-md shadow-xl border-0 bg-white/95 backdrop-blur-sm">
-               <CardHeader className="text-center space-y-4 pb-8">
-                  <div className="mx-auto w-16 h-16 bg-innova-blue rounded-full flex items-center justify-center shadow-lg">
-                     <Clock className="w-8 h-8 text-white" />
+            <Card className="w-full max-w-md shadow-xl border-0 bg-white backdrop-blur-sm">
+               <CardHeader className="text-center space-y-3 pb-4 relative">
+                  <div className="relative mx-auto">
+                     <div className="">
+                           <img src={logotipo} className="w-30 h-30 relative" alt="logo" />
+                     </div>
                   </div>
-                  <div className="space-y-2">
-                     <CardTitle className="text-2xl font-bold text-gray-900">
+                  <div className="space-y-3">
+                     <CardTitle className="text-3xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">
                         Márcate
                      </CardTitle>
-                     <CardDescription className="text-gray-600">
+                     <CardDescription className="text-gray-600 text-base">
                         Ingresa tus credenciales para acceder
                      </CardDescription>
                   </div>
@@ -97,7 +102,10 @@ export default function LoginPage() {
                            htmlFor="email"
                            className="text-sm font-medium text-gray-700"
                         >
-                           Email
+                           <User2Icon className="h-4 w-4" />
+                           <p>
+                              Email
+                           </p>
                         </Label>
                         <div className="relative">
                            <Input
@@ -107,16 +115,8 @@ export default function LoginPage() {
                               value={email}
                               onChange={(e) => setEmail(e.target.value)}
                               //  required
-                              className="h-11 border-gray-200 focus:border-blue-500 focus:ring-blue-500 pl-9"
+                              className="h-11 border-gray-200 focus:border-blue-500 focus:ring-blue-500 pl-3"
                            />
-                           <Button
-                              type="button"
-                              variant="ghost"
-                              size="icon"
-                              className="absolute top-1/2 -translate-y-1/2"
-                           >
-                              <User2Icon />
-                           </Button>
                         </div>
 
                         {errors?.email && (
@@ -132,6 +132,7 @@ export default function LoginPage() {
                            htmlFor="password"
                            className="text-sm font-medium text-gray-700"
                         >
+                           <Lock className="w-4 h-4" />
                            Contraseña
                         </Label>
                         <div className="relative">
@@ -141,13 +142,13 @@ export default function LoginPage() {
                               value={password}
                               onChange={(e) => setPassword(e.target.value)}
                               //  required
-                              className="h-11 border-gray-200 focus:border-blue-500 focus:ring-blue-500 pl-9"
+                              className="h-11 border-gray-200 focus:border-blue-500 focus:ring-blue-500 pl-3"
                            />
                            <Button
                               type="button"
                               variant="ghost"
                               size="icon"
-                              className="absolute top-1/2 -translate-y-1/2"
+                              className="absolute right-2 top-1/2 -translate-y-1/2"
                               onClick={() => setShowPassword(!showPassword)}
                            >
                               {showPassword ? <EyeClosed /> : <Eye />}
@@ -163,11 +164,17 @@ export default function LoginPage() {
 
                      <Button
                         type="submit"
-                        className="w-full h-11 bg-innova-blue hover:bg-innova-blue/90 text-white font-medium transition-colors"
+                        className="w-full h-12 bg-gradient-to-r bg-orange-500  hover:bg-orange-550 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] relative overflow-hidden group"
                         disabled={isLoading}
                      >
                         {isLoading ? "Iniciando sesión..." : "Iniciar Sesión"}
                      </Button>
+
+                     {/* <div className="text-center">
+                        <button className="text-sm text-gray-500 hover:text-orange-600 transition-colors duration-200 font-medium">
+                           ¿Olvidaste tu contraseña?
+                        </button>
+                     </div> */}
                   </form>
 
                   <div className="text-center">
