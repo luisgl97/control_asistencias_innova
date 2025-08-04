@@ -83,6 +83,19 @@ class SequelizeUsuarioRepository {
     });
     return usuarios;
   }
+
+  async obtenerUsuariosAutorizanPermiso() {
+    const usuarios = await Usuario.findAll({
+      where: {
+        estado: true, // Solo usuarios activos
+        rol: ["GERENTE", "ADMINISTRADOR"]
+      },
+      attributes: {
+        exclude: ["password"],
+      },
+    });
+    return usuarios;
+  }
 }
 
 module.exports = SequelizeUsuarioRepository;

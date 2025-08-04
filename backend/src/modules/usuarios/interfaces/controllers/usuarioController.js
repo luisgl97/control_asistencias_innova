@@ -7,6 +7,7 @@ const actualizarUsuario = require("../../application/useCases/actualizarUsuario"
 const eliminarUsuario = require("../../application/useCases/eliminarUsuario");
 const activarUsuario = require("../../application/useCases/activarUsuario");
 const listarUsuariosPorCargo = require("../../application/useCases/listarUsuariosPorCargo");
+const obtenerUsuariosAutorizanPermiso = require("../../application/useCases/obtenerUsuariosAutorizanPermiso");
 
 const usuarioRepository = new sequelizeUsuarioRepository(); // Instancia del repositorio de usuario
 
@@ -95,6 +96,17 @@ const UsuarioController = {
         try {
             const { cargo } = req.body;
             const { codigo, respuesta } = await listarUsuariosPorCargo(cargo, usuarioRepository);
+            res.status(codigo).json(respuesta);
+        } catch (error) {
+            console.log(error);
+            res.status(500).json({ error: error.message, estado: false });
+        }
+    },
+
+    async obtenerUsuariosAutorizanPermiso(_, res) {
+        try {
+          
+            const { codigo, respuesta } = await obtenerUsuariosAutorizanPermiso(usuarioRepository);
             res.status(codigo).json(respuesta);
         } catch (error) {
             console.log(error);
