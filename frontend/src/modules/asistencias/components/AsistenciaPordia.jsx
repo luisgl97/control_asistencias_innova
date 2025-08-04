@@ -16,6 +16,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { ModalJustificarFalta } from "./ModalJustificarFalta";
 import ModalHorasExtras from "./ModalHorasExtras";
+import AsistenciaDetailDialog from "./AsistenciaDetalleModal";
 
 const estilos = {
    ASISTIO: "bg-green-50 text-green-700 border-green-200",
@@ -174,7 +175,7 @@ const AsistenciaPordia = () => {
                                  </Badge>
                               </TableCell>
 
-                              <TableCell className="text-center">
+                              <TableCell className="text-center space-x-2">
                                  {(trabajador.asistencia_id &&
                                     trabajador.estado !==
                                        "FALTA JUSTIFICADA") && (
@@ -187,6 +188,7 @@ const AsistenciaPordia = () => {
                                        }
                                     />
                                  )}
+                                 <AsistenciaDetailDialog asistenciaId={trabajador.asistencia_id}/>
                               </TableCell>
                            </TableRow>
                         ))}

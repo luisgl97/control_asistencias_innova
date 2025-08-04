@@ -143,6 +143,8 @@ export default function MarcarAsistencia() {
          posicion = await obtenerCoordenadas();
       } catch (error) {
          toast.error("No se pudo obtener la ubicación");
+         setAccionEnProceso(false);
+
          return;
       }
       const ubicacion_ingreso = {
@@ -180,6 +182,7 @@ export default function MarcarAsistencia() {
          posicion = await obtenerCoordenadas();
       } catch (error) {
          toast.error("No se pudo obtener la ubicación");
+         setAccionEnProceso(false);
          return;
       }
       const ubicacion_salida = {
@@ -376,7 +379,10 @@ export default function MarcarAsistencia() {
                                        <Button
                                           className="bg-amber-600 hover:bg-amber-500 text-white py-2 h-auto flex items-center justify-center gap-1 text-xs border border-amber-500 cursor-pointer"
                                           variant="outline"
-                                          disabled={status.hora_fin_refrigerio}
+                                          disabled={
+                                             status.hora_fin_refrigerio ||
+                                             status.estadoSalida
+                                          }
                                           onClick={marcarFinRefrigerio}
                                        >
                                           <CoffeeIcon className="w-5 h-5" />
@@ -388,7 +394,10 @@ export default function MarcarAsistencia() {
                                        <Button
                                           className="bg-amber-600 hover:bg-amber-500 text-white py-2 h-auto flex items-center justify-center gap-1 text-xs border border-amber-500 cursor-pointer"
                                           variant="outline"
-                                          disabled={!status.estadoIngreso}
+                                          disabled={
+                                             !status.estadoIngreso ||
+                                             status.estadoSalida
+                                          }
                                           onClick={marcarInicioRefrigerio}
                                        >
                                           <Coffee className="w-5 h-5" />

@@ -18,6 +18,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import asistenciaService from "../service/asistenciaService";
 import { fecha_hora_asistencia } from "../libs/fecha_hora_asistencia";
+import { obtenerCoordenadas } from "../libs/obtenerCoordenadas";
 
 const initForm = {
    autorizado_por: "",
@@ -47,11 +48,20 @@ export function ModalSalidaAnticipada({
       setOpen(false);
    };
    const handleClick = async () => {
-      const { hora_a } = fecha_hora_asistencia();
+      setLoading(true);
 
+      const { hora_a } = fecha_hora_asistencia();
+      let posicion;
+      try {
+         posicion = await obtenerCoordenadas();
+      } catch (error) {
+         toast.error("No se pudo obtener la ubicación");
+         setLoading(false);
+         return;
+      }
       const ubicacion_salida = {
-         lat: ubicacion.latitude,
-         lng: ubicacion.longitude,
+         lat: posicion.lat,
+         lng: posicion.lng,
          direccion: ubicacion.display_name,
       };
       let data = {
