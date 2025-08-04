@@ -79,12 +79,7 @@ export function ModalSalidaAnticipada({
             <Button
                className="bg-gray-600 hover:bg-gray-500 text-gray-200 py-2 h-auto flex items-center justify-center gap-1 text-xs border border-gray-500"
                variant="outline"
-               disabled={
-                  !estado_ingreso ||
-                  estado_salida ||
-                  !ubicacion ||
-                  !estado_fin_refrigerio
-               }
+               disabled={!estado_ingreso || estado_salida || !ubicacion}
             >
                <AlertCircle className="w-5 h-5" />
                <span className="text-sm">Salida Anticipada</span>

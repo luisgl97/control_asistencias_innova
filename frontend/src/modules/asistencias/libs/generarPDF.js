@@ -3,8 +3,6 @@ import { es } from "date-fns/locale";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 
-
-
 export const generarPDF = async (asistenciasPorTrabajador) => {
    const doc = new jsPDF();
 
@@ -30,14 +28,14 @@ export const generarPDF = async (asistenciasPorTrabajador) => {
       doc.setFontSize(8);
       doc.text(`DATOS DE LA EMPRESA`, 14, 18);
       doc.text(`Nombre o Razón Social: `, 14, 24);
-      doc.text(`${usuario.filial_razon_social}`, 50, 24);
+      doc.text(`${usuario.filial_razon_social ?? "No disponible"}`, 50, 24);
       doc.text(`RUC: `, 14, 29);
-      doc.text(`${usuario.filial_ruc}`, 25, 29);
+      doc.text(`${usuario.filial_ruc ?? "No disponible"}`, 25, 29);
       doc.text(`DATOS DEL TRABAJADOR: `, 14, 34);
       doc.text(`Apellidos y nombres: `, 14, 38);
       doc.text(`${usuario.nombres} ${usuario.apellidos}`, 43, 38);
 
-      doc.text(`${usuario.tipo_documento} `, 14, 42);
+      doc.text(`${usuario.tipo_documento??"No disponible"} `, 14, 42);
       doc.text(`${usuario.dni}`, 25, 42);
       doc.text(`Cargo: `, 14, 46);
       doc.text(`${usuario.cargo ? usuario.cargo : "-"}`, 24, 46);

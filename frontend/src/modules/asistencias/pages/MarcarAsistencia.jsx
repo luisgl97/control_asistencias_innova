@@ -26,9 +26,11 @@ import { ModalFalta } from "../components/ModalFalta";
 import { diferenciaHoras } from "../libs/diferenciaHoras";
 import { ModalSalidaAnticipada } from "../components/ModalSalidaAnticipada";
 import { fecha_hora_asistencia } from "../libs/fecha_hora_asistencia";
+import { obtenerCoordenadas } from "../libs/obtenerCoordenadas";
 
 export default function MarcarAsistencia() {
    const { user, loading } = useAuth();
+   const [accionEnProceso, setAccionEnProceso] = useState(false);
    const [status, setStatus] = useState({
       estadoIngreso: true,
       estadoSalida: true,
@@ -39,6 +41,12 @@ export default function MarcarAsistencia() {
    const [ubicacionLoading, setUbicacionLoading] = useState(true);
    const [ubicacionError, setUbicacionError] = useState(null);
    const [asistencia, setAsistencia] = useState({});
+   const fecha_active = new Date(); // o la que venga del backend
+   const esSabado =
+      fecha_active.toLocaleDateString("es-PE", {
+         timeZone: "America/Lima",
+         weekday: "short",
+      }) === "sáb";
 
    const fetchVerificarAsistencia = async () => {
       try {
@@ -125,13 +133,21 @@ export default function MarcarAsistencia() {
    }, [user]);
 
    const marcarAsistenciaIngreso = async () => {
+      setAccionEnProceso(true);
       if (!ubicacion) {
          toast.error("Ubicación no disponible");
          return;
       }
+      let posicion;
+      try {
+         posicion = await obtenerCoordenadas();
+      } catch (error) {
+         toast.error("No se pudo obtener la ubicación");
+         return;
+      }
       const ubicacion_ingreso = {
-         lat: ubicacion.latitude,
-         lng: ubicacion.longitude,
+         lat: posicion.lat,
+         lng: posicion.lng,
          direccion: ubicacion.display_name,
       };
       const { fecha_a, hora_a } = fecha_hora_asistencia();
@@ -147,18 +163,28 @@ export default function MarcarAsistencia() {
       } catch (error) {
          console.log(error);
          toast.error("Error al guardar la asistencia");
+      } finally {
+         setAccionEnProceso(false);
       }
    };
-
    const marcarAsistenciaSalida = async () => {
+      setAccionEnProceso(true);
+
       if (!ubicacion) {
          toast.error("Ubicación no disponible");
          return;
       }
       const { fecha_a, hora_a } = fecha_hora_asistencia();
+      let posicion;
+      try {
+         posicion = await obtenerCoordenadas();
+      } catch (error) {
+         toast.error("No se pudo obtener la ubicación");
+         return;
+      }
       const ubicacion_salida = {
-         lat: ubicacion.latitude,
-         lng: ubicacion.longitude,
+         lat: posicion.lat,
+         lng: posicion.lng,
          direccion: ubicacion.display_name,
       };
 
@@ -174,9 +200,13 @@ export default function MarcarAsistencia() {
       } catch (error) {
          console.log(error);
          toast.error("Error al guardar la asistencia");
+      } finally {
+         setAccionEnProceso(false);
       }
    };
    const marcarInicioRefrigerio = async () => {
+      setAccionEnProceso(true);
+
       const hora = new Intl.DateTimeFormat("es-PE", {
          timeZone: "America/Lima",
          hour: "2-digit",
@@ -195,9 +225,12 @@ export default function MarcarAsistencia() {
       } catch (error) {
          console.log(error);
          toast.error("Se produjo un error");
+      } finally {
+         setAccionEnProceso(false);
       }
    };
    const marcarFinRefrigerio = async () => {
+      setAccionEnProceso(true);
       const hora = new Intl.DateTimeFormat("es-PE", {
          timeZone: "America/Lima",
          hour: "2-digit",
@@ -215,6 +248,8 @@ export default function MarcarAsistencia() {
       } catch (error) {
          console.log(error);
          toast.error("Se produjo un error");
+      } finally {
+         setAccionEnProceso(false);
       }
    };
    if (ubicacionLoading) {
@@ -262,7 +297,7 @@ export default function MarcarAsistencia() {
          <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 mt-0 md:mt-4 grid grid-cols-1 md:grid-cols-3 gap-8">
             {/* Historial reciente - Solo visible en desktop */}
             <section className="w-full order-1 md:order-2 md:col-span-2 space-y-4">
-               <HorariosTrabajo className={"md:hidden"} />
+               <HorariosTrabajo className={"md:hidden"} esSabado={esSabado} />
 
                <Card className="bg-gradient-to-r from-innova-blue/95 to-innova-blue border-0 shadow-lg gap-4">
                   <CardHeader className="text-white ">
@@ -291,95 +326,114 @@ export default function MarcarAsistencia() {
                      )}
                   </CardHeader>
                   <CardContent className="sm:p-6 ">
-                     <div className="grid grid-cols-2 gap-3">
-                        <Button
-                           onClick={marcarAsistenciaIngreso}
-                           className="bg-green-600 hover:bg-green-500 text-white py-4 h-auto flex flex-col items-center gap-1 font-semibold text-base shadow-lg"
-                           disabled={
-                              status.estadoIngreso ||
-                              !ubicacion ||
-                              asistencia.falta_justificada
-                           }
-                        >
-                           <CheckCircle className="w-5 h-5" />
-                           <span className="text-sm">Marcar Entrada</span>
-                        </Button>
-
-                        <Button
-                           className="bg-red-600 hover:bg-red-500 text-white py-4 h-auto flex flex-col items-center gap-1 font-semibold text-base shadow-lg"
-                           onClick={marcarAsistenciaSalida}
-                           disabled={
-                              !status.estadoIngreso ||
-                              status.estadoSalida ||
-                              !ubicacion ||
-                              !status.hora_fin_refrigerio
-                           }
-                        >
-                           <LogOut className="w-5 h-5" />
-                           <span className="text-sm">Marcar Salida</span>
-                        </Button>
-                     </div>
-
-                     {/* <div className="flex items-center gap-3 my-4">
-                        <div className="flex-1 h-px bg-gray-600"></div>
-                        <span className="text-xs text-gray-400">
-                           Permisos Especiales
-                        </span>
-                        <div className="flex-1 h-px bg-gray-600"></div>
-                     </div> */}
-
-                     {/* Botones de permisos especiales */}
-                     <div className="grid grid-cols-2 gap-3 mt-6">
-                        {status.hora_inicio_refrigerio ? (
-                           <Button
-                              className="bg-amber-600 hover:bg-amber-500 text-white py-2 h-auto flex items-center justify-center gap-1 text-xs border border-amber-500 cursor-pointer"
-                              variant="outline"
-                              disabled={status.hora_fin_refrigerio}
-                              onClick={marcarFinRefrigerio}
-                           >
-                              <CoffeeIcon className="w-5 h-5" />
-                              <span className="text-sm">Terminar Break</span>
-                           </Button>
-                        ) : (
-                           <Button
-                              className="bg-amber-600 hover:bg-amber-500 text-white py-2 h-auto flex items-center justify-center gap-1 text-xs border border-amber-500 cursor-pointer"
-                              variant="outline"
-                              disabled={!status.estadoIngreso}
-                              onClick={marcarInicioRefrigerio}
-                           >
-                              <Coffee className="w-5 h-5" />
-                              <span className="text-sm">Iniciar Break</span>
-                           </Button>
-                        )}
-                        <ModalSalidaAnticipada
-                           estado_ingreso={status.estadoIngreso}
-                           estado_salida={status.estadoSalida}
-                           estado_fin_refrigerio={status.hora_fin_refrigerio}
-                           ubicacion={ubicacion}
-                           id={asistencia.asistencia_id}
-                           fetchVerificarAsistencia={fetchVerificarAsistencia}
-                        />
-                     </div>
-
-                     {/* Información adicional */}
-                     <div className="mt-6 pt-4 border-t border-blue-500/30">
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-center text-white/90">
-                           <div>
-                              <p className="text-xs sm:text-sm font-medium">
-                                 Fecha
-                              </p>
-                              <p className="text-sm sm:text-base font-semibold">
-                                 {new Date().toLocaleDateString("es-ES", {
-                                    weekday: "long",
-                                    year: "numeric",
-                                    month: "long",
-                                    day: "numeric",
-                                 })}
-                              </p>
-                           </div>
-                           <HoraActual />
+                     {accionEnProceso ? (
+                        <div className="flex flex-col items-center justify-center min-h-[250px]">
+                           <Loader2 className="w-8 h-8 animate-spin text-innova-blue mb-3" />
+                           <p className="text-sm text-gray-600">
+                              Registrando asistencia...
+                           </p>
                         </div>
-                     </div>
+                     ) : (
+                        <>
+                           {/* Botones y contenido original */}
+                           <div className="grid grid-cols-2 gap-3">
+                              <Button
+                                 onClick={marcarAsistenciaIngreso}
+                                 className="bg-green-600 hover:bg-green-500 text-white py-4 h-auto flex flex-col items-center gap-1 font-semibold text-base shadow-lg"
+                                 disabled={
+                                    status.estadoIngreso ||
+                                    !ubicacion ||
+                                    asistencia.falta_justificada
+                                 }
+                              >
+                                 <CheckCircle className="w-5 h-5" />
+                                 <span className="text-sm">Marcar Entrada</span>
+                              </Button>
+
+                              <Button
+                                 className="bg-red-600 hover:bg-red-500 text-white py-4 h-auto flex flex-col items-center gap-1 font-semibold text-base shadow-lg"
+                                 onClick={marcarAsistenciaSalida}
+                                 disabled={
+                                    !status.estadoIngreso ||
+                                    status.estadoSalida ||
+                                    !ubicacion ||
+                                    (!esSabado && !status.hora_fin_refrigerio)
+                                 }
+                              >
+                                 <LogOut className="w-5 h-5" />
+                                 <span className="text-sm">Marcar Salida</span>
+                              </Button>
+                           </div>
+
+                           <div
+                              className={`grid ${
+                                 esSabado ? "grid-cols-1" : "grid-cols-2"
+                              }  gap-3 mt-6`}
+                           >
+                              {!esSabado && (
+                                 <>
+                                    {status.hora_inicio_refrigerio ? (
+                                       <Button
+                                          className="bg-amber-600 hover:bg-amber-500 text-white py-2 h-auto flex items-center justify-center gap-1 text-xs border border-amber-500 cursor-pointer"
+                                          variant="outline"
+                                          disabled={status.hora_fin_refrigerio}
+                                          onClick={marcarFinRefrigerio}
+                                       >
+                                          <CoffeeIcon className="w-5 h-5" />
+                                          <span className="text-sm">
+                                             Terminar Break
+                                          </span>
+                                       </Button>
+                                    ) : (
+                                       <Button
+                                          className="bg-amber-600 hover:bg-amber-500 text-white py-2 h-auto flex items-center justify-center gap-1 text-xs border border-amber-500 cursor-pointer"
+                                          variant="outline"
+                                          disabled={!status.estadoIngreso}
+                                          onClick={marcarInicioRefrigerio}
+                                       >
+                                          <Coffee className="w-5 h-5" />
+                                          <span className="text-sm">
+                                             Iniciar Break
+                                          </span>
+                                       </Button>
+                                    )}
+                                 </>
+                              )}
+
+                              <ModalSalidaAnticipada
+                                 estado_ingreso={status.estadoIngreso}
+                                 estado_salida={status.estadoSalida}
+                                 estado_fin_refrigerio={
+                                    status.hora_fin_refrigerio
+                                 }
+                                 ubicacion={ubicacion}
+                                 id={asistencia.asistencia_id}
+                                 fetchVerificarAsistencia={
+                                    fetchVerificarAsistencia
+                                 }
+                              />
+                           </div>
+
+                           <div className="mt-6 pt-4 border-t border-blue-500/30">
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-center text-white/90">
+                                 <div>
+                                    <p className="text-xs sm:text-sm font-medium">
+                                       Fecha
+                                    </p>
+                                    <p className="text-sm sm:text-base font-semibold">
+                                       {new Date().toLocaleDateString("es-ES", {
+                                          weekday: "long",
+                                          year: "numeric",
+                                          month: "long",
+                                          day: "numeric",
+                                       })}
+                                    </p>
+                                 </div>
+                                 <HoraActual />
+                              </div>
+                           </div>
+                        </>
+                     )}
                   </CardContent>
                </Card>
             </section>
