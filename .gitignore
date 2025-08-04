@@ -1,0 +1,59 @@
+# Evitar archivos temporales de OneDrive
+*.lnk
+*.tmp
+*.log
+*.bak
+.DS_Store
+Thumbs.db
+node_modules/
+dist/
+build/
+.DS_Store
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.env
+.idea/
+.vscode/
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+.env
+.env.production
+dist.zip
+dist-ssr
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Ignorar archivos de configuración locales, como variables de entorno
+.env
+*.env
+
+# Ignorar archivos de dependencias y builds que no sean necesarios
+node_modules/
+*.log
+*.zip
+*.tar.gz
+
+# Ignorar archivos temporales y de cache
+.DS_Store
+Thumbs.db
