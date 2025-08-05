@@ -18,8 +18,11 @@ import { useState } from "react";
 import { toast } from "sonner";
 import asistenciaService from "../service/asistenciaService";
 import { Badge } from "@/components/ui/badge";
+import { useAuth } from "@/context/AuthContext";
 
 export function ModalJustificarFalta({ fecha_dia, id,cargarDatos }) {
+      const {user}=useAuth()
+   
    const initForm = {
       observacion: "",
       fecha: fecha_dia,
@@ -49,15 +52,19 @@ export function ModalJustificarFalta({ fecha_dia, id,cargarDatos }) {
          setLoading(false);
       }
    };
+   console.log(user.rol==="LIDER TRABAJADOR");
+   
    return (
       <AlertDialog open={open} onOpenChange={setOpen}>
          <AlertDialogTrigger asChild>
-            <Badge
-               className="bg-red-50 text-red-700 border-red-200 cursor-pointer"
+            <Button
+               className="bg-red-50 text-red-700 border-red-200 cursor-pointer text-xs px-1.5 py-0.5"
                variant="outline"
+               disabled={user.rol==="LIDER TRABAJADOR"}
+               size={"xs"}
             >
                <span className="text-xs">SIN REGISTRO</span>
-            </Badge>
+            </Button>
          </AlertDialogTrigger>
          <AlertDialogContent>
             <AlertDialogHeader className="text-start">

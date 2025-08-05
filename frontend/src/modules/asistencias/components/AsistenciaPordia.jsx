@@ -17,6 +17,7 @@ import { Badge } from "@/components/ui/badge";
 import { ModalJustificarFalta } from "./ModalJustificarFalta";
 import ModalHorasExtras from "./ModalHorasExtras";
 import AsistenciaDetailDialog from "./AsistenciaDetalleModal";
+import { useAuth } from "@/context/AuthContext";
 
 const estilos = {
    ASISTIO: "bg-green-50 text-green-700 border-green-200",
@@ -25,6 +26,7 @@ const estilos = {
 };
 
 const AsistenciaPordia = () => {
+   const {user}=useAuth()
    const [datosAsistencia, setDatosAsistencia] = useState([]);
    const [cargando, setCargando] = useState(true);
    const [error, setError] = useState(null);
@@ -178,7 +180,7 @@ const AsistenciaPordia = () => {
                               <TableCell className="text-center space-x-2">
                                  {(trabajador.asistencia_id &&
                                     trabajador.estado !==
-                                       "FALTA JUSTIFICADA") && (
+                                       "FALTA JUSTIFICADA"&&user.rol!=="LIDER TRABAJADOR") && (
                                     <ModalHorasExtras
                                        cargarDatos={cargarDatos}
                                        id={trabajador.asistencia_id}

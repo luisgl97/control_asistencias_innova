@@ -14,7 +14,7 @@ import { Select, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import SelectConEtiquetaFlotante from "@/shared/components/selectConEtiquetaFlotante";
 import { AlertCircle, Loader2, XCircle } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import asistenciaService from "../service/asistenciaService";
 import { fecha_hora_asistencia } from "../libs/fecha_hora_asistencia";
@@ -35,11 +35,30 @@ export function ModalSalidaAnticipada({
    const [open, setOpen] = useState(false);
    const [isLoading, setLoading] = useState(false);
    const [form, setForm] = useState({ ...initForm });
-   const opciones_autorizaciones = [
-      { value: "1", label: "Genaro" },
-      { value: "2", label: "Julio" },
-      { value: "3", label: "Pilar" },
-   ];
+   const [opcionesAutorizaciones, setOpcionesAutorizaciones] = useState([]);
+   const fectAutorizadores = async () => {
+      setLoading(true);
+      try {
+         const res = await asistenciaService.getAutorizadores();
+         const sanitizacion=res.data.datos.map((u)=>{
+            return{
+               value:u.id,
+               label:`${u.nombres} ${u.apellidos}`
+            }
+         })
+         setOpcionesAutorizaciones(sanitizacion);
+      } catch (error) {
+         setLoading(false);
+         toast.error("Error al traer los auorizadores");
+      } finally {
+         setLoading(false);
+      }
+   };
+   useEffect(() => {
+      if (open) {
+         fectAutorizadores();
+      }
+   }, [open]);
    const handleChange = (e) => {
       setForm((prevForm) => ({ ...prevForm, [e.target.name]: e.target.value }));
    };
@@ -110,7 +129,8 @@ export function ModalSalidaAnticipada({
                   }
                   name="autorizado_por"
                   label="Seleccione quien autorizo el permiso"
-                  opciones={opciones_autorizaciones}
+                  opciones={opcionesAutorizaciones}
+                  disabled={isLoading}
                />
                <Textarea
                   name="observacion"
