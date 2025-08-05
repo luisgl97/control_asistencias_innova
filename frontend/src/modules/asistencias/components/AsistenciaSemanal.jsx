@@ -16,11 +16,13 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle, RefreshCw } from "lucide-react";
+import { AlertCircle, ArrowLeft, ArrowRight, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SkeletonTabla } from "../components/SkeletonTable";
 import asistenciaService from "../service/asistenciaService";
 import { getRangoSemanaActual } from "../libs/getRangoSemanaActual";
+import { Input } from "@/components/ui/input";
+import { normalizarTexto } from "../libs/mormalizarTextoBusqueda";
 
 function esFechaFutura(fechaStr) {
    const hoy = new Date(
@@ -107,21 +109,26 @@ function formatearCeldaAsistencia(estado, diaConFecha) {
 }
 
 export default function AsistenciaSemanal() {
+   const [datosAsistenciaGuard, setDatosAsistenciaGuard] = useState([]);
    const [datosAsistencia, setDatosAsistencia] = useState([]);
    const [cargando, setCargando] = useState(true);
    const [error, setError] = useState(null);
    const [columnasDias, setColumnasDias] = useState([]);
+   const [offset, setOffset] = useState(0);
+   const [numeroSemana, setNumeroSemana] = useState("...loading");
+   const [nombreTrabajador, setNombreTrabajador] = useState("");
+
 
    const cargarDatos = async () => {
       try {
          setCargando(true);
          setError(null);
-         const res = await asistenciaService.generarReporte(
-            getRangoSemanaActual()
-         );
+         const { fecha_fin, fecha_inicio, numero_semana } = getRangoSemanaActual(offset);
+         setNumeroSemana(numero_semana)
+         const res = await asistenciaService.generarReporte({ fecha_fin, fecha_inicio });
          const datos = res.data.datos;
          setDatosAsistencia(datos);
-
+         setDatosAsistenciaGuard(datos)
          if (datos.length > 0) {
             const claves = Object.keys(datos[0]);
             const dias = claves.filter((k) =>
@@ -143,7 +150,16 @@ export default function AsistenciaSemanal() {
 
    useEffect(() => {
       cargarDatos();
-   }, []);
+   }, [offset]);
+   useEffect(() => {
+      let copy = [...datosAsistenciaGuard]
+      if (nombreTrabajador) {
+         copy = copy.filter((t) =>
+            normalizarTexto(t.trabajador).includes(normalizarTexto(nombreTrabajador))
+         );
+      }
+      setDatosAsistencia(copy)
+   }, [nombreTrabajador, datosAsistenciaGuard])
 
    if (cargando) {
       return (
@@ -178,17 +194,46 @@ export default function AsistenciaSemanal() {
    return (
       <div className="w-full ">
          <Card>
-            <CardHeader>
-               <div className="flex items-center justify-between">
-                  <div>
-                     <CardTitle>Control de Asistencias Semanal</CardTitle>
+            <CardHeader className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+               <section className="flex flex-col gap-2 md:flex-row md:items-center md:gap-8 w-full">
+                  <div className="flex-1 min-w-[200px]">
+                     <CardTitle className="text-lg md:text-2xl">Control de Asistencias Semanal</CardTitle>
                      <CardDescription>
-                        Registro semanal de asistencias, tardanzas y
-                        observaciones del personal
+                        Registro semanal de asistencias, tardanzas y observaciones del personal
                      </CardDescription>
                   </div>
-               </div>
+
+                  <div className="w-full md:w-auto">
+                     <Input
+                        placeholder="Nombre trabajador"
+                        value={nombreTrabajador}
+                        onChange={(e) => setNombreTrabajador(e.target.value)}
+                        className="w-full md:min-w-[200px]"
+                     />
+                  </div>
+               </section>
+
+               <section className="flex items-center justify-end gap-2 mt-2 md:mt-0">
+                  <Button
+                     onClick={() => setOffset(offset - 1)}
+                     size="icon"
+                     variant="outline"
+                     aria-label="Semana anterior"
+                  >
+                     <ArrowLeft />
+                  </Button>
+                  <span className="text-sm font-medium truncate">{numeroSemana}</span>
+                  <Button
+                     onClick={() => setOffset(offset + 1)}
+                     size="icon"
+                     variant="outline"
+                     aria-label="Semana siguiente"
+                  >
+                     <ArrowRight />
+                  </Button>
+               </section>
             </CardHeader>
+
             <CardContent>
                <div className="overflow-x-auto">
                   <Table>

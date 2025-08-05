@@ -1,34 +1,56 @@
-export const agruparTrabajadoresPorUbicacion = (trabajadores, tipo) => {
+import { calcularDistanciaEnMetros } from "./calcularDistancias";
+
+export const agruparTrabajadoresPorUbicacion = (trabajadores, filtroTipo) => {
    const grupos = [];
 
    trabajadores.forEach((t) => {
-      const color = t.color;
       const nombre = t.trabajador?.split(" ")[0] ?? "Desconocido";
+      const color = t.color;
+
+      const ing = t.ubicacion_ingreso;
+      const sal = t.ubicacion_salida;
+
+      const combinado =
+         ing &&
+         sal &&
+         calcularDistanciaEnMetros(ing.lat, ing.lng, sal.lat, sal.lng) < 50;
 
       const ubicaciones = [];
 
-      if (tipo !== "salida" && t.ubicacion_ingreso) {
+      if (combinado) {
          ubicaciones.push({
-            tipo: "entrada",
-            lat: t.ubicacion_ingreso.lat,
-            lng: t.ubicacion_ingreso.lng,
-            direccion: t.ubicacion_ingreso.direccion,
+            lat: ing.lat,
+            lng: ing.lng,
+            tipo: "combinado",
+            direccion_entrada: ing.direccion,
+            direccion_salida: sal.direccion,
             trabajador: t.trabajador,
-            color,
             nombre,
-         });
-      }
-
-      if (tipo !== "entrada" && t.ubicacion_salida) {
-         ubicaciones.push({
-            tipo: "salida",
-            lat: t.ubicacion_salida.lat,
-            lng: t.ubicacion_salida.lng,
-            direccion: t.ubicacion_salida.direccion,
-            trabajador: t.trabajador,
             color,
-            nombre,
          });
+      } else {
+         if (filtroTipo !== "salida" && ing) {
+            ubicaciones.push({
+               lat: ing.lat,
+               lng: ing.lng,
+               tipo: "entrada",
+               direccion: ing.direccion,
+               trabajador: t.trabajador,
+               nombre,
+               color,
+            });
+         }
+         if (filtroTipo !== "entrada" && sal) {
+            ubicaciones.push({
+               lat: sal.lat,
+               lng: sal.lng,
+               tipo: "salida",
+               direccion: sal.direccion,
+               trabajador: t.trabajador,
+               nombre,
+               color,
+            });
+         }
       }
 
       ubicaciones.forEach((ubic) => {

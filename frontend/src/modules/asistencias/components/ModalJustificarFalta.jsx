@@ -52,8 +52,6 @@ export function ModalJustificarFalta({ fecha_dia, id,cargarDatos }) {
          setLoading(false);
       }
    };
-   console.log(user.rol==="LIDER TRABAJADOR");
-   
    return (
       <AlertDialog open={open} onOpenChange={setOpen}>
          <AlertDialogTrigger asChild>

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { CalendarIcon, LogIn, LogOut, MapPin } from "lucide-react";
+import { ArrowUp, CalendarIcon, LogIn, LogOut, MapPin } from "lucide-react";
 import ReactDOMServer from "react-dom/server";
 import asistenciaService from "../service/asistenciaService";
 import {
@@ -23,20 +23,9 @@ import {
    SelectValue,
 } from "@/components/ui/select";
 import { parseUbicacion } from "../libs/parseUbicacion";
+import { agruparTrabajadoresPorUbicacion } from "../libs/agruparTrabajadores";
+import { crearIconoCombinado, crearIconoLucide } from "./IconosParaMapa";
 
-// ================== UTILS ==================
-
-const calcularDistanciaEnMetros = (lat1, lon1, lat2, lon2) => {
-   const R = 6371e3;
-   const rad = (x) => (x * Math.PI) / 180;
-   const dLat = rad(lat2 - lat1);
-   const dLon = rad(lon2 - lon1);
-   const a =
-      Math.sin(dLat / 2) ** 2 +
-      Math.cos(rad(lat1)) * Math.cos(rad(lat2)) * Math.sin(dLon / 2) ** 2;
-   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-   return R * c;
-};
 
 const getUniqueColorGenerator = () => {
    let index = 0;
@@ -48,134 +37,6 @@ const getUniqueColorGenerator = () => {
       return `hsl(${hue.toFixed(1)}, ${saturation}%, ${lightness}%)`;
    };
 };
-
-const crearIconoLucide = (color, nombre, tipo = "entrada") => {
-   const Icono = tipo === "entrada" ? MapPinHouse : MapPinXInside;
-   const iconoReact = (
-      <div className="flex flex-col items-center">
-         <Icono color="white" fill={color} size={36} strokeWidth={2.5} />
-         <div className="text-xs font-semibold text-gray-800 -mt-1">
-            {nombre}
-         </div>
-      </div>
-   );
-   return new L.DivIcon({
-      html: ReactDOMServer.renderToString(iconoReact),
-      className: "",
-      iconSize: [36, 48],
-      iconAnchor: [18, 48],
-      popupAnchor: [0, -48],
-   });
-};
-
-const crearIconoCombinado = (color, nombre) => {
-   const iconoReact = (
-      <div className="flex flex-col items-center">
-         <MapPinCheckInside
-            color="white"
-            fill={color}
-            size={36}
-            strokeWidth={2.5}
-         />
-         <div className="text-xs font-semibold text-gray-800 -mt-1">
-            {nombre}
-         </div>
-      </div>
-   );
-   return new L.DivIcon({
-      html: ReactDOMServer.renderToString(iconoReact),
-      className: "",
-      iconSize: [36, 48],
-      iconAnchor: [18, 48],
-      popupAnchor: [0, -48],
-   });
-};
-
-// ================== AGRUPADOR ==================
-
-const agruparTrabajadoresPorUbicacion = (trabajadores, filtroTipo) => {
-   const grupos = [];
-
-   trabajadores.forEach((t) => {
-      const nombre = t.trabajador?.split(" ")[0] ?? "Desconocido";
-      const color = t.color;
-
-      const ing = t.ubicacion_ingreso;
-      const sal = t.ubicacion_salida;
-
-      const combinado =
-         ing &&
-         sal &&
-         calcularDistanciaEnMetros(ing.lat, ing.lng, sal.lat, sal.lng) < 200;
-
-      const ubicaciones = [];
-
-      if (combinado) {
-         ubicaciones.push({
-            lat: ing.lat,
-            lng: ing.lng,
-            tipo: "combinado",
-            direccion_entrada: ing.direccion,
-            direccion_salida: sal.direccion,
-            trabajador: t.trabajador,
-            nombre,
-            color,
-         });
-      } else {
-         if (filtroTipo !== "salida" && ing) {
-            ubicaciones.push({
-               lat: ing.lat,
-               lng: ing.lng,
-               tipo: "entrada",
-               direccion: ing.direccion,
-               trabajador: t.trabajador,
-               nombre,
-               color,
-            });
-         }
-         if (filtroTipo !== "entrada" && sal) {
-            ubicaciones.push({
-               lat: sal.lat,
-               lng: sal.lng,
-               tipo: "salida",
-               direccion: sal.direccion,
-               trabajador: t.trabajador,
-               nombre,
-               color,
-            });
-         }
-      }
-
-      ubicaciones.forEach((ubic) => {
-         let agregado = false;
-         for (const grupo of grupos) {
-            const distancia = calcularDistanciaEnMetros(
-               grupo.lat,
-               grupo.lng,
-               ubic.lat,
-               ubic.lng
-            );
-            if (distancia < 50) {
-               grupo.trabajadores.push(ubic);
-               agregado = true;
-               break;
-            }
-         }
-
-         if (!agregado) {
-            grupos.push({
-               lat: ubic.lat,
-               lng: ubic.lng,
-               trabajadores: [ubic],
-            });
-         }
-      });
-   });
-
-   return grupos;
-};
-
-// ================== COMPONENT ==================
 
 const MapaTrabajadores = () => {
    const [trabajadores, setTrabajadores] = useState([]);
@@ -243,10 +104,13 @@ const MapaTrabajadores = () => {
          );
       });
    }, [trabajadoresConColores, trabajadorSeleccionado]);
+   const scrollToTop = () => {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+   };
 
    return (
       <article>
-         <section className="w-full flex flex-wrap gap-4 mb-8">
+         <section className="w-full flex flex-wrap gap-4 mb-8 relative">
             {/* Fecha */}
             <Popover>
                <PopoverTrigger asChild>
@@ -330,10 +194,10 @@ const MapaTrabajadores = () => {
                         unico.tipo === "combinado"
                            ? crearIconoCombinado(unico.color, unico.nombre)
                            : crearIconoLucide(
-                                unico.color,
-                                unico.nombre,
-                                unico.tipo
-                             );
+                              unico.color,
+                              unico.nombre,
+                              unico.tipo
+                           );
                   } else {
                      icon = new L.DivIcon({
                         html: ReactDOMServer.renderToString(
@@ -380,11 +244,11 @@ const MapaTrabajadores = () => {
                                                 title={t.direccion_entrada}
                                              >
                                                 {t.direccion_entrada?.length >
-                                                50
+                                                   50
                                                    ? t.direccion_entrada.substring(
-                                                        0,
-                                                        50
-                                                     ) + "..."
+                                                      0,
+                                                      50
+                                                   ) + "..."
                                                    : t.direccion_entrada}
                                              </span>
                                           </div>
@@ -402,9 +266,9 @@ const MapaTrabajadores = () => {
                                              >
                                                 {t.direccion_salida?.length > 50
                                                    ? t.direccion_salida.substring(
-                                                        0,
-                                                        50
-                                                     ) + "..."
+                                                      0,
+                                                      50
+                                                   ) + "..."
                                                    : t.direccion_salida}
                                              </span>
                                           </div>
@@ -427,9 +291,9 @@ const MapaTrabajadores = () => {
                                              >
                                                 {t.direccion?.length > 50
                                                    ? t.direccion.substring(
-                                                        0,
-                                                        50
-                                                     ) + "..."
+                                                      0,
+                                                      50
+                                                   ) + "..."
                                                    : t.direccion}
                                              </span>
                                           </div>
@@ -444,6 +308,9 @@ const MapaTrabajadores = () => {
                })}
             </MapContainer>
          </section>
+         <Button className={'fixed md:hidden bottom-24  z-50 right-9 bg-innova-blue text-white'} size={'icon'} variant={'outline'} onClick={scrollToTop}>
+            <ArrowUp/>
+         </Button>
       </article>
    );
 };

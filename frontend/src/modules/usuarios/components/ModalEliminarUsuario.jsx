@@ -1,4 +1,4 @@
-import { Loader2, Trash2 } from "lucide-react";
+import { Loader2, Trash2, UserX } from "lucide-react";
 import usuarioService from "../services/usuarioService";
 import {
    AlertDialog,
@@ -36,15 +36,15 @@ const ModalEliminarUsuario = ({ id, nombres, cargarDatos }) => {
       <AlertDialog open={open} onOpenChange={setOpen}>
          <AlertDialogTrigger asChild>
             <Button variant="outline" size={"icon"} className="size-7">
-               <Trash2 className="size-3.5 text-red-500" />
+               <UserX className="size-3.5 text-red-500" />
             </Button>
          </AlertDialogTrigger>
          <AlertDialogContent>
             <AlertDialogHeader className="text-start">
-               <AlertDialogTitle> Eliminar Trabajador</AlertDialogTitle>
+               <AlertDialogTitle> Deshabilitar Trabajador</AlertDialogTitle>
             </AlertDialogHeader>
             <div>
-               ¿Esta seguro que quiere eliminar al trabajador,
+               ¿Esta seguro que quiere Deshabilitar al trabajador,
                <span className="font-semibold">"{nombres}"</span>?
             </div>
 

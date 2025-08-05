@@ -27,6 +27,8 @@ import { diferenciaHoras } from "../libs/diferenciaHoras";
 import { ModalSalidaAnticipada } from "../components/ModalSalidaAnticipada";
 import { fecha_hora_asistencia } from "../libs/fecha_hora_asistencia";
 import { obtenerCoordenadas } from "../libs/obtenerCoordenadas";
+import { calcularDistanciaEnMetros } from "../libs/calcularDistancias";
+import { obtenerUbicacionesSimuladas } from "../mocks/obras_simuladas";
 
 export default function MarcarAsistencia() {
    const { user, loading } = useAuth();
@@ -41,7 +43,8 @@ export default function MarcarAsistencia() {
    const [ubicacionLoading, setUbicacionLoading] = useState(true);
    const [ubicacionError, setUbicacionError] = useState(null);
    const [asistencia, setAsistencia] = useState({});
-   
+   const [obras,setObras]=useState([])
+
    const fecha_active = new Date(); // o la que venga del backend
    const esSabado =
       fecha_active.toLocaleDateString("es-PE", {
@@ -61,7 +64,8 @@ export default function MarcarAsistencia() {
             hora_inicio_refrigerio: res.data.datos.hora_inicio_refrigerio,
             hora_fin_refrigerio: res.data.datos.hora_fin_refrigerio,
          });
-
+         console.log(res.data.datos);
+         
          setAsistencia(res.data.datos);
       } catch (error) {
          console.error(error);
@@ -134,7 +138,7 @@ export default function MarcarAsistencia() {
    }, [user]);
 
    const marcarAsistenciaIngreso = async () => {
-      setAccionEnProceso(true);
+      // setAccionEnProceso(true);
       if (!ubicacion) {
          toast.error("Ubicación no disponible");
          return;
@@ -148,27 +152,35 @@ export default function MarcarAsistencia() {
 
          return;
       }
-      const ubicacion_ingreso = {
-         lat: posicion.lat,
-         lng: posicion.lng,
-         direccion: ubicacion.display_name,
-      };
-      const { fecha_a, hora_a } = fecha_hora_asistencia();
-      try {
-         const response = await asistenciaService.registrarIngreso({
-            fecha: fecha_a,
-            hora_ingreso: hora_a,
-            ubicacion_ingreso,
-            observacion_ingreso: "",
-         });
-         toast.success("Asistencia guardada con éxito");
-         fetchVerificarAsistencia(); // Actualizar estado
-      } catch (error) {
-         console.log(error);
-         toast.error("Error al guardar la asistencia");
-      } finally {
-         setAccionEnProceso(false);
+      // console.log(posicion);
+      
+      const ubicacionesSimuladas = await obtenerUbicacionesSimuladas()
+      for (const ubicacion of ubicacionesSimuladas) {
+         const distancia = calcularDistanciaEnMetros(ubicacion.latitude, ubicacion.longitude, "-13.043236969844097", '-76.42447451225563');
+         console.log('Distancia es: ', distancia);
+
       }
+      // const ubicacion_ingreso = {
+      //    lat: posicion.lat,
+      //    lng: posicion.lng,
+      //    direccion: ubicacion.display_name,
+      // };
+      //    const { fecha_a, hora_a } = fecha_hora_asistencia();
+      //    try {
+      //       const response = await asistenciaService.registrarIngreso({
+      //          fecha: fecha_a,
+      //          hora_ingreso: hora_a,
+      //          ubicacion_ingreso,
+      //          observacion_ingreso: "",
+      //       });
+      //       toast.success("Asistencia guardada con éxito");
+      //       fetchVerificarAsistencia(); // Actualizar estado
+      //    } catch (error) {
+      //       console.log(error);
+      //       toast.error("Error al guardar la asistencia");
+      //    } finally {
+      //       setAccionEnProceso(false);
+      //    }
    };
    const marcarAsistenciaSalida = async () => {
       setAccionEnProceso(true);
@@ -370,9 +382,8 @@ export default function MarcarAsistencia() {
                            </div>
 
                            <div
-                              className={`grid ${
-                                 esSabado ? "grid-cols-1" : "grid-cols-2"
-                              }  gap-3 mt-6`}
+                              className={`grid ${esSabado ? "grid-cols-1" : "grid-cols-2"
+                                 }  gap-3 mt-6`}
                            >
                               {!esSabado && (
                                  <>
@@ -501,9 +512,9 @@ export default function MarcarAsistencia() {
                            <span className="font-medium text-innova-blue">
                               {asistencia.ingreso.hora && asistencia.salida.hora
                                  ? diferenciaHoras(
-                                      asistencia.ingreso.hora,
-                                      asistencia.salida.hora
-                                   )
+                                    asistencia.ingreso.hora,
+                                    asistencia.salida.hora
+                                 )
                                  : "Pendiente"}
                            </span>
                         </div>
