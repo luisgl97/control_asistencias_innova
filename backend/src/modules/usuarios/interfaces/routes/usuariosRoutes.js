@@ -12,6 +12,7 @@ router.use(verificarToken); // Verifica token para todas las rutas
 
 // 🔓 Ruta accesible para cualquier usuario autenticado (ej: listar usuarios)
 router.get("/", usuarioController.obtenerUsuarios);
+router.get("/todos", usuarioController.obtenerUsuariosTodos);
 router.get("/autorizan-permiso", usuarioController.obtenerUsuariosAutorizanPermiso);
 router.get("/:id", usuarioController.obtenerUsuarioPorId);
 

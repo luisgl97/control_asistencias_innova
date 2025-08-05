@@ -13,11 +13,12 @@ router.use(verificarToken); // Verifica token para todas las rutas
 
 
 // 🔒 Ruta protegida, solo para usuarios con rol de gerente, administrador o gerente
+router.post("/autorizar-horas-extras", autorizarRol(["GERENTE", "ADMINISTRADOR"]), asistenciaController.autorizarHorasExtras);
+
 router.get("/", autorizarRol(["GERENTE", "ADMINISTRADOR", "LIDER TRABAJADOR"]), asistenciaController.obtenerAsistencias);
 //router.post("/usuario", autorizarRol(["GERENTE", "ADMINISTRADOR", "LIDER TRABAJADOR"]), asistenciaController.obtenerAsistenciasPorUsuario);
 router.post("/reporte", autorizarRol(["GERENTE", "ADMINISTRADOR", "LIDER TRABAJADOR"]), asistenciaController.obtenerReporteAsistencias);
 router.post("/del-dia",autorizarRol(["GERENTE", "ADMINISTRADOR", "LIDER TRABAJADOR"]), asistenciaController.obtenerAsistenciasDelDia);
-router.post("/autorizar-horas-extras", autorizarRol(["GERENTE", "ADMINISTRADOR"]), asistenciaController.autorizarHorasExtras);
 router.post("/mapa-ubicaciones", autorizarRol(["GERENTE", "ADMINISTRADOR", "LIDER TRABAJADOR"]), asistenciaController.obtenerMapaUbicaciones);
 
 // 🔓 Ruta accesible para cualquier usuario autenticado
