@@ -11,7 +11,7 @@ import { Edit, ListChecks } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import ModalEliminarObra from './ModalEliminarObra';
 
-const TablaObras = ({ searchTerm, filteredObras, obras }) => {
+const TablaObras = ({ searchTerm, filteredObras }) => {
 
     const navigate = useNavigate()
 
@@ -44,7 +44,7 @@ const TablaObras = ({ searchTerm, filteredObras, obras }) => {
                                 </TableCell>
                             </TableRow>
                         ) : (
-                            obras.map((obra, index) => (
+                            filteredObras.map((obra, index) => (
                                 <TableRow key={obra.id} className={"hover:bg-innova-blue/10"}>
                                     <TableCell>
                                         <div className="flex flex-col">

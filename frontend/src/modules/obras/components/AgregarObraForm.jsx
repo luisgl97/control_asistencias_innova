@@ -19,14 +19,10 @@ const AgregarObraForm = ({
     buscarUbicacion,
     handleRadioChange,
     showRadio,
+    handleSubmit
 }) => {
     const navigate = useNavigate()
 
-
-    const handleRadioChangeform = (e) => {
-        e.preventDefault();
-        handleRadioChange(e);
-    }
     return (
         <Card className="md:mt-8 min-h-[10vh] mx-auto self-end border-2 border-gray-300 shadow-md">
             <CardHeader>
@@ -107,16 +103,18 @@ const AgregarObraForm = ({
                             )}
                         </section>
 
-                        <section className="w-full">
+                        <section className="w-full flex flex-col">
                             <label className="flex items-center space-x-2">
-                                <button
-                                    onClick={(e) => handleRadioChange(e)}
-                                    className={`cursor-pointer ${showRadio ? "bg-blue-500" : "bg-gray-500"
-                                        }  hover:scale-105 transition-all w-9 h-8 flex items-center justify-center rounded-md text-white`}
-                                >
-                                    <Map className="w-6 h-6" />
-                                </button>
+                                <span>Ubicación en el mapa</span>
                             </label>
+                            <button
+                                onClick={(e) => handleRadioChange(e)}
+                                className={`cursor-pointer ${showRadio ? "bg-blue-500" : "bg-gray-500"
+                                    }  hover:scale-105 transition-all w-9 h-8 flex items-center justify-center rounded-md text-white`}
+                            >
+                                <Map className="w-6 h-6" />
+                            </button>
+
                         </section>
                     </article>
                 </form>
@@ -134,6 +132,7 @@ const AgregarObraForm = ({
                     type="submit"
                     form="form-usuario"
                     disabled={isLoading}
+                    onClick={handleSubmit}
                 >
                     {isLoading ? (
                         <span className="flex items-center gap-2">
