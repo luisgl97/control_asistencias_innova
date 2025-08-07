@@ -9,6 +9,8 @@ const activarUsuario = require("../../application/useCases/activarUsuario");
 const listarUsuariosPorCargo = require("../../application/useCases/listarUsuariosPorCargo");
 const obtenerUsuariosAutorizanPermiso = require("../../application/useCases/obtenerUsuariosAutorizanPermiso");
 const obtenerUsuariosTodos = require("../../application/useCases/obtenerUsuariosTodos");
+const obtenerUsuariosTrabajadores = require("../../application/useCases/obtenerUsuariosTrabajadores");
+const obtenerUsuariosConMinimoUnaAsistenciaDelMes = require("../../application/useCases/obtenerUsuariosConMinimoUnaAsistenciaDelMes");
 
 const usuarioRepository = new sequelizeUsuarioRepository(); // Instancia del repositorio de usuario
 
@@ -118,8 +120,31 @@ const UsuarioController = {
 
     async obtenerUsuariosAutorizanPermiso(_, res) {
         try {
-          
             const { codigo, respuesta } = await obtenerUsuariosAutorizanPermiso(usuarioRepository);
+            res.status(codigo).json(respuesta);
+        } catch (error) {
+            console.log(error);
+            res.status(500).json({ error: error.message, estado: false });
+        }
+    },
+    async obtenerUsuariosTrabajadores(_, res) {
+        try {
+            const { codigo, respuesta } = await obtenerUsuariosTrabajadores(usuarioRepository);
+            res.status(codigo).json(respuesta);
+        } catch (error) {
+            console.log(error);
+            res.status(500).json({ error: error.message, estado: false });
+        }
+    },
+
+    async obtenerUsuariosConMinimoUnaAsistenciaDelMes(req, res) {
+        try {
+
+            const { fecha_inicio, fecha_fin } = req.body;
+
+            console.log({fecha_inicio, fecha_fin});
+
+            const { codigo, respuesta } = await obtenerUsuariosConMinimoUnaAsistenciaDelMes(fecha_inicio,fecha_fin, usuarioRepository);
             res.status(codigo).json(respuesta);
         } catch (error) {
             console.log(error);

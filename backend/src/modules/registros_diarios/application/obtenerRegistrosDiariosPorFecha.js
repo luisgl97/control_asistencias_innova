@@ -1,16 +1,19 @@
-module.exports = async (registrosDiariosRepository) => {
+const { formatearRegistros } = require("../infrastructure/services/formatearRegistrosDiariosPorFecha");
 
-    const registrosDiariosPorFecha = await registrosDiariosRepository.registrosDiariosPorFecha();
+module.exports = async (fecha, registrosDiariosRepository) => {
 
-    console.log('registrosDiariosPorFecha', registrosDiariosPorFecha);
+    console.log('fechaaaa', fecha);
+    const registrosDiariosPorFecha = await registrosDiariosRepository.obtenerRegistrosDiariosPorFecha(fecha);
+
+    const registros = formatearRegistros(registrosDiariosPorFecha)
     
     return {
         codigo: 200,
         respuesta: {
-            mensaje: registrosDiariosPorFecha.length == 0 ? "Registros diarios por fecha no registradas" : "Registros diarios por fecha encontrados",
+            mensaje: registros.length == 0 ? "Registros diarios por fecha no registradas" : "Registros diarios por fecha encontrados",
             estado: true,
-            total: registrosDiariosPorFecha.length,
-            datos: registrosDiariosPorFecha,
+            total: registros.length,
+            datos: registros,
         },
     };
 } 

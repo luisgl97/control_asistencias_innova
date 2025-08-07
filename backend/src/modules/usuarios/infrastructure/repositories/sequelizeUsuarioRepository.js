@@ -1,5 +1,9 @@
 const db = require("../../../../models");
 const { Usuario } = require("../models/usuarioModel");
+const {
+  Asistencia,
+} = require("../../../asistencias/infrastructure/models/asistenciaModel");
+const { Op, Sequelize } = require("sequelize");
 
 class SequelizeUsuarioRepository {
   getModel() {
@@ -12,6 +16,9 @@ class SequelizeUsuarioRepository {
 
   async obtenerUsuarios() {
     const usuarios = await Usuario.findAll({
+      where: {
+        estado: true, // Solo usuarios activos
+      },
       attributes: {
         exclude: ["password"],
       },
@@ -19,13 +26,13 @@ class SequelizeUsuarioRepository {
         {
           model: db.filiales,
           as: "filial",
-        }
-      ]
+        },
+      ],
     });
     return usuarios;
   }
 
-   async obtenerUsuariosTodos() {
+  async obtenerUsuariosTodos() {
     const usuarios = await Usuario.findAll({
       attributes: {
         exclude: ["password"],
@@ -34,8 +41,8 @@ class SequelizeUsuarioRepository {
         {
           model: db.filiales,
           as: "filial",
-        }
-      ]
+        },
+      ],
     });
     return usuarios;
   }
@@ -48,9 +55,9 @@ class SequelizeUsuarioRepository {
       include: [
         {
           model: db.filiales,
-          as: "filial"
-        }
-      ]
+          as: "filial",
+        },
+      ],
     });
   }
 
@@ -86,7 +93,6 @@ class SequelizeUsuarioRepository {
   }
 
   async listarUsuariosPorCargo(cargo) {
-    
     const usuarios = await Usuario.findAll({
       where: { cargo },
       attributes: {
@@ -96,11 +102,19 @@ class SequelizeUsuarioRepository {
     return usuarios;
   }
 
+  async listarUsuariosTrabajadores() {
+    const usuarios = await Usuario.findAll({
+      where: { rol: ["TRABAJADOR", "LIDER TRABAJADOR"] },
+      attributes: ["id", "dni", "nombres", "apellidos", "cargo"],
+    });
+    return usuarios;
+  }
+
   async obtenerUsuariosAutorizanPermiso() {
     const usuarios = await Usuario.findAll({
       where: {
         estado: true, // Solo usuarios activos
-        rol: ["GERENTE", "ADMINISTRADOR"]
+        rol: ["GERENTE", "ADMINISTRADOR"],
       },
       attributes: {
         exclude: ["password"],
@@ -108,6 +122,40 @@ class SequelizeUsuarioRepository {
     });
     return usuarios;
   }
+
+  async obtenerUsuariosConMinimoUnaAsistenciaDelMes(fecha_inicio, fecha_fin) {
+  const usuarios = await Asistencia.findAll({
+    where: {
+      fecha: {
+        [Op.between]: [fecha_inicio, fecha_fin],
+      },
+    },
+    attributes: [
+      "usuario_id",
+      [
+        Sequelize.fn("COUNT", Sequelize.col("asistencias.id")),
+        "total_asistencias",
+      ],
+    ],
+    group: ["usuario_id", "usuario.id", "usuario.nombres", "usuario.apellidos", "usuario.dni"], // Necesario para evitar errores con MySQL strict
+    include: [
+      {
+        model: Usuario,
+        as: "usuario",
+        attributes: ["id", "nombres", "apellidos", "dni"],
+      },
+    ],
+    having: Sequelize.literal("COUNT(`asistencias`.`id`) >= 1"),
+  });
+
+  const usuariosConMinimoUnaAsistencia = usuarios.map(usuario => (({
+    id: usuario?.usuario?.id,
+    nombres: usuario?.usuario?.nombres,
+    apellidos: usuario?.usuario?.apellidos,
+    dni: usuario?.usuario?.dni,
+  })))
+  return usuariosConMinimoUnaAsistencia;
+}
 }
 
 module.exports = SequelizeUsuarioRepository;

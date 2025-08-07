@@ -1,5 +1,6 @@
 const db = require("../../../../models");
 const { RegistrosDiarios } = require("../models/registrosRegistrosDiariosModel");
+const { Obra } = require("../../../obras/infrastructure/models/obraModel")
 
 class SequelizeRegistrosDiariosRepository {
   getModel() {
@@ -19,7 +20,20 @@ class SequelizeRegistrosDiariosRepository {
     const registrosDiarios = await RegistrosDiarios.findAll({
       where: {
         fecha
-      }
+      },
+      include: [
+        {
+          model: db.obras,
+          as: "obra"
+        },
+        {
+          model: db.usuarios,
+          as: "usuario",
+          attributes: {
+            exclude: ["password"]
+          }
+        }
+      ]
     });
     return registrosDiarios;
   }

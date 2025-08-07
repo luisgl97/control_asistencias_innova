@@ -23,6 +23,11 @@ const Obra = sequelize.define(
     longitud: {
       type: DataTypes.STRING(255),
     },
+    estado: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: true,
+    },
   },
   {
     tableName: "obras",
