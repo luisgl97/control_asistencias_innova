@@ -133,6 +133,7 @@ const AsistenciaPordia = () => {
                         value={fechaSeleccionada}
                         onChange={(e) => setFechaSeleccionada(e.target.value)}
                         className="w-full md:w-auto"
+                        max={new Date().toISOString().slice(0, 10)}
                      />
                   </div>
                </div>

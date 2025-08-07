@@ -22,6 +22,11 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { useCallback, useEffect, useState } from "react";
 import asistenciaService from "../service/asistenciaService";
+import {
+   Tooltip,
+   TooltipContent,
+   TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 // Componente de esqueleto de carga
 const LoadingSkeleton = () => (
@@ -88,16 +93,34 @@ export default function AsistenciaDetailDialog({ asistenciaId }) {
 
    return (
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
-         <DialogTrigger asChild>
-            <Button
-               variant="outline"
-               size="icon"
-               aria-label={`Ver detalles de asistencia ${asistenciaId}`}
-               disabled={!asistenciaId}
-            >
-               <Eye className="h-4 w-4" />
-            </Button>
-         </DialogTrigger>
+         <Tooltip>
+            {asistenciaId ? (
+               <DialogTrigger asChild>
+                  <TooltipTrigger asChild>
+                     <Button variant="outline" size="icon">
+                        <Eye className="h-4 w-4" />
+                     </Button>
+                  </TooltipTrigger>
+               </DialogTrigger>
+            ) : (
+               <TooltipTrigger asChild>
+                  <span tabIndex={-1}>
+                     <Button
+                        variant="outline"
+                        size="icon"
+                        className="text-gray-400 pointer-events-none opacity-60"
+                        tabIndex={-1} // opcional: evitar focus
+                     >
+                        <Eye className="h-4 w-4" />
+                     </Button>
+                  </span>
+               </TooltipTrigger>
+            )}
+            <TooltipContent>
+               <p>{asistenciaId ? "Ver detalles" : "No disponible"}</p>
+            </TooltipContent>
+         </Tooltip>
+
          <DialogContent className="sm:max-w-[425px]">
             <DialogHeader>
                <DialogTitle>Detalles de Asistencia </DialogTitle>

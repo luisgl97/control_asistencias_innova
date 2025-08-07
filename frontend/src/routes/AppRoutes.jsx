@@ -6,23 +6,32 @@ import {
    Route,
    Routes,
 } from "react-router-dom";
-// import AuthGuard from "./auth.guard";
-// import RoleGuard from "./rol.guard";
-import GestionAsistencias from "@/modules/asistencias/pages/GestionAsistencias";
-import MarcarAsistencia from "@/modules/asistencias/pages/MarcarAsistencia";
-import GestionObras from "@/modules/obras/pages/GestionObras";
-import ListarObras from "@/modules/obras/pages/ListarObras";
-import RegistrarTarea from "@/modules/obras/pages/RegistrarTarea";
-import RegistroObras from "@/modules/obras/pages/RegistroObras";
-import GestionUsuarios from "@/modules/usuarios/pages/GestionUsuarios";
-import RegistrarUsuario from "@/modules/usuarios/pages/RegistrarUsuario";
-import HeaderAsistencias from "@/shared/components/HeaderAsistencias";
+
 import LoaderInnova from "@/shared/components/LoaderInnova";
 import AuthGuard from "./auth.guard";
 import RoleGuard from "./rol.guard";
+import HeaderAsistencias from "@/shared/components/HeaderAsistencias";
 
-// Lazy load components
+// Lazy load de todas las páginas
 const Login = lazy(() => import("@/modules/auth/pages/Login"));
+const GestionAsistencias = lazy(() =>
+   import("@/modules/asistencias/pages/GestionAsistencias")
+);
+const MarcarAsistencia = lazy(() =>
+   import("@/modules/asistencias/pages/MarcarAsistencia")
+);
+const GestionObras = lazy(() => import("@/modules/obras/pages/GestionObras"));
+const ListarObras = lazy(() => import("@/modules/obras/pages/ListarObras"));
+const RegistrarTarea = lazy(() =>
+   import("@/modules/obras/pages/RegistrarTarea")
+);
+const RegistroObras = lazy(() => import("@/modules/obras/pages/RegistroObras"));
+const GestionUsuarios = lazy(() =>
+   import("@/modules/usuarios/pages/GestionUsuarios")
+);
+const RegistrarUsuario = lazy(() =>
+   import("@/modules/usuarios/pages/RegistrarUsuario")
+);
 
 export default function AppRoutes() {
    const Router =
@@ -30,11 +39,13 @@ export default function AppRoutes() {
 
    return (
       <Router>
-         {/* Suspense para mostrar fallback mientras carga */}
+         {/* Suspense para mostrar fallback mientras carga cualquier ruta */}
          <Suspense fallback={<LoaderInnova />}>
             <Routes>
                {/* Ruta pública */}
                <Route path="/login" element={<Login />} />
+
+               {/* Rutas protegidas */}
                <Route path="/" element={<AuthGuard />}>
                   <Route element={<HeaderAsistencias />}>
                      <Route
@@ -46,6 +57,7 @@ export default function AppRoutes() {
                      >
                         <Route index element={<MarcarAsistencia />} />
                      </Route>
+
                      <Route
                         element={
                            <RoleGuard
@@ -62,6 +74,7 @@ export default function AppRoutes() {
                            element={<GestionAsistencias />}
                         />
                      </Route>
+
                      <Route
                         element={
                            <RoleGuard roles={["GERENTE", "ADMINISTRADOR"]} />
@@ -74,15 +87,24 @@ export default function AppRoutes() {
                         <Route path="/usuarios" element={<GestionUsuarios />} />
 
                         <Route path="/obras" element={<ListarObras />} />
-                        <Route path="/obras/registrar" element={<RegistroObras />} />
-                        <Route path="/registro-diario" element={<GestionObras />} />
-                        <Route path="/registro-diario/registrar" element={<RegistrarTarea />} />
+                        <Route
+                           path="/obras/registrar"
+                           element={<RegistroObras />}
+                        />
+                        <Route
+                           path="/registro-diario"
+                           element={<GestionObras />}
+                        />
+                        <Route
+                           path="/registro-diario/registrar"
+                           element={<RegistrarTarea />}
+                        />
                      </Route>
                   </Route>
                </Route>
 
                {/* Catch-all */}
-               <Route path="*" element={<Navigate to={"/"} replace />} />
+               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
          </Suspense>
       </Router>

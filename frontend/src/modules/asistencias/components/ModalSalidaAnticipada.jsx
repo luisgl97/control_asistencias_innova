@@ -30,7 +30,7 @@ export function ModalSalidaAnticipada({
    ubicacion,
    id,
    fetchVerificarAsistencia,
-   estado_fin_refrigerio,
+   construccionDataDeEnvio,
 }) {
    const [open, setOpen] = useState(false);
    const [isLoading, setLoading] = useState(false);
@@ -40,12 +40,12 @@ export function ModalSalidaAnticipada({
       setLoading(true);
       try {
          const res = await asistenciaService.getAutorizadores();
-         const sanitizacion=res.data.datos.map((u)=>{
-            return{
-               value:u.id,
-               label:`${u.nombres} ${u.apellidos}`
-            }
-         })
+         const sanitizacion = res.data.datos.map((u) => {
+            return {
+               value: u.id,
+               label: `${u.nombres} ${u.apellidos}`,
+            };
+         });
          setOpcionesAutorizaciones(sanitizacion);
       } catch (error) {
          setLoading(false);
@@ -68,33 +68,23 @@ export function ModalSalidaAnticipada({
    };
    const handleClick = async () => {
       setLoading(true);
-
-      const { hora_a } = fecha_hora_asistencia();
-      let posicion;
-      try {
-         posicion = await obtenerCoordenadas();
-      } catch (error) {
-         toast.error("No se pudo obtener la ubicación");
+      const datosUbicacion = await construccionDataDeEnvio();
+      if (!datosUbicacion) {
          setLoading(false);
          return;
       }
-      const ubicacion_salida = {
-         lat: posicion.lat,
-         lng: posicion.lng,
-         direccion: ubicacion.display_name,
-      };
+      const { hora_a } = fecha_hora_asistencia();
       let data = {
          ...form,
          asistencia_id: id,
          hora_salida: hora_a,
-         ubicacion_salida,
+         ubicacion_salida: datosUbicacion,
       };
       try {
          setLoading(true);
          await asistenciaService.registrarSalidaAnticipada(data);
          fetchVerificarAsistencia();
          toast.success("Salida anticipada registrada");
-
          handleClose();
       } catch (error) {
          toast.error("El registro a fallado");

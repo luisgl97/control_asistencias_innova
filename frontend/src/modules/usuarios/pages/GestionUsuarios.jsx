@@ -82,7 +82,7 @@ const GestionUsuarios = () => {
          await fetchUsuarios();
          toast.success('Usuario Activado')
       } catch (error) {
-         toast.error('Error alk activar usuario')
+         toast.error('Error al activar usuario')
       } finally {
          setLoading(false)
       }
