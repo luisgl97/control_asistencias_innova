@@ -10,9 +10,13 @@ const {
 
 router.use(verificarToken); // Verifica token para todas las rutas
 
-router.get("/listar", obraController.obtenerObras);
-router.get("/obtener-obra", obraController.obtenerObraId);
+router.get("/", obraController.obtenerObras);
+router.get("/:id", obraController.obtenerObraId);
 router.post("/", obraController.registrarObra);
-
+router.put("/:id", obraController.actualizarObra)
+router.patch(
+  "/eliminar/:id",
+  obraController.eliminarObra
+);
 
 module.exports = router;

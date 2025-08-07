@@ -1,4 +1,3 @@
-
 module.exports = async (asignador_por, registroDiarioData, registrosDiariosRepository) => {
 
     const {obra_id, lista_usuarios_ids, fecha, descripcion_tarea } = registroDiarioData;

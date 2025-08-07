@@ -10,6 +10,7 @@ const listarUsuariosPorCargo = require("../../application/useCases/listarUsuario
 const obtenerUsuariosAutorizanPermiso = require("../../application/useCases/obtenerUsuariosAutorizanPermiso");
 const obtenerUsuariosTodos = require("../../application/useCases/obtenerUsuariosTodos");
 const obtenerUsuariosTrabajadores = require("../../application/useCases/obtenerUsuariosTrabajadores");
+const obtenerUsuariosConMinimoUnaAsistenciaDelMes = require("../../application/useCases/obtenerUsuariosConMinimoUnaAsistenciaDelMes");
 
 const usuarioRepository = new sequelizeUsuarioRepository(); // Instancia del repositorio de usuario
 
@@ -87,6 +88,7 @@ const UsuarioController = {
             );
             res.status(codigo).json(respuesta);
         } catch (error) {
+            console.log('error', error)
             res.status(500).json({ error: error.message, estado: false });
         }
     },
@@ -100,6 +102,7 @@ const UsuarioController = {
             );
             res.status(codigo).json(respuesta);
         } catch (error) {
+            console.log('error', error);
             res.status(500).json({ error: error.message, estado: false });
         }
     },
@@ -127,6 +130,21 @@ const UsuarioController = {
     async obtenerUsuariosTrabajadores(_, res) {
         try {
             const { codigo, respuesta } = await obtenerUsuariosTrabajadores(usuarioRepository);
+            res.status(codigo).json(respuesta);
+        } catch (error) {
+            console.log(error);
+            res.status(500).json({ error: error.message, estado: false });
+        }
+    },
+
+    async obtenerUsuariosConMinimoUnaAsistenciaDelMes(req, res) {
+        try {
+
+            const { fecha_inicio, fecha_fin } = req.body;
+
+            console.log({fecha_inicio, fecha_fin});
+
+            const { codigo, respuesta } = await obtenerUsuariosConMinimoUnaAsistenciaDelMes(fecha_inicio,fecha_fin, usuarioRepository);
             res.status(codigo).json(respuesta);
         } catch (error) {
             console.log(error);

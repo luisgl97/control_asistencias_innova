@@ -9,7 +9,6 @@ module.exports = async (idUsuario, dataAsistencia, asistenciaRepository, registr
     const obrasAsignadasAlTrabajadorPorDia = await registrosDiariosRepository.obtenerObrasAsignadasAlTrabajadorPorDia(idUsuario, fecha)
   
     const siguienteFechaLaboral = obtenerSiguienteDiaLaboral(fecha); // Feriado
-console.log(siguienteFechaLaboral); // 2025-08-07 (si no es feriado ni domingo)
 
    const obrasAsignadasAlTrabajadorDeManiana = await registrosDiariosRepository.obtenerObrasAsignadasAlTrabajadorPorDia(idUsuario, siguienteFechaLaboral)
 

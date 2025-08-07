@@ -2,6 +2,7 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { format, parseISO } from "date-fns";
 import { es } from "date-fns/locale";
+import logotipo from "@/assets/png/logov1-removebg-preview.png";
 
 const toBase64 = async (url) => {
   const res = await fetch(url);
@@ -15,6 +16,7 @@ const toBase64 = async (url) => {
 
 export const generarPDFMasivoInformativo = async (asistenciasPorTrabajador) => {
   const imageBase64 = await toBase64("/images/logo_azul.png");
+  const marcateLogoBase64 = await toBase64(logotipo);
   const resultados = [];
   const batchSize = 5;
 
@@ -117,6 +119,7 @@ export const generarPDFMasivoInformativo = async (asistenciasPorTrabajador) => {
             finalY + 45
           );
           doc.text("Todos los derechos reservados © Grupo INNOVA - Sistema Marcate+", 20, finalY + 50);
+          doc.addImage(marcateLogoBase64, "PNG", 10, finalY + 40, 10, 10);
 
           const pdfBlob = doc.output("blob");
           const pdfUrl = URL.createObjectURL(pdfBlob);

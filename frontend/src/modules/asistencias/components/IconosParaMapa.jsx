@@ -1,4 +1,5 @@
 import { MapPinCheckInside, MapPinHouse, MapPinXInside } from "lucide-react";
+import ReactDOMServer from "react-dom/server";
 
 export const crearIconoLucide = (color, nombre, tipo = "entrada") => {
     const Icono = tipo === "entrada" ? MapPinHouse : MapPinXInside;
