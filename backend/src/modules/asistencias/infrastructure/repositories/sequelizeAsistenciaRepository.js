@@ -11,16 +11,17 @@ const {
   CONST_HORA_FIN_LV,
   CONST_HORA_FIN_SAB,
 } = require("../../../../constants/horarios");
+const {
+  ESTADO_PRESENTE,
+  ESTADO_FALTA_JUSTIFICADA,
+  ESTADO_TARDANZA,
+  ESTADO_SALIDA_ANTICIPADA,
+  ESTADO_ASISTIO,
+  ESTADO_ASISTIO_TARDE,
+} = require("../../../../constants/estados");
 const { CONST_FERIADOS_PERU } = require("../../../../constants/feriadosPeru");
 require("moment/locale/es"); // importa el idioma español
 moment.locale("es"); // establece el idioma a español
-
-const ESTADO_PRESENTE = "PRESENTE";
-const ESTADO_FALTA_JUSTIFICADA = "FALTA JUSTIFICADA";
-const ESTADO_TARDANZA = "TARDANZA";
-const ESTADO_SALIDA_ANTICIPADA = "SALIDA ANTICIPADA";
-const ESTADO_ASISTIO = "ASISTIO";
-const ESTADO_ASISTIO_TARDE = "ASISTIO TARDE";
 
 class SequelizeAsistenciaRepository {
   getModel() {

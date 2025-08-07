@@ -24,21 +24,24 @@ export const generarPDF = async (asistenciasPorTrabajador) => {
       // Encabezado
       doc.setFontSize(10);
       doc.addImage(imageBase64, "JPEG", 14, 5, 22, 10);
-      doc.text(`REGISTRO DE CONTROL DE ASISTENCIA`, 40, 12);
-      doc.setFontSize(8);
-      doc.text(`DATOS DE LA EMPRESA`, 14, 18);
-      doc.text(`Nombre o Razón Social: `, 14, 24);
-      doc.text(`${usuario.filial_razon_social ?? "No disponible"}`, 50, 24);
-      doc.text(`RUC: `, 14, 29);
-      doc.text(`${usuario.filial_ruc ?? "No disponible"}`, 25, 29);
-      doc.text(`DATOS DEL TRABAJADOR: `, 14, 34);
-      doc.text(`Apellidos y nombres: `, 14, 38);
-      doc.text(`${usuario.nombres} ${usuario.apellidos}`, 43, 38);
+      doc.setFont("helvetica", "bold");
+      doc.text(`REGISTRO DE CONTROL DE ASISTENCIA`, 105, 12, { align: "center" });
 
-      doc.text(`${usuario.tipo_documento??"No disponible"} `, 14, 42);
-      doc.text(`${usuario.dni}`, 25, 42);
-      doc.text(`Cargo: `, 14, 46);
-      doc.text(`${usuario.cargo ? usuario.cargo : "-"}`, 24, 46);
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(9);
+      doc.text(`DATOS DE LA EMPRESA`, 14, 20);
+      doc.setFontSize(8);
+      doc.text(`RAZÓN SOCIAL: ${usuario.filial_razon_social ?? "No disponible"}`, 14, 26);
+      doc.text(`RUC: ${usuario.filial_ruc ?? "No disponible"}`, 14, 30);
+
+      doc.setFontSize(9);
+      doc.text(`DATOS DEL TRABAJADOR: `, 14, 38);
+      doc.setFontSize(8);
+      const nombre_completo = (usuario.apellidos + " " + usuario.nombres);
+      doc.text(`APELLIDOS Y NOMBRES: ${nombre_completo.toUpperCase()}`, 14, 44);
+      doc.text(`DOCUMENTO DE IDENTIDAD: ${usuario.tipo_documento ?? "-"} ${usuario.dni ?? "-"}`, 14, 48);
+      doc.text(`CARGO: ${usuario.cargo || "-"}`, 14, 52);
+
       const tableData = asistencias.map((a) => {
          const fecha = parseISO(a.fecha);
          return [
@@ -52,13 +55,13 @@ export const generarPDF = async (asistenciasPorTrabajador) => {
       });
 
       autoTable(doc, {
-         startY: 50,
+         startY: 60,
          head: [
             [
                "Fecha",
-               "Hora\nIngreso",
-               "Hora inicio\nrefrigerio",
-               "Hora termino\nrefrigerio",
+               "Ingreso",
+               "Inicio Refrigerio",
+               "Fin Refrigerio",
                "Salida",
                "Horas Extras",
             ],
@@ -69,38 +72,58 @@ export const generarPDF = async (asistenciasPorTrabajador) => {
             cellPadding: 1.5,
          },
          headStyles: {
-            fontSize: 8,
+            fillColor: [41, 128, 185],
+            textColor: [255, 255, 255],
+            fontStyle: "bold",
             halign: "center",
             valign: "middle",
          },
          columnStyles: {
-            0: { halign: "start", valign: "middle" },
-            1: { halign: "center", valign: "middle" },
-            2: { halign: "center", valign: "middle" },
-            3: { halign: "center", valign: "middle" },
-            4: { halign: "center", valign: "middle" },
-            5: { halign: "center", valign: "middle" },
+            0: { halign: "left" },
+            1: { halign: "center" },
+            2: { halign: "center" },
+            3: { halign: "center" },
+            4: { halign: "center" },
+            5: { halign: "center" },
          },
          didParseCell: function (data) {
             // Marcar en rojo si hay "FALTA"
             if (data.cell.raw === "FALTA") {
-               data.cell.styles.textColor = [255, 0, 0];
+               data.cell.styles.textColor = [200, 0, 0];
                data.cell.styles.fontStyle = "bold";
             }
          },
       });
 
       // Firmas al final de la página
-      const finalY = doc.lastAutoTable.finalY + 20;
-      doc.text("Firma del Trabajador: _______________________", 14, finalY);
-      doc.text("Firma del Gerente: __________________________", 110, finalY);
+      const finalY = doc.lastAutoTable.finalY + 10;
+
+      const textoLegal =
+      "Conforme al Decreto Legislativo N.º 728 y el Decreto Supremo N.º 004-2006-TR, el trabajador certifica mediante su firma y huella que los registros de ingreso, salida, tiempos de refrigerio y horas extras consignados en este reporte son veraces y constituyen evidencia válida del cumplimiento de su jornada laboral.";
+
+      doc.setFontSize(7);
+      doc.setTextColor(60, 60, 60);
+      doc.text(textoLegal, 14, finalY, {
+      maxWidth: 180,
+      align: "justify",
+      });
+
+      doc.setTextColor(0, 0, 0);
+      doc.setFontSize(8);
+      doc.text("Firma del Trabajador: __________________________", 14, finalY + 40);
+      doc.text("Firma del Supervisor: __________________________", 110, finalY + 40);
+
 
       // Salto de página si no es el último
-      if (index !== asistenciasPorTrabajador.length - 1) {
+      if (index < asistenciasPorTrabajador.length - 1) {
          doc.addPage();
       }
    });
 
    // Descargar PDF
-   doc.save("reporte_asistencias.pdf");
+   //doc.save("reporte_asistencias.pdf");
+
+   // Retornar el Blob para previsualización
+   const pdfBlob = doc.output("blob");
+   return URL.createObjectURL(pdfBlob);
 };
