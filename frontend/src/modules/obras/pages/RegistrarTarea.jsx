@@ -107,10 +107,10 @@ const RegistrarTarea = () => {
 
 
         {/* Asignación de Tareas y Trabajadores */}
-        <div className="grid grid-cols-6 grid-rows-6 gap-4">
+        <div className="flex gap-4 items-start">
 
           {/* Información General */}
-          <Card className="shadow-lg col-span-4 row-span-1 border-2 border-slate-200 bg-white/80 backdrop-blur-sm">
+          <Card className="flex flex-col gap-4 w-3/12 shadow-lg  border-2 border-slate-200 bg-white/80 backdrop-blur-sm">
             <CardHeader className="text-slate-700">
               <CardTitle className="flex items-center space-x-2">
                 <Calendar className="h-5 w-5" />
@@ -118,7 +118,7 @@ const RegistrarTarea = () => {
               </CardTitle>
             </CardHeader>
             <CardContent className="p-6">
-              <div className="grid md:grid-cols-2 gap-6">
+              <div className="flex flex-col gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="fecha" className="text-slate-700 font-medium">Fecha de la Tarea</Label>
                   <Input
@@ -129,18 +129,18 @@ const RegistrarTarea = () => {
                     className="border-slate-300 focus:border-blue-500"
                   />
                 </div>
-                <div className="space-y-2">
+                <div className="space-y-2 w-full">
                   <Label htmlFor="obra" className="text-slate-700 font-medium">Seleccionar Obra</Label>
-                  <Select value={obraSeleccionada} onValueChange={setObraSeleccionada}>
-                    <SelectTrigger className="border-slate-300 focus:border-blue-500">
+                  <Select value={obraSeleccionada} onValueChange={setObraSeleccionada} className="w-full">
+                    <SelectTrigger className="border-slate-300 focus:border-blue-500 w-full">
                       <SelectValue placeholder="Selecciona una obra" />
                     </SelectTrigger>
                     <SelectContent>
                       {obras.map((obra) => (
-                        <SelectItem key={obra.id} value={obra.id.toString()}>
-                          <div className="flex items-center space-x-2">
+                        <SelectItem key={obra.id} value={obra.id.toString()} className="w-full">
+                          <div className="flex items-center space-x-2 w-full">
                             <Building2 className="h-4 w-4" />
-                            <span>{obra.nombre}</span>
+                            <span className="flex-1">{obra.nombre}</span>
                           </div>
                         </SelectItem>
                       ))}
@@ -152,7 +152,7 @@ const RegistrarTarea = () => {
           </Card>
 
           {/* Tareas */}
-            <div className="col-span-4 row-span-8 col-start-1 row-start-4">
+            <div className="hadow-lg w-5/12 border-2 border-slate-200 bg-white/80 backdrop-blur-sm rounded-xl">
             <Card className="shadow-lg border-0 bg-white/80 backdrop-blur-sm">
               <CardHeader className="text-slate-700">
                 <div className="flex items-center justify-between">
@@ -250,9 +250,9 @@ const RegistrarTarea = () => {
           </div>
 
           {/* Trabajadores Disponibles */}
-          <div className="col-span-2 row-span-6 col-start-5 row-start-1">
-            <Card className="shadow-lg border-0 bg-white/80 backdrop-blur-sm">
-              <CardHeader className="bg-gradient-to-r from-purple-600 to-purple-700 text-white">
+          <div className="shadow-lg w-4/12 border-0 flex flex-col  rounded-xl">
+            <Card className="shadow-lg border-2  backdrop-blur-sm">
+              <CardHeader className="text-slate-700">
                 <CardTitle className="flex items-center space-x-2">
                   <Users className="h-5 w-5" />
                   <span>Trabajadores Disponibles</span>
@@ -262,6 +262,14 @@ const RegistrarTarea = () => {
                 </p>
               </CardHeader>
               <CardContent className="p-4">
+              <Input
+                type="search"
+                placeholder="Buscar trabajador"
+                className="px-4 py-2 border-0 rounded-lg w-full"
+                // value={filtro}
+                // onChange={(e) => setFiltro(e.target.value)}
+              />
+
                 <div className="space-y-3 max-h-96 overflow-y-auto">
                   {trabajadoresLibres.length === 0 ? (
                     <div className="text-center py-8 text-slate-500">
