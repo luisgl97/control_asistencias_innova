@@ -4,6 +4,7 @@ import { format, parseISO} from "date-fns";
 import { es } from "date-fns/locale";
 import QRCode from "qrcode";
 import api from "../../../shared/service/api";
+import logotipo from "@/assets/png/logov1-removebg-preview.png";
 
 // Funcion para convertir imagenes a base64
 const toBase64 = async (url) => {
@@ -38,7 +39,8 @@ const calcularHashSHA256 = async (arrayBuffer) => {
 // Función principal para generar PDF por cada trabajador con hash + QR
 export const generarPDFMasivoConQR = async (asistenciasPorTrabajador, mes, anio, creadoPor = 1) => {
     const imageBase64 = await toBase64("/images/logo_azul.png");
-
+    const marcateLogoBase64 = await toBase64(logotipo);
+    
     const resultados = [];
 
     const batchSize = 5;
@@ -228,6 +230,7 @@ export const generarPDFMasivoConQR = async (asistenciasPorTrabajador, mes, anio,
                             20,
                             firmaY + 20
                         );
+                        doc.addImage(marcateLogoBase64, "PNG", 10, finalY + 40, 10, 10);
 
                     };
 
@@ -250,12 +253,6 @@ export const generarPDFMasivoConQR = async (asistenciasPorTrabajador, mes, anio,
                     // Exportamos el FINAL que irá al backend
                     const pdfFinalBuffer = docFinal.output("arraybuffer");
                     const pdfFinalBase64 = arrayBufferToBase64(pdfFinalBuffer);
-
-/*                     // IMPORTANTE: Calculamos el hash del FINAL otra vez y lo comparamos
-                    const hashFinalConfirmado = await calcularHashSHA256(pdfFinalBuffer);
-                    if (hashFinal !== hashFinalConfirmado) {
-                        console.warn("El hash visual no coincide con el hash real del PDF guardado");
-                    } */
 
                     // Enviamos al backend para guardar, generar hash y registrar oficialmente
                     const res = await api.post("/reportes/guardar-reporte-individual", {

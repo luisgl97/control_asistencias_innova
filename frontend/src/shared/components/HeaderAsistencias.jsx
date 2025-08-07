@@ -2,19 +2,10 @@
 
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/context/AuthContext";
-import { Clock } from "lucide-react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import MobileMenu from "./MobileMenu";
 import UserMenu from "./UserMenu";
-import {
-   Menubar,
-   MenubarContent,
-   MenubarItem,
-   MenubarMenu,
-   MenubarSeparator,
-   MenubarShortcut,
-   MenubarTrigger,
-} from "@/components/ui/menubar";
+import logotipo from "@/assets/png/logov1-removebg-preview.png";
 import { Button } from "@/components/ui/button";
 
 const isPathActive = (currentPath, itemPath) => {
@@ -29,7 +20,7 @@ const isPathActive = (currentPath, itemPath) => {
 const HeaderAsistencias = () => {
    const location = useLocation();
 
-   const { user, loading, logout } = useAuth();
+   const { user, logout } = useAuth();
    const navigate = useNavigate();
    return (
       <>
@@ -39,8 +30,8 @@ const HeaderAsistencias = () => {
                   {/* Logo y título */}
                   <article className="flex gap-8 items-center">
                      <div className="flex items-center space-x-3">
-                        <div className="w-10 h-10 bg-innova-blue rounded-full flex items-center justify-center">
-                           <Clock className="w-6 h-6 text-white" />
+                        <div className="">
+                           <img src={logotipo} className="w-10 h-10 relative" alt="logo" />              
                         </div>
                         <div className="hidden sm:block">
                            <h1 className="text-lg font-bold text-gray-900">
