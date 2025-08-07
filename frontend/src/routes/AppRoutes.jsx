@@ -1,20 +1,24 @@
-import React, { Suspense, lazy } from "react";
+import { Suspense, lazy } from "react";
 import {
    BrowserRouter,
    HashRouter,
-   Routes,
-   Route,
    Navigate,
+   Route,
+   Routes,
 } from "react-router-dom";
 // import AuthGuard from "./auth.guard";
 // import RoleGuard from "./rol.guard";
+import GestionAsistencias from "@/modules/asistencias/pages/GestionAsistencias";
+import MarcarAsistencia from "@/modules/asistencias/pages/MarcarAsistencia";
+import GestionObras from "@/modules/obras/pages/GestionObras";
+import ListarObras from "@/modules/obras/pages/ListarObras";
+import RegistrarTarea from "@/modules/obras/pages/RegistrarTarea";
+import RegistroObras from "@/modules/obras/pages/RegistroObras";
+import GestionUsuarios from "@/modules/usuarios/pages/GestionUsuarios";
+import RegistrarUsuario from "@/modules/usuarios/pages/RegistrarUsuario";
+import HeaderAsistencias from "@/shared/components/HeaderAsistencias";
 import LoaderInnova from "@/shared/components/LoaderInnova";
 import AuthGuard from "./auth.guard";
-import MarcarAsistencia from "@/modules/asistencias/pages/MarcarAsistencia";
-import HeaderAsistencias from "@/shared/components/HeaderAsistencias";
-import GestionAsistencias from "@/modules/asistencias/pages/GestionAsistencias";
-import RegistrarUsuario from "@/modules/usuarios/pages/RegistrarUsuario";
-import GestionUsuarios from "@/modules/usuarios/pages/GestionUsuarios";
 import RoleGuard from "./rol.guard";
 
 // Lazy load components
@@ -50,6 +54,11 @@ export default function AppRoutes() {
                            element={<RegistrarUsuario />}
                         />
                         <Route path="/usuarios" element={<GestionUsuarios />} />
+
+                        <Route path="/obras" element={<ListarObras />} />
+                        <Route path="/obras/registrar" element={<RegistroObras />} />
+                        <Route path="/registro-diario" element={<GestionObras />} />
+                        <Route path="/registro-diario/registrar" element={<RegistrarTarea />} />
                      </Route>
                   </Route>
                </Route>

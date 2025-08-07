@@ -1,7 +1,4 @@
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
    Card,
    CardContent,
@@ -9,24 +6,22 @@ import {
    CardHeader,
    CardTitle,
 } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useAuth } from "@/context/AuthContext";
 import {
-   Clock,
-   Building2,
-   Timer,
-   Users,
    AlertCircle,
    Eye,
    EyeClosed,
-   User2Icon,
    Lock,
+   User2Icon
 } from "lucide-react";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { loginSchema } from "../schemas/usuarioSchema";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { useAuth } from "@/context/AuthContext";
-import { useNavigate } from "react-router-dom";
 
-import logotipo from "../../../assets/png/logov1-removebg-preview.png"
+import logotipo from "../../../assets/png/logov1-removebg-preview.png";
 
 export default function LoginPage() {
    const navigate = useNavigate();
