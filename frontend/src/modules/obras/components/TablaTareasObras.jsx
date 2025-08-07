@@ -2,8 +2,9 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { ChevronDown, ChevronRight, Users, Calendar, Building2, ClipboardList, Edit3, User } from 'lucide-react'
-import React, { useState } from "react"
+import React, { useEffect, useState } from "react"
 import TareaDescipcion from "./TareaDescipcion"
+import obraService from "../services/obraService"
 
 const tareas = [
     {
@@ -74,6 +75,14 @@ const TablaTareasObras = () => {
     const toggleExpand = (index) => {
         setExpandedIndex(prev => (prev === index ? null : index))
     }
+
+    useEffect(() => {
+        const obtenerTarea = async () => {
+            const respuesta = await obraService.listarRegistrosDiarios({ fecha: "2025-08-7" });
+            console.log(respuesta)
+        }
+        obtenerTarea();
+    }, [])
 
     return (
         <div className="px-6 bg-gradient-to-br">

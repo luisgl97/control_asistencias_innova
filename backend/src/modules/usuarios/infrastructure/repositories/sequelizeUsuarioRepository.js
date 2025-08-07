@@ -29,7 +29,7 @@ class SequelizeUsuarioRepository {
     return usuarios;
   }
 
-   async obtenerUsuariosTodos() {
+  async obtenerUsuariosTodos() {
     const usuarios = await Usuario.findAll({
       attributes: {
         exclude: ["password"],
@@ -90,7 +90,7 @@ class SequelizeUsuarioRepository {
   }
 
   async listarUsuariosPorCargo(cargo) {
-    
+
     const usuarios = await Usuario.findAll({
       where: { cargo },
       attributes: {
@@ -102,8 +102,13 @@ class SequelizeUsuarioRepository {
 
   async listarUsuariosTrabajadores() {
     const usuarios = await Usuario.findAll({
-      where: { rol: "TRABAJADOR" },
-      attributes: ["id", "dni", "nombres","apellidos", "cargo"],
+      where: {
+        [Op.or]: [
+          { cargo: "MONTADOR" },
+          { cargo: "ALMACEN" }
+        ]
+      },
+      attributes: ["id", "dni", "nombres", "apellidos", "cargo"],
     });
     return usuarios;
   }
