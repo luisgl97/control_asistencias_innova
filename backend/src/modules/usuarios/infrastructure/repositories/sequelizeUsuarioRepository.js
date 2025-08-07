@@ -1,5 +1,6 @@
 const db = require("../../../../models");
 const { Usuario } = require("../models/usuarioModel");
+const { Op } = require("sequelize");
 
 class SequelizeUsuarioRepository {
   getModel() {
@@ -95,6 +96,14 @@ class SequelizeUsuarioRepository {
       attributes: {
         exclude: ["password"],
       },
+    });
+    return usuarios;
+  }
+
+  async listarUsuariosTrabajadores() {
+    const usuarios = await Usuario.findAll({
+      where: { rol: "TRABAJADOR" },
+      attributes: ["id", "dni", "nombres","apellidos", "cargo"],
     });
     return usuarios;
   }

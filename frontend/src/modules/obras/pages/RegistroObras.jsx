@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/card";
 
 import { Loader2, Loader2Icon, LocateFixed, Map } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { use, useEffect, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import InputConEtiquetaFlotante from "../../../shared/components/InputConEtiquetaFlotante";
 
@@ -21,6 +21,7 @@ import iconShadow from "leaflet/dist/images/marker-shadow.png";
 import { toast } from "sonner";
 import { getCoordsFromAddress } from "../services/getCoordsFromAddress";
 import AgregarObraForm from "../components/AgregarObraForm";
+import obraService from "../services/obraService";
 
 let DefaultIcon = L.icon({
     iconUrl: icon,
@@ -94,9 +95,18 @@ const RegistroObras = () => {
 
     const fetchObra = async () => {
         try {
-            // Lógica para obtener la obra y actualizar el formulario
-            // setForm({ ...obra_obtenida });
-            // setPosition([obra_obtenida.latitud, obra_obtenida.longitud]);
+            console.log("entro a el fetch")
+            setIsLoading(true);
+            const {data, status} = await obraService.obtnerObraConId(id);
+            if(status === 200) {
+                setForm({
+                    ...data.datos,
+                    latitud: parseFloat(data.datos.latitud),
+                    longitud: parseFloat(data.datos.longitud),
+                });
+                setPosition([data.datos.latitud, data.datos.longitud]);
+                setLatitudIncial([data.datos.latitud, data.datos.longitud]);
+            }
         } catch (error) {
 
         } finally {
@@ -129,7 +139,7 @@ const RegistroObras = () => {
 
                 // ** CENTRAR el mapa
                 if (mapRef.current) {
-                mapRef.current.setView(coords, 16); // ** zoom
+                    mapRef.current.setView(coords, 16); // ** zoom
                 }
                 setZoom(20);
             } else {
@@ -143,6 +153,13 @@ const RegistroObras = () => {
         }
     };
 
+    useEffect(() => {
+        console.log("adwdawd")
+        if (id !== null) {
+            fetchObra();
+        }
+    }, [id]);
+
 
     const handleRadioChange = (e) => {
         e.preventDefault();
@@ -150,7 +167,14 @@ const RegistroObras = () => {
     }
 
     const handleChange = (e) => {
-        setForm((prevForm) => ({ ...prevForm, [e.target.name]: e.target.value }));
+        if (e.target.name === "nombre") {
+            setForm((prevForm) => ({
+                ...prevForm,
+                [e.target.name]: e.target.value.toUpperCase(),
+            }));
+        } else {
+            setForm((prevForm) => ({ ...prevForm, [e.target.name]: e.target.value }));
+        }
     };
 
     const renderDegradadoZona = (centro, radioBase, capas = 4) => {
@@ -203,6 +227,30 @@ const RegistroObras = () => {
         )
     }
 
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setIsLoading(true);
+        try {
+            let dataForm = {
+                ...form,
+                latitud: form.latitud ? form.latitud.toString() : "",
+                longitud: form.longitud ? form.longitud.toString() : "",
+            }
+            const {status,data,} = await obraService.crear(dataForm);
+            if (status === 201) {
+                toast.success(data.mensaje);
+                setForm({...claves});
+                navigate("/obras")
+            } else {
+                toast.error("Error al registrar la obra");
+            }
+        } catch (error) {
+            toast.error("Hubo un error al crear la obra");
+        } finally {
+            setIsLoading(false);
+        }
+    }
+
 
     return (
         <div className="max-w-7xl mx-auto flex pb-[100px] md:pb-0  flex-col md:flex-row  items-start">
@@ -215,6 +263,7 @@ const RegistroObras = () => {
                     buscarUbicacion={buscarUbicacion}
                     handleRadioChange={handleRadioChange}
                     showRadio={showRadio}
+                    handleSubmit={handleSubmit}
                 />
             </div>
 

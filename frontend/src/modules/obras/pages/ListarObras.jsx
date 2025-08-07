@@ -1,62 +1,59 @@
-import { useEffect, useState } from "react";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
     Card,
-    CardContent,
     CardDescription,
     CardHeader,
-    CardTitle,
+    CardTitle
 } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from "@/components/ui/table";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Skeleton } from "@/components/ui/skeleton";
+import { HousePlus, Search, SearchCheck } from "lucide-react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Edit, HousePlus, ListChecks, Trash } from "lucide-react";
-import ModalEliminarObra from "../components/ModalEliminarObra";
+import { toast } from "sonner";
 import TablaObras from "../components/TablaObras";
-import ListaTareasDiario from "../components/ListaTareasDiario";
+import obraService from "../services/obraService";
+import { Input } from "@/components/ui/input";
 
 const ListarObras = () => {
-    const [obras, setObras] = useState([
-        {
-            id: 1,
-            nombre: "Obra 1",
-            direccion: "Calle 123",
-
-        },
-        {
-            id: 2,
-            nombre: "Obra 2",
-            direccion: "Calle 456",
-
-        }
-    ])
+    const [obras, setObras] = useState([])
+    const [totalObras, setTotalObras] = useState(0)
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(null)
     const [searchTerm, setSearchTerm] = useState("")
-    const [filteredObras, setFilteredObras] = useState([
-        {
-            id: 1,
-            nombre: "Obra 1",
-            direccion: "Calle 123",
+    const [filteredObras, setFilteredObras] = useState([])
 
-        },
-        {
-            id: 2,
-            nombre: "Obra 2",
-            direccion: "Calle 456dwadawdwdadwawaddwadwa wddwa",
-
+    const fetchObras = async () => {
+        try {
+            setLoading(true)
+            const { data, status } = await obraService.listarObras()
+            if (status === 200) {
+                toast.success(`${data.mensaje} ${data.total}`)
+                setTotalObras(data.total)
+                console.log("obras a asignar",)
+                setObras(data.datos)
+                setFilteredObras(data.datos)
+            } else {
+                toast.error(data.mensaje)
+            }
+        } catch (error) {
+            setError(error)
+        } finally {
+            setLoading(false)
         }
-    ])
+    }
+
+    useEffect(() => {
+        fetchObras();
+    }, []);
+
+    useEffect(() => {
+        const filtered = obras.filter(
+            (obra) =>
+                obra.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                obra.direccion.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+        setFilteredObras(filtered);
+    }, [searchTerm, obras]);
+
     const navigate = useNavigate()
 
     return (
@@ -69,9 +66,7 @@ const ListarObras = () => {
                                 Listado de Obras
                             </CardTitle>
                             <CardDescription>
-                                Administra las obras del sistema ( 4
-                                obras registrados
-                                )
+                                Administra las obras del sistema ( {totalObras} obras registradas )
                             </CardDescription>
                         </div>
                         <Button
@@ -84,12 +79,40 @@ const ListarObras = () => {
                     </div>
                 </CardHeader>
 
-                {/* Tabla de obras */}
-                <TablaObras
-                    searchTerm={searchTerm}
-                    filteredObras={filteredObras}
-                    obras={obras}
-                />
+                {
+                    loading ? (
+                        <div className="grid gap-4 py-4 text-sm px-20">
+                            <div className="h-4 bg-gray-200 rounded w-3/4 animate-pulse"></div>
+                            <div className="h-4 bg-gray-200 rounded w-1/2 animate-pulse"></div>
+                            <div className="h-4 bg-gray-200 rounded w-2/3 animate-pulse"></div>
+                            <div className="h-4 bg-gray-200 rounded w-3/5 animate-pulse"></div>
+                            <div className="h-4 bg-gray-200 rounded w-1/3 animate-pulse"></div>
+                            <div className="h-4 bg-gray-200 rounded w-4/5 animate-pulse"></div>
+                            <div className="h-4 bg-gray-200 rounded w-1/2 animate-pulse"></div>
+                        </div>
+                    ) : (
+                        <div className="flex flex-col">
+                            <div className="flex items-center gap-4 mb-6 px-20">
+                                <div className="relative flex-1 max-w-sm">
+                                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                                    <Input
+                                        placeholder="Buscar obras..."
+                                        value={searchTerm}
+                                        onChange={(e) => setSearchTerm(e.target.value)}
+                                        className="pl-10"
+                                    />
+                                </div>
+                                <div className="text-sm text-muted-foreground">
+                                    {filteredObras.length} de {obras.length} obras
+                                </div>
+                            </div>
+                            <TablaObras
+                                searchTerm={searchTerm}
+                                filteredObras={filteredObras}
+                            />
+                        </div>
+                    )
+                }
 
             </Card>
         </div>

@@ -16,7 +16,11 @@ class SequelizeObraRepository {
   }
 
   async obtenerPorId(id) {
-    return await Obra.findByPk(id);
+    return await Obra.findByPk(id, {
+      attributes: {
+        exclude: ["createdAt", "updatedAt"],
+      },
+    });
   }
 
   async actualizarObra(id, obraData) {
