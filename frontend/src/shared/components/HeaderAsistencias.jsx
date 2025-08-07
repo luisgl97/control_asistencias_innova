@@ -85,6 +85,32 @@ const HeaderAsistencias = () => {
                            >
                               Trabajadores
                            </Button>
+                           <Button
+                              variant="ghost "
+                              className={`font-semibold text-base ${
+                                 isPathActive(location.pathname, "/obras")
+                                    ? "text-neutral-800"
+                                    : "text-neutral-500"
+                              }  hover:text-neutral-800`}
+                              onClick={() => {
+                                 navigate("/obras");
+                              }}
+                           >
+                              Obras
+                           </Button>
+                           <Button
+                              variant="ghost "
+                              className={`font-semibold text-base ${
+                                 isPathActive(location.pathname, "/registro-diario")
+                                    ? "text-neutral-800"
+                                    : "text-neutral-500"
+                              }  hover:text-neutral-800`}
+                              onClick={() => {
+                                 navigate("/registro-diario");
+                              }}
+                           >
+                              Registro diario
+                           </Button>
                         </section>
                      )}
                      {user.rol === "LIDER TRABAJADOR" && (

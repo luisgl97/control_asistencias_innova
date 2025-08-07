@@ -1,7 +1,10 @@
-export function getRangoSemanaActual() {
+export function getRangoSemanaActual(offset = 0) {   
    const fechaLima = new Date(
       new Date().toLocaleString("en-US", { timeZone: "America/Lima" })
    );
+
+   // Aplicar offset de semanas (puede ser positivo o negativo)
+   fechaLima.setDate(fechaLima.getDate() + offset * 7);
 
    const diaSemana = fechaLima.getDay(); // 0 = domingo, 1 = lunes, ..., 6 = sábado
 
@@ -14,6 +17,24 @@ export function getRangoSemanaActual() {
    const sabado = new Date(lunes);
    sabado.setDate(lunes.getDate() + 5);
 
+   // Calcular número de semana dentro del mes
+   const primerDiaMes = new Date(lunes.getFullYear(), lunes.getMonth(), 1);
+   const primerLunesMes = new Date(primerDiaMes);
+   const primerDiaSemana = primerDiaMes.getDay();
+   const offsetPrimerLunes = primerDiaSemana === 0 ? 1 : 8 - primerDiaSemana;
+   primerLunesMes.setDate(primerLunesMes.getDate() + (offsetPrimerLunes - 1));
+
+   let numeroSemanaMes = 1;
+   if (lunes >= primerLunesMes) {
+      const diferenciaDias = Math.floor(
+         (lunes - primerLunesMes) / (1000 * 60 * 60 * 24)
+      );
+      numeroSemanaMes += Math.floor(diferenciaDias / 7);
+   }
+
+   // Nombre del mes en español
+   const nombreMes = lunes.toLocaleString("es-ES", { month: "long" });
+
    // Formato YYYY-MM-DD
    const formatoFecha = (fecha) => {
       const anio = fecha.getFullYear();
@@ -21,9 +42,10 @@ export function getRangoSemanaActual() {
       const dia = String(fecha.getDate()).padStart(2, "0");
       return `${anio}-${mes}-${dia}`;
    };
-
    return {
       fecha_inicio: formatoFecha(lunes),
       fecha_fin: formatoFecha(sabado),
+      numero_semana: `${numeroSemanaMes}° semana de ${nombreMes}`,
    };
 }
+

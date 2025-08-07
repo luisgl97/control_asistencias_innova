@@ -28,6 +28,21 @@ class SequelizeUsuarioRepository {
     return usuarios;
   }
 
+   async obtenerUsuariosTodos() {
+    const usuarios = await Usuario.findAll({
+      attributes: {
+        exclude: ["password"],
+      },
+      include: [
+        {
+          model: db.filiales,
+          as: "filial",
+        }
+      ]
+    });
+    return usuarios;
+  }
+
   async obtenerPorId(id) {
     return await Usuario.findByPk(id, {
       attributes: {

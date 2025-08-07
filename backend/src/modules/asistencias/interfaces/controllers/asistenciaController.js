@@ -1,5 +1,6 @@
 const sequelizeAsistenciaRepository = require("../../infrastructure/repositories/sequelizeAsistenciaRepository");
 const sequelizeUsuarioRepository = require("../../../usuarios/infrastructure/repositories/sequelizeUsuarioRepository");
+const sequelizeRegistrosDiariosRepository = require("../../../registros_diarios/infrastructure/repositories/sequelizeRegistrosDiariosRepository");
 
 
 const obtenerAsistencias = require("../../application/useCases/obtenerAsistencias");
@@ -17,6 +18,7 @@ const obtenerDetalleAsistencia = require("../../application/useCases/obtenerDeta
 
 const asistenciaRepository = new sequelizeAsistenciaRepository(); // Instancia del repositorio de usuario
 const usuarioRepository = new sequelizeUsuarioRepository(); // Instancia del repositorio de asistencia
+const registrosDiariosRepository = new sequelizeRegistrosDiariosRepository()
 
 const AsistenciaController = {
   
@@ -122,7 +124,8 @@ const AsistenciaController = {
       const { codigo, respuesta } = await verificarAsistenciaDelUsuarioDelDia(
         usuario_id,
         req.body,
-        asistenciaRepository
+        asistenciaRepository,
+        registrosDiariosRepository
       );
 
       res.status(codigo).json(respuesta);

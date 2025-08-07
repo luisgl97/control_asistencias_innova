@@ -67,7 +67,7 @@ export function SkeletonTabla() {
                      </TableRow>
                   </TableHeader>
                   <TableBody>
-                     {Array.from({ length: 3 }).map((_, indice) => (
+                     {Array.from({ length: 10 }).map((_, indice) => (
                         <TableRow key={indice}>
                            <TableCell>
                               <Skeleton className="h-4 w-32" />

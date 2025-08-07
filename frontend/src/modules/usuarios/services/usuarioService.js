@@ -5,7 +5,9 @@ const usuarioService = {
    editar: (data, id) => api.put(`/usuarios/${id}`, data),
    eliminar: (id) => api.patch(`/usuarios/desactivar/${id}`),
    getUsuarios: () => api.get("/usuarios"),
+   getUsuariosAll: () => api.get("/usuarios/todos"),
    getUsuario: (id) => api.get(`/usuarios/${id}`),
+   activarUsuario: (id) => api.patch(`/usuarios/activar/${id}`),
 };
 
 export default usuarioService;
