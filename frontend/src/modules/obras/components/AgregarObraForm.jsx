@@ -19,14 +19,10 @@ const AgregarObraForm = ({
     buscarUbicacion,
     handleRadioChange,
     showRadio,
+    handleSubmit
 }) => {
     const navigate = useNavigate()
 
-
-    const handleRadioChangeform = (e) => {
-        e.preventDefault();
-        handleRadioChange(e);
-    }
     return (
         <Card className="md:mt-8 min-h-[10vh] mx-auto self-end border-2 border-gray-300 shadow-md">
             <CardHeader>
@@ -134,6 +130,7 @@ const AgregarObraForm = ({
                     type="submit"
                     form="form-usuario"
                     disabled={isLoading}
+                    onClick={handleSubmit}
                 >
                     {isLoading ? (
                         <span className="flex items-center gap-2">
