@@ -103,16 +103,18 @@ const AgregarObraForm = ({
                             )}
                         </section>
 
-                        <section className="w-full">
+                        <section className="w-full flex flex-col">
                             <label className="flex items-center space-x-2">
-                                <button
-                                    onClick={(e) => handleRadioChange(e)}
-                                    className={`cursor-pointer ${showRadio ? "bg-blue-500" : "bg-gray-500"
-                                        }  hover:scale-105 transition-all w-9 h-8 flex items-center justify-center rounded-md text-white`}
-                                >
-                                    <Map className="w-6 h-6" />
-                                </button>
+                                <span>Ubicación en el mapa</span>
                             </label>
+                            <button
+                                onClick={(e) => handleRadioChange(e)}
+                                className={`cursor-pointer ${showRadio ? "bg-blue-500" : "bg-gray-500"
+                                    }  hover:scale-105 transition-all w-9 h-8 flex items-center justify-center rounded-md text-white`}
+                            >
+                                <Map className="w-6 h-6" />
+                            </button>
+
                         </section>
                     </article>
                 </form>

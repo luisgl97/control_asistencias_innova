@@ -1,22 +1,13 @@
-"use client"
-
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
-import { Badge } from "@/components/ui/badge"
-import { Plus, Trash2, UserPlus, UserMinus, Calendar, Building2, ClipboardList, Users, Save, User } from 'lucide-react'
-import React, { useState } from "react"
-
-// Datos de ejemplo
-const obras = [
-  { id: 1, nombre: "PROYECTO PALMERA DEL SUR" },
-  { id: 2, nombre: "EDIFICIO TORRE AZUL" },
-  { id: 3, nombre: "COMPLEJO RESIDENCIAL NORTE" },
-  { id: 4, nombre: "CENTRO COMERCIAL PLAZA" },
-]
+import { Building2, Calendar, ClipboardList, Plus, Save, Trash2, User, UserMinus, UserPlus, Users } from 'lucide-react'
+import { useEffect, useState } from "react"
+import obraService from "../services/obraService"
+import usuarioService from "@/modules/usuarios/services/usuarioService"
 
 const trabajadoresDisponibles = [
   { id: 1, nombre: "Pepito Perez", dni: "75756507", especialidad: "Albañil" },
@@ -32,11 +23,47 @@ const trabajadoresDisponibles = [
 ]
 
 const RegistrarTarea = () => {
+  // ?? FORM STATE
+  const [registro_diario, setRegistroDiario] = useState({
+    obra: "",
+    dia: "",
+    nro_tarea: "",
+    nro_trabajadores_asignados: "",
+    tareas: []
+  })
+
+  // ?? DATA STATE
+  const [trabajadores, setTrabajadores] = useState([])
+  const [obras, setObras] = useState([])
+
+
   const [fecha, setFecha] = useState("")
   const [obraSeleccionada, setObraSeleccionada] = useState("")
   const [tareas, setTareas] = useState([
     { id: 1, descripcion: "", trabajadores: [] }
   ])
+
+
+  useEffect(() => {
+    const obtenerDatosIniciales = async () => {
+      try {
+        // ** obtener obras
+        const {status: statusO,data: dataO} = await obraService.listarObras()
+        // ** obtener trabajadores
+        if(statusO === 200) {
+          setObras(dataO.datos)
+        }
+        const{status: statusT, data: dataT} = await usuarioService.getUsuariosAllTrabajadores()
+        if(statusT === 200) {
+          console.log("trabajadores", dataT.datos)
+          setTrabajadores(dataT.datos)
+        }
+      } catch (error) {
+        console.error(error)
+      }
+    }
+    obtenerDatosIniciales()
+  }, [])
 
   const agregarTarea = () => {
     const nuevaTarea = {
@@ -80,7 +107,7 @@ const RegistrarTarea = () => {
   }
 
   const trabajadoresAsignados = tareas.flatMap(tarea => tarea.trabajadores.map(t => t.id))
-  const trabajadoresLibres = trabajadoresDisponibles.filter(t => !trabajadoresAsignados.includes(t.id))
+  const trabajadoresLibres = trabajadores.filter(t => !trabajadoresAsignados.includes(t.id))
 
   const guardarRegistro = () => {
     const registro = {
@@ -108,51 +135,122 @@ const RegistrarTarea = () => {
 
         {/* Asignación de Tareas y Trabajadores */}
         <div className="flex gap-4 items-start">
+          <div className="flex flex-col gap-4 w-5/12">
+            {/* Información General */}
+            <Card className="flex flex-col gap-4 w-full shadow-lg  border-2 border-slate-200 bg-white/80 backdrop-blur-sm">
+              <CardHeader className="text-slate-700">
+                <CardTitle className="flex items-center space-x-2">
+                  <Calendar className="h-5 w-5" />
+                  <span>Información General</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-6">
+                <div className="flex flex-col gap-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="fecha" className="text-slate-700 font-medium">Fecha de la Tarea</Label>
+                    <Input
+                      id="fecha"
+                      type="date"
+                      value={fecha}
+                      onChange={(e) => setFecha(e.target.value)}
+                      className="border-slate-300 focus:border-blue-500"
+                    />
+                  </div>
+                  <div className="space-y-2 w-full">
+                    <Label htmlFor="obra" className="text-slate-700 font-medium">Seleccionar Obra</Label>
+                    <Select value={obraSeleccionada} onValueChange={setObraSeleccionada} className="w-full">
+                      <SelectTrigger className="border-slate-300 focus:border-blue-500 w-full">
+                        <SelectValue placeholder="Selecciona una obra" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {obras.map((obra) => (
+                          <SelectItem key={obra.id} value={obra.id.toString()} className="w-full">
+                            <div className="flex items-center space-x-2 w-full">
+                              <Building2 className="h-4 w-4" />
+                              <span className="flex-1">{obra.nombre}</span>
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
 
-          {/* Información General */}
-          <Card className="flex flex-col gap-4 w-3/12 shadow-lg  border-2 border-slate-200 bg-white/80 backdrop-blur-sm">
-            <CardHeader className="text-slate-700">
-              <CardTitle className="flex items-center space-x-2">
-                <Calendar className="h-5 w-5" />
-                <span>Información General</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-6">
-              <div className="flex flex-col gap-6">
-                <div className="space-y-2">
-                  <Label htmlFor="fecha" className="text-slate-700 font-medium">Fecha de la Tarea</Label>
-                  <Input
-                    id="fecha"
-                    type="date"
-                    value={fecha}
-                    onChange={(e) => setFecha(e.target.value)}
-                    className="border-slate-300 focus:border-blue-500"
+            {/* Trabajadores Disponibles */}
+            <div className="shadow-lg w-full border-0 flex flex-col  rounded-xl">
+              <Card className="shadow-lg border-2  backdrop-blur-sm">
+                <CardHeader className="text-slate-700">
+                  <CardTitle className="flex items-center space-x-2">
+                    <Users className="h-5 w-5" />
+                    <span>Trabajadores Disponibles</span>
+                  </CardTitle>
+                  <p className="text-gray-600 text-md mt-1">
+                    {trabajadores.length} de {trabajadoresDisponibles.length} disponibles
+                  </p>
+                </CardHeader>
+                <Input
+                    type="search"
+                    placeholder="Buscar trabajador"
+                    className="px-9 border-2 mx-7 rounded-lg "
+                  // value={filtro}
+                  // onChange={(e) => setFiltro(e.target.value)}
                   />
-                </div>
-                <div className="space-y-2 w-full">
-                  <Label htmlFor="obra" className="text-slate-700 font-medium">Seleccionar Obra</Label>
-                  <Select value={obraSeleccionada} onValueChange={setObraSeleccionada} className="w-full">
-                    <SelectTrigger className="border-slate-300 focus:border-blue-500 w-full">
-                      <SelectValue placeholder="Selecciona una obra" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {obras.map((obra) => (
-                        <SelectItem key={obra.id} value={obra.id.toString()} className="w-full">
-                          <div className="flex items-center space-x-2 w-full">
-                            <Building2 className="h-4 w-4" />
-                            <span className="flex-1">{obra.nombre}</span>
+                <CardContent className="p-4">
+
+
+                  <div className="space-y-3 max-h-96 overflow-y-auto">
+                    {trabajadoresLibres.length === 0 ? (
+                      <div className="text-center py-8 text-slate-500">
+                        <Users className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                        <p>Todos los trabajadores están asignados</p>
+                      </div>
+                    ) : (
+                      trabajadoresLibres.map((trabajador) => (
+                        <div key={trabajador.id} className="border border-slate-200 rounded-lg p-3 hover:border-purple-300 transition-colors bg-white">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center space-x-3">
+                              <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
+                                <User className="h-4 w-4 text-purple-600" />
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className="font-medium text-slate-800 truncate">{trabajador.nombre}</p>
+                                <p className="text-sm text-slate-500 truncate">{trabajador.especialidad}</p>
+                                <p className="text-xs text-slate-400">DNI: {trabajador.dni}</p>
+                              </div>
+                            </div>
                           </div>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+
+                          <div className="space-y-1">
+                            <p className="text-xs text-slate-600 mb-2">Asignar a tarea:</p>
+                            <div className="flex flex-wrap gap-1">
+                              {tareas.map((tarea, index) => (
+                                <Button
+                                  key={tarea.id}
+                                  onClick={() => asignarTrabajador(tarea.id, trabajador)}
+                                  variant="outline"
+                                  size="sm"
+                                  className="text-xs h-7 px-2 border-purple-200 text-purple-600 hover:bg-purple-50 hover:border-purple-300"
+                                  disabled={!tarea.descripcion.trim()}
+                                >
+                                  <UserPlus className="h-3 w-3 mr-1" />
+                                  Tarea {index + 1}
+                                </Button>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
 
           {/* Tareas */}
-            <div className="hadow-lg w-5/12 border-2 border-slate-200 bg-white/80 backdrop-blur-sm rounded-xl">
+          <div className="hadow-lg w-7/12 border-2 border-slate-200 bg-white/80 backdrop-blur-sm rounded-xl">
             <Card className="shadow-lg border-0 bg-white/80 backdrop-blur-sm">
               <CardHeader className="text-slate-700">
                 <div className="flex items-center justify-between">
@@ -249,74 +347,7 @@ const RegistrarTarea = () => {
             </Card>
           </div>
 
-          {/* Trabajadores Disponibles */}
-          <div className="shadow-lg w-4/12 border-0 flex flex-col  rounded-xl">
-            <Card className="shadow-lg border-2  backdrop-blur-sm">
-              <CardHeader className="text-slate-700">
-                <CardTitle className="flex items-center space-x-2">
-                  <Users className="h-5 w-5" />
-                  <span>Trabajadores Disponibles</span>
-                </CardTitle>
-                <p className="text-purple-100 text-sm mt-1">
-                  {trabajadoresLibres.length} de {trabajadoresDisponibles.length} disponibles
-                </p>
-              </CardHeader>
-              <CardContent className="p-4">
-              <Input
-                type="search"
-                placeholder="Buscar trabajador"
-                className="px-4 py-2 border-0 rounded-lg w-full"
-                // value={filtro}
-                // onChange={(e) => setFiltro(e.target.value)}
-              />
 
-                <div className="space-y-3 max-h-96 overflow-y-auto">
-                  {trabajadoresLibres.length === 0 ? (
-                    <div className="text-center py-8 text-slate-500">
-                      <Users className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                      <p>Todos los trabajadores están asignados</p>
-                    </div>
-                  ) : (
-                    trabajadoresLibres.map((trabajador) => (
-                      <div key={trabajador.id} className="border border-slate-200 rounded-lg p-3 hover:border-purple-300 transition-colors bg-white">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center space-x-3">
-                            <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
-                              <User className="h-4 w-4 text-purple-600" />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <p className="font-medium text-slate-800 truncate">{trabajador.nombre}</p>
-                              <p className="text-sm text-slate-500 truncate">{trabajador.especialidad}</p>
-                              <p className="text-xs text-slate-400">DNI: {trabajador.dni}</p>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="space-y-1">
-                          <p className="text-xs text-slate-600 mb-2">Asignar a tarea:</p>
-                          <div className="flex flex-wrap gap-1">
-                            {tareas.map((tarea, index) => (
-                              <Button
-                                key={tarea.id}
-                                onClick={() => asignarTrabajador(tarea.id, trabajador)}
-                                variant="outline"
-                                size="sm"
-                                className="text-xs h-7 px-2 border-purple-200 text-purple-600 hover:bg-purple-50 hover:border-purple-300"
-                                disabled={!tarea.descripcion.trim()}
-                              >
-                                <UserPlus className="h-3 w-3 mr-1" />
-                                Tarea {index + 1}
-                              </Button>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                    ))
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
         </div>
 
         {/* Botón Guardar */}

@@ -8,6 +8,7 @@ import TareaDescipcion from "./TareaDescipcion"
 const tareas = [
     {
         obra: {
+            id: 1,
             nombre: "PROYECTO PALMERA DEL SUR",
         },
         dia: "07-08-2025",

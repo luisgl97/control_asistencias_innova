@@ -6,6 +6,7 @@ const usuarioService = {
    eliminar: (id) => api.patch(`/usuarios/desactivar/${id}`),
    getUsuarios: () => api.get("/usuarios"),
    getUsuariosAll: () => api.get("/usuarios/todos"),
+   getUsuariosAllTrabajadores: () => api.get("/usuarios//trabajadores"),
    getUsuario: (id) => api.get(`/usuarios/${id}`),
    activarUsuario: (id) => api.patch(`/usuarios/activar/${id}`),
 };

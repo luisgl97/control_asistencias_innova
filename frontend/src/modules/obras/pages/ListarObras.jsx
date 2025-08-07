@@ -26,7 +26,7 @@ const ListarObras = () => {
             setLoading(true)
             const { data, status } = await obraService.listarObras()
             if (status === 200) {
-                toast.success(data.mensaje + "" + data.total)
+                toast.success(`${data.mensaje} ${data.total}`)
                 setTotalObras(data.total)
                 console.log("obras a asignar",)
                 setObras(data.datos)
@@ -42,8 +42,8 @@ const ListarObras = () => {
     }
 
     useEffect(() => {
-        fetchObras()
-    }, [])
+        fetchObras();
+    }, []);
 
     useEffect(() => {
         const filtered = obras.filter(
@@ -54,8 +54,6 @@ const ListarObras = () => {
         setFilteredObras(filtered);
     }, [searchTerm, obras]);
 
-    console.log(obras)
-    console.log(filteredObras)
     const navigate = useNavigate()
 
     return (
@@ -81,27 +79,40 @@ const ListarObras = () => {
                     </div>
                 </CardHeader>
 
-                {/* Barra de búsqueda */}
-                <div className="flex items-center gap-4 mb-6 px-20">
-                    <div className="relative flex-1 max-w-sm">
-                        <SearchCheck className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                        <Input
-                            placeholder="Buscar obras..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            className="pl-10"
-                        />
-                    </div>
-                    <div className="text-sm text-muted-foreground">
-                        {filteredObras.length} de {obras.length} obras
-                    </div>
-                </div>
-
-                {/* Tabla de obras */}
-                <TablaObras
-                    searchTerm={searchTerm}
-                    filteredObras={filteredObras}
-                />
+                {
+                    loading ? (
+                        <div className="grid gap-4 py-4 text-sm px-20">
+                            <div className="h-4 bg-gray-200 rounded w-3/4 animate-pulse"></div>
+                            <div className="h-4 bg-gray-200 rounded w-1/2 animate-pulse"></div>
+                            <div className="h-4 bg-gray-200 rounded w-2/3 animate-pulse"></div>
+                            <div className="h-4 bg-gray-200 rounded w-3/5 animate-pulse"></div>
+                            <div className="h-4 bg-gray-200 rounded w-1/3 animate-pulse"></div>
+                            <div className="h-4 bg-gray-200 rounded w-4/5 animate-pulse"></div>
+                            <div className="h-4 bg-gray-200 rounded w-1/2 animate-pulse"></div>
+                        </div>
+                    ) : (
+                        <div className="flex flex-col">
+                            <div className="flex items-center gap-4 mb-6 px-20">
+                                <div className="relative flex-1 max-w-sm">
+                                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                                    <Input
+                                        placeholder="Buscar obras..."
+                                        value={searchTerm}
+                                        onChange={(e) => setSearchTerm(e.target.value)}
+                                        className="pl-10"
+                                    />
+                                </div>
+                                <div className="text-sm text-muted-foreground">
+                                    {filteredObras.length} de {obras.length} obras
+                                </div>
+                            </div>
+                            <TablaObras
+                                searchTerm={searchTerm}
+                                filteredObras={filteredObras}
+                            />
+                        </div>
+                    )
+                }
 
             </Card>
         </div>
