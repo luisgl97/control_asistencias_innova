@@ -18,11 +18,16 @@ db.asistencias = Asistencia;
 const { Permiso } = require('../modules/permisos/infrastructure/models/permisoModel');
 db.permisos = Permiso;
 
+
+const { ReporteEmitido } = require('../modules/reportes/infrastructure/models/ReporteEmitidoModel');
+db.reportes_emitidos = ReporteEmitido;
+
 const { Obra } = require('../modules/obras/infrastructure/models/obraModel')
 db.obras = Obra;
 
 const { RegistrosDiarios } = require('../modules/registros_diarios/infrastructure/models/registrosRegistrosDiariosModel')
 db.registros_diarios = RegistrosDiarios;
+
 
 // ✅ Solo se asocian los que tienen .associate()
 if (db.usuarios.associate) db.usuarios.associate(db);
