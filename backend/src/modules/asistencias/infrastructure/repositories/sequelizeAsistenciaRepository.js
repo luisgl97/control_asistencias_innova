@@ -5,13 +5,15 @@ const {
 } = require("../../../usuarios/infrastructure/models/usuarioModel");
 const db = require("../../../../models");
 
-const moment = require("moment");
+
 const {
   CONST_HORA_INICIO,
   CONST_HORA_FIN_LV,
   CONST_HORA_FIN_SAB,
 } = require("../../../../constants/horarios");
 const { CONST_FERIADOS_PERU } = require("../../../../constants/feriadosPeru");
+
+const moment = require("moment");
 require("moment/locale/es"); // importa el idioma español
 moment.locale("es"); // establece el idioma a español
 
@@ -447,7 +449,7 @@ class SequelizeAsistenciaRepository {
       return fila;
     });
 
-    return resultado;
+    return resultado
   }
 
   // Verificar asistencia del usuario parar mostrar el boton de ingreso o salida en el frontend
