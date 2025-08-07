@@ -19,10 +19,11 @@ import {
 } from "@/components/ui/table";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Search, UserPlus, Edit, Trash2, Mail } from "lucide-react";
+import { Search, UserPlus, Edit, Trash2, Mail, UserCheck2Icon } from "lucide-react";
 import usuarioService from "../services/usuarioService";
 import { useNavigate } from "react-router-dom";
 import ModalEliminarUsuario from "../components/ModalEliminarUsuario";
+import { toast } from "sonner";
 
 // Tipo para el usuario basado en la estructura proporcionada
 
@@ -38,7 +39,7 @@ const GestionUsuarios = () => {
       try {
          setLoading(true);
          setError(null);
-         const res = await usuarioService.getUsuarios();
+         const res = await usuarioService.getUsuariosAll();
          const usuariosData = res.data.datos || [];
          setUsuarios(usuariosData);
          setFilteredUsuarios(usuariosData);
@@ -72,6 +73,21 @@ const GestionUsuarios = () => {
       );
       setFilteredUsuarios(filtered);
    }, [searchTerm, usuarios]);
+
+   const activarUsuario = async (id) => {
+      setLoading(true)
+      try {
+         const res = await usuarioService.activarUsuario(id);
+         console.log(res);
+         await fetchUsuarios();
+         toast.success('Usuario Activado')
+      } catch (error) {
+         toast.error('Error alk activar usuario')
+      } finally {
+         setLoading(false)
+      }
+
+   }
 
    const getRoleBadgeVariant = (rol) => {
       switch (rol) {
@@ -188,6 +204,9 @@ const GestionUsuarios = () => {
                            <TableHead className={"text-white"}>Rol</TableHead>
                            <TableHead className={"text-white"}>Cargo</TableHead>
                            <TableHead className={"text-white"}>
+                              Estado
+                           </TableHead>
+                           <TableHead className={"text-white"}>
                               Acciones
                            </TableHead>
                         </TableRow>
@@ -245,6 +264,12 @@ const GestionUsuarios = () => {
                                        </span>
                                     )}
                                  </TableCell>
+                                 <TableCell>
+
+                                    <span className="text-sm bg-muted px-2 py-1 rounded">
+                                       {usuario.estado?"Activo":"Inactivo"}
+                                    </span>
+                                 </TableCell>
                                  <TableCell className={"flex gap-3"}>
                                     <Button
                                        variant="outline"
@@ -258,11 +283,22 @@ const GestionUsuarios = () => {
                                     >
                                        <Edit className="size-3.5 text-innova-orange" />
                                     </Button>
-                                    <ModalEliminarUsuario
-                                       id={usuario.id}
-                                       nombres={`${usuario.nombres} ${usuario.apellidos}`}
-                                       cargarDatos={fetchUsuarios}
-                                    />
+                                    {usuario.estado ? (
+                                       <ModalEliminarUsuario
+                                          id={usuario.id}
+                                          nombres={`${usuario.nombres} ${usuario.apellidos}`}
+                                          cargarDatos={fetchUsuarios}
+                                       />
+                                    ) : (<Button
+                                       variant="outline"
+                                       size={"icon"}
+                                       className="size-7"
+                                       onClick={() => activarUsuario(usuario.id)}
+                                    >
+                                       <UserCheck2Icon className="size-3.5 text-green-700" />
+                                    </Button>)}
+
+
                                  </TableCell>
                               </TableRow>
                            ))

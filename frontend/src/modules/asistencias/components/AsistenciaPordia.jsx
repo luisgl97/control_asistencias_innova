@@ -1,6 +1,6 @@
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import asistenciaService from "../service/asistenciaService";
-import { AlertCircle, RefreshCw } from "lucide-react";
+import { AlertCircle, Calendar, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import { SkeletonTabla } from "./SkeletonTable";
@@ -18,6 +18,9 @@ import { ModalJustificarFalta } from "./ModalJustificarFalta";
 import ModalHorasExtras from "./ModalHorasExtras";
 import AsistenciaDetailDialog from "./AsistenciaDetalleModal";
 import { useAuth } from "@/context/AuthContext";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { normalizarTexto } from "../libs/mormalizarTextoBusqueda";
 
 const estilos = {
    ASISTIO: "bg-green-50 text-green-700 border-green-200",
@@ -25,29 +28,28 @@ const estilos = {
    "FALTA JUSTIFICADA": "bg-yellow-50 text-yellow-700 border-yellow-200",
 };
 
+
 const AsistenciaPordia = () => {
-   const {user}=useAuth()
+   const { user } = useAuth()
    const [datosAsistencia, setDatosAsistencia] = useState([]);
+   const [datosAsistenciaGuard, setDatosAsistenciaGuard] = useState([]);
    const [cargando, setCargando] = useState(true);
    const [error, setError] = useState(null);
-
+   const [fechaSeleccionada, setFechaSeleccionada] = useState(
+      new Date().toISOString().split("T")[0]
+   );
+   const [nombreTrabajador, setNombreTrabajador] = useState("")
    const cargarDatos = async () => {
       try {
          setCargando(true);
-         const date = new Date();
-         const year = date.getFullYear();
-         const month = String(date.getMonth() + 1).padStart(2, "0"); // Mes comienza en 0
-         const day = String(date.getDate()).padStart(2, "0");
-
-         const formattedDate = `${year}-${month}-${day}`;
          setError(null);
-
          const res = await asistenciaService.asistenciasDelDia({
-            fecha: formattedDate,
+            fecha: fechaSeleccionada,
          });
-
+         console.log(res.data.datos);
 
          setDatosAsistencia(res.data.datos);
+         setDatosAsistenciaGuard(res.data.datos)
       } catch (err) {
          setError(
             "Error al cargar los datos de asistencia. Por favor, intenta nuevamente."
@@ -58,13 +60,26 @@ const AsistenciaPordia = () => {
       }
    };
 
+
    useEffect(() => {
-      cargarDatos();
-   }, []);
+      if (fechaSeleccionada) {
+         cargarDatos();
+      }
+   }, [fechaSeleccionada]);
+
+   useEffect(() => {
+      let copy = [...datosAsistenciaGuard]
+      if (nombreTrabajador) {
+         copy = copy.filter((t) =>
+            normalizarTexto(t.trabajador).includes(normalizarTexto(nombreTrabajador))
+         );
+      }
+      setDatosAsistencia(copy)
+   }, [nombreTrabajador, datosAsistenciaGuard])
 
    if (cargando) {
       return (
-         <div className="w-full mx-auto ">
+         <div className="w-full max-w-7xl ">
             <SkeletonTabla />
          </div>
       );
@@ -95,12 +110,34 @@ const AsistenciaPordia = () => {
       <div className="w-full ">
          <Card className="">
             <CardHeader>
-               <div className="flex items-center justify-between">
-                  <div>
-                     <CardTitle>Control de Asistencias Diarias</CardTitle>
+               <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between md:gap-6">
+                  <div className="flex-1 min-w-[200px]">
+                     <CardTitle className="text-lg md:text-2xl">
+                        Control de Asistencias Diarias
+                     </CardTitle>
+                  </div>
+                  <div className="w-full md:w-auto">
+                     <Input
+                        placeholder="Nombre trabajador"
+                        value={nombreTrabajador}
+                        onChange={(e) => setNombreTrabajador(e.target.value)}
+                        className="w-full md:min-w-[200px]"
+                     />
+                  </div>
+                  <div className="flex items-center gap-2 flex-wrap md:flex-nowrap">
+                     <Calendar className="h-4 w-4" />
+                     <Label htmlFor="fecha" className="text-sm whitespace-nowrap">Fecha:</Label>
+                     <Input
+                        id="fecha"
+                        type="date"
+                        value={fechaSeleccionada}
+                        onChange={(e) => setFechaSeleccionada(e.target.value)}
+                        className="w-full md:w-auto"
+                     />
                   </div>
                </div>
             </CardHeader>
+
             <CardContent>
                <div className="overflow-x-auto">
                   <Table>
@@ -144,9 +181,8 @@ const AsistenciaPordia = () => {
                                  ) : (
                                     <Badge
                                        variant="outline"
-                                       className={`${
-                                          estilos[trabajador.estado]
-                                       } text-xs`}
+                                       className={`${estilos[trabajador.estado]
+                                          } text-xs`}
                                     >
                                        {trabajador.estado}
                                     </Badge>
@@ -180,17 +216,17 @@ const AsistenciaPordia = () => {
                               <TableCell className="text-center space-x-2">
                                  {(trabajador.asistencia_id &&
                                     trabajador.estado !==
-                                       "FALTA JUSTIFICADA"&&user.rol!=="LIDER TRABAJADOR") && (
-                                    <ModalHorasExtras
-                                       cargarDatos={cargarDatos}
-                                       id={trabajador.asistencia_id}
-                                       nombres={trabajador.trabajador}
-                                       hizo_horas_extras={
-                                          trabajador.hizo_horas_extras
-                                       }
-                                    />
-                                 )}
-                                 <AsistenciaDetailDialog asistenciaId={trabajador.asistencia_id}/>
+                                    "FALTA JUSTIFICADA" && user.rol !== "LIDER TRABAJADOR") && (
+                                       <ModalHorasExtras
+                                          cargarDatos={cargarDatos}
+                                          id={trabajador.asistencia_id}
+                                          nombres={trabajador.trabajador}
+                                          hizo_horas_extras={
+                                             trabajador.hizo_horas_extras
+                                          }
+                                       />
+                                    )}
+                                 <AsistenciaDetailDialog asistenciaId={trabajador.asistencia_id} />
                               </TableCell>
                            </TableRow>
                         ))}
