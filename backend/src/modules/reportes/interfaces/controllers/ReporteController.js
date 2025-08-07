@@ -17,7 +17,8 @@ const guardarReporteIndividual = async (req, res) => {
         usuario_id,
         mes,
         creado_por,
-        qr_base64
+        qr_base64,
+        hash
     } = req.body;
 
     // Validaciones básicas
@@ -36,15 +37,18 @@ const guardarReporteIndividual = async (req, res) => {
     const buffer = Buffer.from(pdfBase64, "base64");
     fs.writeFileSync(rutaCompleta, buffer);
 
-    // Calcular el hash del archivo guardado como referencia (NO se usa para validar integridad)
-    const hash = crypto.createHash("sha256").update(buffer).digest("hex");
-
     // Construímos el URL público
     const dominio = process.env.DOMINIO_PUBLICO || "http://localhost:4001";
     const url = `${dominio}/reportes/${carpeta}/${nombre_archivo}`;
 
-    // Guardamos en base de datos como reporte emitido (inmutable)
+    // Verificamos si ya existe 
     const repository = new SequelizeReporteEmitidoRepository();
+    const existente = await repository.obtenerPorUsuarioYMes(usuario_id, mes);
+    if (existente) {
+        return res.status(200).json({ hash, url, yaEmitido: true});
+    }
+
+    // Guardamos en base de datos como reporte emitido con hash y QR (inmutable)
     if (qr_base64 && qr_base64 !== "TEMPORAL") {
         await guardarReporteEmitido({
             usuario_id,

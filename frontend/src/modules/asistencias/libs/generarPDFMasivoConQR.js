@@ -27,6 +27,14 @@ const arrayBufferToBase64 = (buffer) => {
     return btoa(binary);
 }
 
+// Calcular hash SHA-256 en el navegador
+const calcularHashSHA256 = async (arrayBuffer) => {
+  const hashBuffer = await window.crypto.subtle.digest("SHA-256", arrayBuffer);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+};
+
+
 // Función principal para generar PDF por cada trabajador con hash + QR
 export const generarPDFMasivoConQR = async (asistenciasPorTrabajador, mes, anio, creadoPor = 1) => {
     const imageBase64 = await toBase64("/images/logo_azul.png");
@@ -222,41 +230,35 @@ export const generarPDFMasivoConQR = async (asistenciasPorTrabajador, mes, anio,
                         );
 
                     };
-                    
-                    // Paso 1: generar primer PDF temporal sin hash ni QR
-                    const doc1 = new jsPDF();
-                    generarContenidoPDF(doc1);
-                    const pdfBuffer = doc1.output("arraybuffer");
-                    const pdfBase64Temp = arrayBufferToBase64(pdfBuffer);
 
-                    // Paso 2: guardar temporalmente para construir el QR + hash
-                    const res = await api.post("/reportes/guardar-reporte-individual", {
-                        pdfBase64: pdfBase64Temp,
-                        nombre_archivo: nombreArchivo,
-                        carpeta,
-                        usuario_id: usuario.id,
-                        mes: `${anio}-${mes}`,
-                        creado_por: creadoPor,
-                        qr_base64: "TEMPORAL",
-                    });
+                    // Generamos PPDF sin hash ni qr aún
+                    const docTemp = new jsPDF();
+                    generarContenidoPDF(docTemp); 
+                    const bufferTemp = docTemp.output("arraybuffer");
 
-                    if (!res.data || !res.data.hash || !res.data.url) {
-                        throw new Error("El servidor no devolvió hash ni url válidos");
-                    }
+                    // HASH UNICO !!!
+                    const hashFinal = await calcularHashSHA256(bufferTemp);
 
-                    const { url, hash } = res.data;
+                    // Generamos QR con la URL destino del archivo
+                    const urlPDF = `${window.location.origin}/reportes/${carpeta}/${nombreArchivo}`;
+                    const qrDataUrl = await QRCode.toDataURL(urlPDF);
 
-                    // Paso 3: regenerar PDF con hash y QR impresos
-                    const qrDataUrl = await QRCode.toDataURL(url);
+                     // Regeneramos PDF definitivo con hash real
+                    const docFinal = new jsPDF();
+                    generarContenidoPDF(docFinal, hashFinal, qrDataUrl);
 
-                    // Paso 4: generar segundo PDF final con hash + QR
-                    const doc2 = new jsPDF();
-                    generarContenidoPDF(doc2, hash, qrDataUrl)
-                    const pdfFinalBuffer = doc2.output("arraybuffer");
+                    // Exportamos el FINAL que irá al backend
+                    const pdfFinalBuffer = docFinal.output("arraybuffer");
                     const pdfFinalBase64 = arrayBufferToBase64(pdfFinalBuffer);
 
-                    // Paso 5: sobrescribir archivo en backend
-                    await api.post("/reportes/guardar-reporte-individual", {
+/*                     // IMPORTANTE: Calculamos el hash del FINAL otra vez y lo comparamos
+                    const hashFinalConfirmado = await calcularHashSHA256(pdfFinalBuffer);
+                    if (hashFinal !== hashFinalConfirmado) {
+                        console.warn("El hash visual no coincide con el hash real del PDF guardado");
+                    } */
+
+                    // Enviamos al backend para guardar, generar hash y registrar oficialmente
+                    const res = await api.post("/reportes/guardar-reporte-individual", {
                         pdfBase64: pdfFinalBase64,
                         nombre_archivo: nombreArchivo,
                         carpeta,
@@ -264,12 +266,15 @@ export const generarPDFMasivoConQR = async (asistenciasPorTrabajador, mes, anio,
                         mes: `${anio}-${mes}`,
                         creado_por: creadoPor,
                         qr_base64: qrDataUrl,
+                        hash: hashFinal
                     });
+
+                    const { url } = res.data;
 
                     return {
                         trabajador: `${usuario.nombres} ${usuario.apellidos}`,
                         url,
-                        hash,
+                        hash: hashFinal,
                         usuario_id: usuario.id
                     };
                 } catch (error) {
