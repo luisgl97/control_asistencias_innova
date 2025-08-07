@@ -16,6 +16,17 @@ const routes = require("./routes"); // Importa rutas
 
 const app = express();
 
+// Habilitamos la ruta pública para que puedan acceder al PDF mediante un link o QR
+const path = require("path");
+
+app.use("/reportes", cors({
+  origin: ["http://localhost:5173"],
+  methods: ["GET"],
+}));
+
+app.use("/reportes", express.static(path.join(__dirname, "../public/reportes")));
+
+
 // 🔥 Detectamos si estamos en producción o desarrollo
 const PORT = process.env.PORT || 4001;
 const API_BASE_URL = process.env.API_URL || "http://localhost:4001/api";
@@ -23,10 +34,14 @@ const API_BASE_URL = process.env.API_URL || "http://localhost:4001/api";
 // ✅ Aplicar middlewares globales
 app.use(cors({
   origin: ['http://localhost:5173',"https://bkr0vv5n-5173.brs.devtunnels.ms"], // Cambia esto a tu frontend en producción
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
+  allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true
 }));
 
-app.use(express.json());
+app.use(express.json({ limit: "25mb" }));
+app.use(express.urlencoded({ extended: true, limit: "25mb" }));
+
 app.use(compression()); // 🔥 Reduce el tamaño de las respuestas
 app.use(helmet()); // 🛡️ Protege contra ataques comunes
 

@@ -1,6 +1,6 @@
 module.exports = async (obraRepository) => {
-    const obras = await obraRepository.obtenerObras(); 
-      
+    const obras = await obraRepository.obtenerObras();
+
     return {
         codigo: 200,
         respuesta: {
