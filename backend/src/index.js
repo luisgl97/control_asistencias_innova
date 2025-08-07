@@ -34,7 +34,7 @@ const API_BASE_URL = process.env.API_URL || "http://localhost:4001/api";
 // ✅ Aplicar middlewares globales
 app.use(cors({
   origin: ['http://localhost:5173',"https://bkr0vv5n-5173.brs.devtunnels.ms"], // Cambia esto a tu frontend en producción
-  methods: ["GET", "POST", "PUT", "DELETE"],
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
   allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true
 }));

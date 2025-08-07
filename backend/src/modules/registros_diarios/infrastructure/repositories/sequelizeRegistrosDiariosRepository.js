@@ -10,6 +10,20 @@ class SequelizeRegistrosDiariosRepository {
     return await RegistrosDiarios.create(registrosDiariosData);
   }
 
+   async obtenerRegistrosDiarios() {
+    const registrosDiarios = await RegistrosDiarios.findAll();
+    return registrosDiarios;
+  }
+
+  async obtenerRegistrosDiariosPorFecha(fecha) {
+    const registrosDiarios = await RegistrosDiarios.findAll({
+      where: {
+        fecha
+      }
+    });
+    return registrosDiarios;
+  }
+
   async insertarRegistrosDiarios(listaRegistrosDiarios){
     return await RegistrosDiarios.bulkCreate(listaRegistrosDiarios)
   }

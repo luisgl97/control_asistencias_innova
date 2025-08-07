@@ -1,6 +1,6 @@
 module.exports = async (registrosDiariosRepository) => {
-    const registrosDiarios = await registrosDiariosRepository.obtenerRegistrosDiarios(); 
-      
+    const registrosDiarios = await registrosDiariosRepository.obtenerRegistrosDiarios();
+    
     return {
         codigo: 200,
         respuesta: {

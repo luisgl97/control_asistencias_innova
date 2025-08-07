@@ -3,6 +3,7 @@ const sequelizeRegistrosDiariosRepository = require("../../infrastructure/reposi
 
 const obtenerRegistrosDiarios = require("../../application/obtenerRegistrosDiarios");
 const insertarRegistrosDiarios = require("../../application/insertarRegistrosDiarios");
+const obtenerRegistrosDiariosPorFecha = require("../../application/obtenerRegistrosDiariosPorFecha");
 
 const registrosDiariosRepository = new sequelizeRegistrosDiariosRepository(); 
 
@@ -24,6 +25,20 @@ const RegistrosDiariosController = {
              const asignado_por = req.usuario.id; // Asumiendo que el ID del usuario está en el token JWT
 
             const { codigo, respuesta } = await insertarRegistrosDiarios(asignado_por, req.body, registrosDiariosRepository);
+            res.status(codigo).json(respuesta);
+        } catch (error) {
+            console.log(error);
+            res.status(500).json({ error: error.message, estado: false });
+        }
+    },
+
+    
+    async obtenerRegistrosDiariosPorFecha(req, res) {
+        try {
+
+           const { fecha } = req.body;
+
+            const { codigo, respuesta } = await obtenerRegistrosDiariosPorFecha(fecha, registrosDiariosRepository);
             res.status(codigo).json(respuesta);
         } catch (error) {
             console.log(error);

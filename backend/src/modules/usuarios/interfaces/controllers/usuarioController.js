@@ -86,6 +86,7 @@ const UsuarioController = {
             );
             res.status(codigo).json(respuesta);
         } catch (error) {
+            console.log('error', error)
             res.status(500).json({ error: error.message, estado: false });
         }
     },
@@ -99,6 +100,7 @@ const UsuarioController = {
             );
             res.status(codigo).json(respuesta);
         } catch (error) {
+            console.log('error', error);
             res.status(500).json({ error: error.message, estado: false });
         }
     },
