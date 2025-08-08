@@ -16,6 +16,11 @@ class SequelizeRegistrosDiariosRepository {
     return registrosDiarios;
   }
 
+   async obtenerRegistroDiarioPorId(id) {
+    const registrosDiarios = await RegistrosDiarios.findByPk(id);
+    return registrosDiarios;
+  }
+
   async obtenerRegistrosDiariosPorFecha(fecha) {
     const registrosDiarios = await RegistrosDiarios.findAll({
       where: {
@@ -37,6 +42,31 @@ class SequelizeRegistrosDiariosRepository {
     });
     return registrosDiarios;
   }
+
+   async obtenerRegistrosDiarioPorObraYFecha(obra_id, fecha) {
+    
+    const registrosDiarios = await RegistrosDiarios.findAll({
+      where: {
+        fecha,
+        obra_id
+      },
+      include: [
+        {
+          model: db.obras,
+          as: "obra"
+        },
+        {
+          model: db.usuarios,
+          as: "usuario",
+          attributes: {
+            exclude: ["password"]
+          }
+        }
+      ]
+    });
+    return registrosDiarios;
+  }
+
 
   async insertarRegistrosDiarios(listaRegistrosDiarios){
     return await RegistrosDiarios.bulkCreate(listaRegistrosDiarios)
@@ -68,6 +98,30 @@ class SequelizeRegistrosDiariosRepository {
     await registrosDiarios.update(registrosDiariosData);
     return registrosDiarios;
   }
+
+  async eliminarRegistroDiario({ obra_id, usuario_id, fecha }) {
+   
+   return RegistrosDiarios.destroy({ where: { obra_id, usuario_id, fecha } });
+  }
+
+  async crearRegistroDiario({ obra_id, usuario_id, fecha, descripcion_tarea, asignador_por }) {
+  
+  return RegistrosDiarios.create({
+    obra_id,
+    usuario_id,
+    fecha, // si es DATEONLY, asegúrate 'YYYY-MM-DD'
+    descripcion_tarea,
+    asignador_por,
+  });
+}
+
+  async actualizarRegistroDiario({ obra_id, usuario_id, fecha, descripcion_tarea, asignador_por }) {
+
+  return RegistrosDiarios.update(
+    { descripcion_tarea, asignador_por },
+    { where: { obra_id, usuario_id, fecha } }
+  );
+}
 
 
 }

@@ -6,6 +6,7 @@ const usuarioRepository = new sequelizeUsuarioRepository();
 const AuthController = {
    async login(req, res) {
       try {
+         console.log('login');
          const { codigo, respuesta } = await loginUsuario(
             req.body,
             usuarioRepository
