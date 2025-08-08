@@ -23,6 +23,7 @@ const { CONST_FERIADOS_PERU } = require("../../../../constants/feriadosPeru");
 
 const moment = require("moment");
 require("moment/locale/es"); // importa el idioma español
+require("moment-timezone");
 moment.locale("es"); // establece el idioma a español
 
 class SequelizeAsistenciaRepository {
@@ -119,11 +120,16 @@ class SequelizeAsistenciaRepository {
 
   // Registra el ingreso del usuario si aún no existe un registro para hoy
   async registrarIngreso(dataIngreso) {
+
+     // Fecha y hora actuales en Lima
+  const fecha = moment().tz("America/Lima").format("YYYY-MM-DD"); // para DATEONLY
+  const hora_ingreso   = moment().tz("America/Lima").format("HH:mm:ss");      // para campo hora_ingreso
+
     // Verifica si ya existe una asistencia para la fecha proporcionada
     const yaRegistrado = await Asistencia.findOne({
       where: {
         usuario_id: dataIngreso.usuario_id,
-        fecha: dataIngreso.fecha,
+        fecha: fecha,
       },
     });
 
@@ -136,7 +142,7 @@ class SequelizeAsistenciaRepository {
     }
 
     // Calcular estado de ingreso según la hora
-    const [hi, mi] = dataIngreso.hora_ingreso.split(":").map(Number);
+    const [hi, mi] = hora_ingreso.split(":").map(Number);
     const minutosIngreso = hi * 60 + mi;
     const toleranciaMinutos = 466; // 7:46 AM (466 minutos = 7h × 60 + 46m.)
 
@@ -147,7 +153,7 @@ class SequelizeAsistenciaRepository {
     const nuevaAsistencia = await Asistencia.create({
       usuario_id: dataIngreso.usuario_id,
       fecha: dataIngreso.fecha,
-      hora_ingreso: dataIngreso.hora_ingreso,
+      hora_ingreso: hora_ingreso,
       ubicacion_ingreso: dataIngreso.ubicacion_ingreso,
       estado: estado,
     });
@@ -161,11 +167,16 @@ class SequelizeAsistenciaRepository {
 
   // Registra la salida del usuario y calcula las horas extras si aplica
   async registrarSalida(dataSalida) {
+
+     // Fecha y hora actuales en Lima
+  const fecha = moment().tz("America/Lima").format("YYYY-MM-DD"); // para DATEONLY
+  const hora_salida   = moment().tz("America/Lima").format("HH:mm:ss");      // para campo hora_salida
+
     // Buscar la asistencia de hoy del usuario
     const asistencia = await Asistencia.findOne({
       where: {
         usuario_id: dataSalida.usuario_id,
-        fecha: dataSalida.fecha,
+        fecha: fecha,
       },
     });
 
@@ -187,7 +198,7 @@ class SequelizeAsistenciaRepository {
     let horasExtras = 0;
 
     // Extraemos la hora de salida en formato string (ej. "17:45")
-    const horaSalida = dataSalida?.hora_salida;
+    const horaSalida = hora_salida;
 
     // Dividimos el string por ":" para separar hora y minutos, luego los convertimos a números
     const [hs, ms] = horaSalida.split(":").map(Number);

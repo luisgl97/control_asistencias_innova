@@ -1,5 +1,11 @@
 const Permiso = require("../../domain/entities/permiso"); // Importamos la entidad Permiso
 
+const moment = require("moment");
+require("moment/locale/es");
+require("moment-timezone");
+
+moment.locale("es"); // español
+
 module.exports = async (permisoData, permisoRepository,asistenciaRepository) => {
 
   const dataRegistroPermiso = {
@@ -55,9 +61,12 @@ module.exports = async (permisoData, permisoRepository,asistenciaRepository) => 
   // Registrar el permiso
   const nuevoPermiso = await permisoRepository.crear(dataRegistroPermiso);
 
+  // Hora marcada salida de Lima
+    const hora = moment().tz("America/Lima").format("HH:mm:ss");   
+
   const dataActualizarAsistencia = {
     estado: "SALIDA ANTICIPADA",
-    hora_salida: permisoData.hora_salida,
+    hora_salida: hora,
     ubicacion_salida: permisoData.ubicacion_salida
   };
   // Actualizar la asistencia con el permiso registrado

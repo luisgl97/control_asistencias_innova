@@ -1,9 +1,9 @@
 module.exports = async (asignador_por, registroDiarioData, registrosDiariosRepository) => {
   const { obra_id, lista_usuarios_ids, fecha, descripcion_tarea } = registroDiarioData;
 
- /*  if (!Array.isArray(lista_usuarios_ids) || lista_usuarios_ids.length === 0) {
+  if (!Array.isArray(lista_usuarios_ids) || lista_usuarios_ids.length === 0) {
     return { codigo: 400, respuesta: { mensaje: "Asignar trabajadores a la obra", estado: false } };
-  } */
+  }
 
   // Registros actuales en BD
   const registrosPrevios = await registrosDiariosRepository.obtenerRegistrosDiarioPorObraYFecha(obra_id, fecha);
