@@ -19,17 +19,14 @@ const app = express();
 // Habilitamos la ruta pública para que puedan acceder al PDF mediante un link o QR
 const path = require("path");
 
-const allowedOrigins = process.env.NODE_ENV === "production"
-  ? process.env.CORS_ORIGINS : ['http://localhost:5173', "https://bkr0vv5n-5173.br"];
-
-  
+const USE_ORIGIN=process.env.NODE_ENV === "production" ?[process.env.CORS_ORIGINS_PROD]:["http://localhost:5173"];
 
 app.use("/reportes", cors({
-  origin: allowedOrigins,
+  origin: USE_ORIGIN,
   methods: ["GET"],
 }));
 
-app.use("/reportes", express.static(path.join(__dirname, "../public/reportes")));
+app.use("/reportes", express.static(path.join(__dirname, "../public/reportes")));  
 
 
 // 🔥 Detectamos si estamos en producción o desarrollo
@@ -38,7 +35,7 @@ const API_BASE_URL = process.env.API_URL || "http://localhost:4001/api";
 
 // ✅ Aplicar middlewares globales
 app.use(cors({
-  origin: allowedOrigins, // Cambia esto a tu frontend en producción
+  origin: USE_ORIGIN, // Cambia esto a tu frontend en producción
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
   allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true
@@ -59,6 +56,7 @@ app.use((req, res, next) => {
 
 // 📂 Cargar rutas correctamente (SIN DUPLICAR)
 const API_BASE_PATH = process.env.NODE_ENV === "production" ? "/backend/api" : "/api";
+
 app.use(API_BASE_PATH, routes);
 console.log(`🔀 API corriendo en: ${API_BASE_PATH}`);
 

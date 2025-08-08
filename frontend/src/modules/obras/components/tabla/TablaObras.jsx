@@ -40,8 +40,8 @@ const TablaObras = ({ searchTerm, filteredObras, fetchObras }) => {
                                     className="text-center py-8 text-muted-foreground"
                                 >
                                     {searchTerm
-                                        ? "No se encontraron usuarios que coincidan con la búsqueda"
-                                        : "No hay usuarios registrados"}
+                                        ? "No se encontraron obras que coincidan con la búsqueda"
+                                        : "No hay obras registradas"}
                                 </TableCell>
                             </TableRow>
                         ) : (
