@@ -14,7 +14,7 @@ const ObraController = {
 
     async registrarObra(req, res) {
             try {
-                console.log("desde controller",req.body);
+               
                 const { codigo, respuesta } = await registrarObra(
                     req.body,
                     obraRepository

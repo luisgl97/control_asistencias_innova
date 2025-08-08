@@ -159,7 +159,7 @@ const RegistroObras = () => {
     }
 
     const handleChange = (e) => {
-        if (e.target.name === "nombre") {
+        if (e.target.name === "nombre" ||e.target.name === "direccion") {
             setForm((prevForm) => ({
                 ...prevForm,
                 [e.target.name]: e.target.value.toUpperCase(),

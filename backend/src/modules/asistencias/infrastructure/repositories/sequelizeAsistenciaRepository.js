@@ -57,7 +57,7 @@ class SequelizeAsistenciaRepository {
   }
 
   async obtenerAsistenciasDelDia(fecha) {
-    console.log('fecha', fecha);
+   
     // Obtener fecha actual en Lima para comparar
     const hoy = moment().tz("America/Lima").format("YYYY-MM-DD");
 
