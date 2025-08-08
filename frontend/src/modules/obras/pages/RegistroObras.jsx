@@ -73,7 +73,7 @@ const RegistroObras = () => {
 
     // ?? Mapa
     const [zoom, setZoom] = useState(13); // ** Zoom inicial
-    const [showRadio, setShowRadio] = useState(false); // ** Muestra el radio
+    const [showRadio, setShowRadio] = useState(true); // ** Muestra el radio
     const [position, setPosition] = useState(null); // ** Posicion en el map
 
     // ?? Loading
@@ -182,8 +182,8 @@ const RegistroObras = () => {
                     radius={r}
                     pathOptions={{
                         // color: "#1AED1D",
-                        fillColor: "blue",
-                        fillOpacity: opacidad * 1.5,
+                        fillColor: "brown",
+                        fillOpacity: opacidad * 2.5,
                         stroke: false,
                         borderColor: "black",
                         weight: 0,
