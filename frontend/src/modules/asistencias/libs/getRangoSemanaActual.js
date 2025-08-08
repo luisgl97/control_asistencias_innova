@@ -1,4 +1,4 @@
-export function getRangoSemanaActual(offset = 0) {   
+export function getRangoSemanaActual(offset = 0) {
    const fechaLima = new Date(
       new Date().toLocaleString("en-US", { timeZone: "America/Lima" })
    );
@@ -42,10 +42,32 @@ export function getRangoSemanaActual(offset = 0) {
       const dia = String(fecha.getDate()).padStart(2, "0");
       return `${anio}-${mes}-${dia}`;
    };
+
+   const hoy = new Date(
+      new Date().toLocaleString("en-US", { timeZone: "America/Lima" })
+   );
+   hoy.setHours(0, 0, 0, 0); // Ignora la hora
+   const mesActual = hoy.getMonth();
+   let coincideMes = false;
+
+   for (let i = 0; i < 6; i++) {
+      // lunes a sábado
+      const dia = new Date(lunes);
+      dia.setDate(lunes.getDate() + i);
+      if (dia.getMonth() === mesActual) {
+         coincideMes = true;
+         break;
+      }
+   }
+
+   // Validación de semana futura (lunes y sábado después de hoy)
+   const esFutura = lunes > hoy && sabado > hoy;
+
+   // Solo desactivar si NO coincide mes y es futura
+   const desactivar = !coincideMes && esFutura;
    return {
       fecha_inicio: formatoFecha(lunes),
       fecha_fin: formatoFecha(sabado),
       numero_semana: `${numeroSemanaMes}° semana de ${nombreMes}`,
-   };
+      desactivar   };
 }
-

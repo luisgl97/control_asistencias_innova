@@ -60,7 +60,7 @@ const ModalHorasExtras = ({ nombres, id, cargarDatos, hizo_horas_extras }) => {
                <AlertDialogTitle> Habilitar horas extras </AlertDialogTitle>
             </AlertDialogHeader>
             <div>
-               Haga click en Aceptar para habiliar horas extras al trabajador{" "}
+               Haga click en Aceptar para habilitar horas extras a{" "}
                <span className="font-semibold">"{nombres}"</span>
             </div>
 

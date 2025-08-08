@@ -117,18 +117,27 @@ export default function AsistenciaSemanal() {
    const [offset, setOffset] = useState(0);
    const [numeroSemana, setNumeroSemana] = useState("...loading");
    const [nombreTrabajador, setNombreTrabajador] = useState("");
-
-
+   const [desactivar, setDesactivar] = useState(false);
    const cargarDatos = async () => {
       try {
-         setCargando(true);
+         const { fecha_fin, fecha_inicio, numero_semana, desactivar } =
+            getRangoSemanaActual(offset);
+         const data=getRangoSemanaActual(offset+1);
+         if (data.desactivar) {
+            setDesactivar(true)
+         }
          setError(null);
-         const { fecha_fin, fecha_inicio, numero_semana } = getRangoSemanaActual(offset);
-         setNumeroSemana(numero_semana)
-         const res = await asistenciaService.generarReporte({ fecha_fin, fecha_inicio });
+
+         setCargando(true);
+
+         setNumeroSemana(numero_semana);
+         const res = await asistenciaService.generarReporte({
+            fecha_fin,
+            fecha_inicio,
+         });
          const datos = res.data.datos;
          setDatosAsistencia(datos);
-         setDatosAsistenciaGuard(datos)
+         setDatosAsistenciaGuard(datos);
          if (datos.length > 0) {
             const claves = Object.keys(datos[0]);
             const dias = claves.filter((k) =>
@@ -152,14 +161,16 @@ export default function AsistenciaSemanal() {
       cargarDatos();
    }, [offset]);
    useEffect(() => {
-      let copy = [...datosAsistenciaGuard]
+      let copy = [...datosAsistenciaGuard];
       if (nombreTrabajador) {
          copy = copy.filter((t) =>
-            normalizarTexto(t.trabajador).includes(normalizarTexto(nombreTrabajador))
+            normalizarTexto(t.trabajador).includes(
+               normalizarTexto(nombreTrabajador)
+            )
          );
       }
-      setDatosAsistencia(copy)
-   }, [nombreTrabajador, datosAsistenciaGuard])
+      setDatosAsistencia(copy);
+   }, [nombreTrabajador, datosAsistenciaGuard]);
 
    if (cargando) {
       return (
@@ -197,9 +208,12 @@ export default function AsistenciaSemanal() {
             <CardHeader className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                <section className="flex flex-col gap-2 md:flex-row md:items-center md:gap-8 w-full">
                   <div className="flex-1 min-w-[200px]">
-                     <CardTitle className="text-lg md:text-2xl">Control de Asistencias Semanal</CardTitle>
+                     <CardTitle className="text-lg md:text-2xl">
+                        Control de Asistencias Semanal
+                     </CardTitle>
                      <CardDescription>
-                        Registro semanal de asistencias, tardanzas y observaciones del personal
+                        Registro semanal de asistencias, tardanzas y
+                        observaciones del personal
                      </CardDescription>
                   </div>
 
@@ -222,12 +236,15 @@ export default function AsistenciaSemanal() {
                   >
                      <ArrowLeft />
                   </Button>
-                  <span className="text-sm font-medium truncate">{numeroSemana}</span>
+                  <span className="text-sm font-medium truncate">
+                     {numeroSemana}
+                  </span>
                   <Button
                      onClick={() => setOffset(offset + 1)}
                      size="icon"
                      variant="outline"
                      aria-label="Semana siguiente"
+                     disabled={desactivar}
                   >
                      <ArrowRight />
                   </Button>
