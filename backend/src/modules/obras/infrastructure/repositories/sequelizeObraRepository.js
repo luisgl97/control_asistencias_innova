@@ -30,6 +30,12 @@ class SequelizeObraRepository {
     return obra;
   }
 
+  async eliminarObra(id) {
+    const obra = await this.obtenerPorId(id);
+    if (!obra) return null;
+    return await obra.update({ estado: false });
+  }
+
 
 }
 

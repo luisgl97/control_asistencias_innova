@@ -1,22 +1,24 @@
-module.exports = async (obra_id, obraRepository) => {
-    
-    const obra = await obraRepository.obtenerPorId(obra_id);
-    console.log('obra', obra);
-    if(!obra)
+module.exports = async (id, obraRepository) => {
+    const obraObtenido = await obraRepository.obtenerPorId(id);
+
+    if (!obraObtenido) {
+       
         return {
             codigo: 404,
             respuesta: {
                 mensaje: "Obra no encontrada",
                 estado: false,
-                obra: null,
             },
         };
+    }
+
+    await obraRepository.eliminarObra(id);
+
     return {
         codigo: 200,
         respuesta: {
-            mensaje: "Obra encontrada",
+            mensaje: "Obra eliminado exitosamente",
             estado: true,
-            obra: obra,
         },
     };
-}
+};

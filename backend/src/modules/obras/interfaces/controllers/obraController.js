@@ -4,6 +4,8 @@ const sequelizeObraRepository = require("../../infrastructure/repositories/seque
 const obtenerObras = require("../../application/obtenerObras");
 const registrarObra = require("../../application/registrarObra");
 const obtenerObraId = require("../../application/obtenerObraId");
+const actualizarObra = require("../../application/actualizarObra");
+const eliminarObra = require("../../application/eliminarObra");
 
 const obraRepository = new sequelizeObraRepository(); // Instancia del repositorio de obra
 
@@ -35,9 +37,43 @@ const ObraController = {
     },
     async obtenerObraId(req, res) {
         try {
-            console.log("desde controller",req.query.obra_id);
+            
+            const { id } = req.params;
+
             const { codigo, respuesta } = await obtenerObraId(
-                req.query.obra_id,
+                id,
+                obraRepository
+            );
+            res.status(codigo).json(respuesta);
+        } catch (error) {
+            console.log(error);
+            res.status(500).json({ error: error.message, estado: false });
+        }
+    },
+     async actualizarObra(req, res) {
+        try {
+            
+            const { id } = req.params;
+
+            const { codigo, respuesta } = await actualizarObra(
+                id,
+                req.body,
+                obraRepository
+            );
+            res.status(codigo).json(respuesta);
+        } catch (error) {
+            console.log(error);
+            res.status(500).json({ error: error.message, estado: false });
+        }
+    },
+
+     async eliminarObra(req, res) {
+        try {
+          
+            const { id } = req.params;
+
+            const { codigo, respuesta } = await eliminarObra(
+                id,
                 obraRepository
             );
             res.status(codigo).json(respuesta);

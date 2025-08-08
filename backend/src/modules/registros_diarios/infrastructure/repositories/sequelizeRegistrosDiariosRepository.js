@@ -1,5 +1,6 @@
 const db = require("../../../../models");
 const { RegistrosDiarios } = require("../models/registrosRegistrosDiariosModel");
+const { Obra } = require("../../../obras/infrastructure/models/obraModel")
 
 class SequelizeRegistrosDiariosRepository {
   getModel() {
@@ -8,6 +9,33 @@ class SequelizeRegistrosDiariosRepository {
 
   async crear(registrosDiariosData) {
     return await RegistrosDiarios.create(registrosDiariosData);
+  }
+
+   async obtenerRegistrosDiarios() {
+    const registrosDiarios = await RegistrosDiarios.findAll();
+    return registrosDiarios;
+  }
+
+  async obtenerRegistrosDiariosPorFecha(fecha) {
+    const registrosDiarios = await RegistrosDiarios.findAll({
+      where: {
+        fecha
+      },
+      include: [
+        {
+          model: db.obras,
+          as: "obra"
+        },
+        {
+          model: db.usuarios,
+          as: "usuario",
+          attributes: {
+            exclude: ["password"]
+          }
+        }
+      ]
+    });
+    return registrosDiarios;
   }
 
   async insertarRegistrosDiarios(listaRegistrosDiarios){

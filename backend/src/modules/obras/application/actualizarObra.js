@@ -1,5 +1,5 @@
 module.exports = async (obra_id, obraData, obraRepository) => {
-    const obra = await obraRepository.actualizar(obra_id, obraData);
+    const obra = await obraRepository.actualizarObra(obra_id, obraData);
     
     return {
         codigo: 200,
