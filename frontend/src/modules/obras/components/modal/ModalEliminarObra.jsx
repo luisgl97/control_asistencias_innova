@@ -9,6 +9,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { toast } from "sonner";
+import obraService from "../../services/obraService";
 
 const ModalEliminarObra = ({ id, nombres, cargarDatos }) => {
     const [open, setOpen] = useState(false);
@@ -19,13 +20,13 @@ const ModalEliminarObra = ({ id, nombres, cargarDatos }) => {
     const handleClick = async () => {
         try {
             setLoading(true);
-            // const res = await usuarioService.eliminar(id);
-            // await cargarDatos();
-            toast.success("Usuario eliminado");
-            handleClose();
+            const { data, status } = await obraService.eliminar(id);
+            if (status == 200 && data.estado) {
+                await cargarDatos();
+                toast.success(data.mensaje);
+                handleClose();
+            }
         } catch (error) {
-            console.log(error);
-
             toast.error("Hubo un error");
         } finally {
             setLoading(false);

@@ -22,9 +22,7 @@ const RegistrosDiariosController = {
 
     async insertarRegistrosDiarios(req, res) {
         try {
-
              const asignado_por = req.usuario.id; // Asumiendo que el ID del usuario está en el token JWT
-
             const { codigo, respuesta } = await insertarRegistrosDiarios(asignado_por, req.body, registrosDiariosRepository);
             res.status(codigo).json(respuesta);
         } catch (error) {

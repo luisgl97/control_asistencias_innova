@@ -9,9 +9,9 @@ import { HousePlus, Search, SearchCheck } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import TablaObras from "../components/TablaObras";
 import obraService from "../services/obraService";
 import { Input } from "@/components/ui/input";
+import TablaObras from "../components/tabla/TablaObras";
 
 const ListarObras = () => {
     const [obras, setObras] = useState([])
@@ -22,24 +22,22 @@ const ListarObras = () => {
     const [filteredObras, setFilteredObras] = useState([])
 
     const fetchObras = async () => {
+        setLoading(true);
         try {
-            setLoading(true)
-            const { data, status } = await obraService.listarObras()
+            const { data, status } = await obraService.listarObras();
             if (status === 200) {
-                toast.success(`${data.mensaje} ${data.total}`)
-                setTotalObras(data.total)
-                console.log("obras a asignar",)
-                setObras(data.datos)
-                setFilteredObras(data.datos)
+                setTotalObras(data.datos.filter(obra => obra.estado !== false).length);
+                setObras(data.datos.filter(obra => obra.estado !== false));
+                setFilteredObras(data.datos);
             } else {
-                toast.error(data.mensaje)
+                toast.error(data.mensaje);
             }
         } catch (error) {
-            setError(error)
+            setError(error);
         } finally {
-            setLoading(false)
+            setLoading(false);
         }
-    }
+    };
 
     useEffect(() => {
         fetchObras();
@@ -62,10 +60,10 @@ const ListarObras = () => {
                 <CardHeader>
                     <div className="flex items-center justify-between">
                         <div>
-                            <CardTitle className="text-2xl font-bold">
+                            <CardTitle className="text-xl md:text-2xl font-bold">
                                 Listado de Obras
                             </CardTitle>
-                            <CardDescription>
+                            <CardDescription className={"text-xs md:text-sm"}>
                                 Administra las obras del sistema ( {totalObras} obras registradas )
                             </CardDescription>
                         </div>
@@ -81,7 +79,7 @@ const ListarObras = () => {
 
                 {
                     loading ? (
-                        <div className="grid gap-4 py-4 text-sm px-20">
+                        <div className="grid gap-4 py-4 text-sm px-4 md:px-20">
                             <div className="h-4 bg-gray-200 rounded w-3/4 animate-pulse"></div>
                             <div className="h-4 bg-gray-200 rounded w-1/2 animate-pulse"></div>
                             <div className="h-4 bg-gray-200 rounded w-2/3 animate-pulse"></div>
@@ -92,7 +90,7 @@ const ListarObras = () => {
                         </div>
                     ) : (
                         <div className="flex flex-col">
-                            <div className="flex items-center gap-4 mb-6 px-20">
+                            <div className="flex items-center gap-4 mb-6 px-3 md:px-20">
                                 <div className="relative flex-1 max-w-sm">
                                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                                     <Input
@@ -109,6 +107,7 @@ const ListarObras = () => {
                             <TablaObras
                                 searchTerm={searchTerm}
                                 filteredObras={filteredObras}
+                                fetchObras={fetchObras}
                             />
                         </div>
                     )

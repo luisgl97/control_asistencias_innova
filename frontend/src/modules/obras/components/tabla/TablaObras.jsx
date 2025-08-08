@@ -9,14 +9,15 @@ import {
 } from "@/components/ui/table";
 import { Edit, ListChecks } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import ModalEliminarObra from './ModalEliminarObra';
+import ModalEliminarObra from "../modal/ModalEliminarObra";
 
-const TablaObras = ({ searchTerm, filteredObras }) => {
+const TablaObras = ({ searchTerm, filteredObras, fetchObras }) => {
 
     const navigate = useNavigate()
 
+
     return (
-        <div className="px-20">
+        <div className="md:px-20 px-3">
             <div className="rounded-md border ">
                 <Table className={"rounded-md overflow-hidden shadow-xl"}>
                     <TableHeader className="bg-innova-blue">
@@ -45,6 +46,7 @@ const TablaObras = ({ searchTerm, filteredObras }) => {
                             </TableRow>
                         ) : (
                             filteredObras.map((obra, index) => (
+
                                 <TableRow key={obra.id} className={"hover:bg-innova-blue/10"}>
                                     <TableCell>
                                         <div className="flex flex-col">
@@ -76,26 +78,27 @@ const TablaObras = ({ searchTerm, filteredObras }) => {
                                         >
                                             <Edit className="size-3.5 text-innova-orange" />
                                         </Button>
-                                        <Button
-                                            variant="outline"
-                                            size={"icon"}
+                                        {/* <Button
+                                                    variant="outline"
+                                                    size={"icon"}
                                             className="size-7"
                                             onClick={() =>
                                                 navigate(
-                                                    `/obras/gestion?id=${obra.id}`
-                                                )
-                                            }
-                                        >
-                                            <ListChecks className="size-3.5 text-green-500" />
-                                        </Button>
-                                        {/* <ModalEliminarObra
+                                                    `/registro-diario/registrar?id_registro_diario=${obra.id}`
+                                                    )
+                                                    }
+                                                    >
+                                                    <ListChecks className="size-3.5 text-green-500" />
+                                                    </Button> */}
+                                        <ModalEliminarObra
                                             id={obra.id}
                                             nombres={`${obra.nombre}`}
-                                        // cargarDatos={fetchUsuarios}
-                                        /> */}
+                                            cargarDatos={fetchObras}
+                                        />
                                     </TableCell>
                                 </TableRow>
-                            ))
+                            )
+                            )
                         )}
                     </TableBody>
                 </Table>

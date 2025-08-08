@@ -5,13 +5,13 @@ const TareaDescipcion = ({ tarea, index }) => {
 
     return (
         <div key={index} className="border border-slate-200 rounded-xl p-6 hover:border-blue-300 transition-colors bg-slate-50/50">
-            <div className="flex items-start justify-between">
-                <div className="flex items-center space-x-3">
+            <div className="flex items-start justify-end">
+                {/* <div className="flex items-center space-x-3">
                     <div className="flex items-center justify-center w-8 h-8 bg-blue-100 text-blue-600 rounded-full font-semibold text-sm">
                         {index + 1}
                     </div>
                     <h3 className="text-lg font-semibold text-slate-800">Tarea {index + 1}</h3>
-                </div>
+                </div> */}
                 <Badge variant="secondary" className="bg-blue-100 text-blue-700">
                     Numero de trabajadores: {tarea.trabajadores.length}
                 </Badge>
@@ -24,7 +24,7 @@ const TareaDescipcion = ({ tarea, index }) => {
                         <span>Descripción</span>
                     </h4>
                     <div className="bg-white border border-slate-200 rounded-lg p-4 text-slate-700">
-                        {tarea.descripcion}
+                        {tarea.tarea_descripcion}
                     </div>
                 </div>
 
@@ -48,7 +48,7 @@ const TareaDescipcion = ({ tarea, index }) => {
                                             <div className="w-6 h-6 bg-slate-200 rounded-full flex items-center justify-center">
                                                 <User className="h-3 w-3 text-slate-500" />
                                             </div>
-                                            <span className="text-slate-700 font-medium">{trab.nombre}</span>
+                                            <span className="text-slate-700 font-medium">{trab.nombres}{" "}{trab.apellidos}</span>
                                         </div>
                                         <span className="text-slate-600 font-mono text-sm">{trab.dni}</span>
                                     </div>
