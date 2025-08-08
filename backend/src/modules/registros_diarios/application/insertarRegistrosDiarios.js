@@ -2,8 +2,6 @@ module.exports = async (asignador_por, registroDiarioData, registrosDiariosRepos
 
     const {obra_id, lista_usuarios_ids, fecha, descripcion_tarea } = registroDiarioData;
 
-    console.log('lista_usuarios_ids', lista_usuarios_ids);
-
     if(lista_usuarios_ids.length == 0){
       return {
         codigo: 400,
@@ -21,8 +19,6 @@ module.exports = async (asignador_por, registroDiarioData, registrosDiariosRepos
       fecha: fecha,
       descripcion_tarea: descripcion_tarea
     }))
-
-    console.log('listaRegistros', listaRegistros);
 
     const registrosDiariosGuardados = await registrosDiariosRepository.insertarRegistrosDiarios(listaRegistros)
 
