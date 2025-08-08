@@ -66,7 +66,6 @@ export default function MarcarAsistencia() {
             hora_inicio_refrigerio: res.data.datos.hora_inicio_refrigerio,
             hora_fin_refrigerio: res.data.datos.hora_fin_refrigerio,
          });
-         console.log(res.data.datos);
          setObras(res.data.datos.obras_asignadas_del_dia);
          setObrasSiguiente(res.data.datos.obras_asignadas_de_maniana);
          setAsistencia(res.data.datos);
@@ -112,8 +111,6 @@ export default function MarcarAsistencia() {
       }
       let posicion;
       try {
-         console.log("obteniedo ubicacion..");
-
          posicion = await obtenerCoordenadas();
       } catch (error) {
          toast.error("No se pudo obtener la ubicación");
@@ -122,18 +119,12 @@ export default function MarcarAsistencia() {
       let obraEncontrada = null;
 
       for (const obra of obras) {
-         console.log(posicion);
-         console.log(obra);
-
          const distancia = calcularDistanciaEnMetros(
             posicion.lat,
             posicion.lng,
             obra.latitud,
             obra.longitud
          );
-         console.log("Nombre obra:", obra.nombre);
-         console.log("La distancia es : ", distancia);
-
          if (distancia < 60) {
             obraEncontrada = obra;
             break;
@@ -160,8 +151,6 @@ export default function MarcarAsistencia() {
          return;
       }
       const { fecha_a, hora_a } = fecha_hora_asistencia();
-      console.log("DATOS DE UBICACION: ", datosUbicacion);
-
       try {
          const response = await asistenciaService.registrarIngreso({
             fecha: fecha_a,
@@ -169,12 +158,10 @@ export default function MarcarAsistencia() {
             ubicacion_ingreso: datosUbicacion,
             observacion_ingreso: "",
          });
-         console.log(response);
-
          toast.success("Asistencia guardada con éxito");
          fetchVerificarAsistencia(); // Actualizar estado
       } catch (error) {
-         console.log(error);
+         console.error(error);
          toast.error("Error al guardar la asistencia");
       } finally {
          setAccionEnProceso(false);
@@ -199,7 +186,7 @@ export default function MarcarAsistencia() {
          toast.success("Asistencia guardada con éxito");
          fetchVerificarAsistencia(); // Actualizar estado
       } catch (error) {
-         console.log(error);
+         console.error(error);
          toast.error("Error al guardar la asistencia");
       } finally {
          setAccionEnProceso(false);
@@ -224,7 +211,7 @@ export default function MarcarAsistencia() {
          toast.success("Inicio de refrigerio guardado con éxito");
          fetchVerificarAsistencia();
       } catch (error) {
-         console.log(error);
+         console.error(error);
          toast.error("Se produjo un error");
       } finally {
          setAccionEnProceso(false);
@@ -247,7 +234,7 @@ export default function MarcarAsistencia() {
          toast.success("Fin de refrigerio guardado con éxito");
          fetchVerificarAsistencia();
       } catch (error) {
-         console.log(error);
+         console.error(error);
          toast.error("Se produjo un error");
       } finally {
          setAccionEnProceso(false);

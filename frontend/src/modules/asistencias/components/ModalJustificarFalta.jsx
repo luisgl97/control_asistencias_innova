@@ -19,7 +19,11 @@ import { toast } from "sonner";
 import asistenciaService from "../service/asistenciaService";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/context/AuthContext";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+   Tooltip,
+   TooltipContent,
+   TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 export function ModalJustificarFalta({ fecha_dia, id, cargarDatos }) {
    const { user } = useAuth();
@@ -55,23 +59,21 @@ export function ModalJustificarFalta({ fecha_dia, id, cargarDatos }) {
    };
    return (
       <AlertDialog open={open} onOpenChange={setOpen}>
-            <Tooltip>
-               <TooltipTrigger asChild>
-                           <AlertDialogTrigger asChild>
-
+         <Tooltip>
+            <TooltipTrigger asChild>
+               <AlertDialogTrigger asChild>
                   <Button
-                     className="bg-red-50 text-red-700 border-red-200 cursor-pointer text-xs px-1.5 py-0.5"
+                     className=" text-gray-500 border-gray-300 hover:bg-amber-50 hover:text-amber-600 hover:border-amber-200   cursor-pointer text-xs px-1.5 py-0.5"
                      variant="outline"
                      disabled={user.rol === "LIDER TRABAJADOR"}
                      size={"icon"}
                   >
                      <NotebookPen />
                   </Button>
-                           </AlertDialogTrigger>
-
-               </TooltipTrigger>
-               <TooltipContent>Justificar falta</TooltipContent>
-            </Tooltip>
+               </AlertDialogTrigger>
+            </TooltipTrigger>
+            <TooltipContent>Justificar falta</TooltipContent>
+         </Tooltip>
          <AlertDialogContent>
             <AlertDialogHeader className="text-start">
                <AlertDialogTitle>Falta Justificada</AlertDialogTitle>

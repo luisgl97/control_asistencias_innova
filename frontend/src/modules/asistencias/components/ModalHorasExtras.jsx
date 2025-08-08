@@ -42,7 +42,7 @@ const ModalHorasExtras = ({ nombres, id, cargarDatos, hizo_horas_extras }) => {
             <AlertDialogTrigger asChild>
                <TooltipTrigger asChild>
                   <Button
-                     className="bg-green-50 text-green-700 hover:text-green-500 border-green-200 cursor-pointer"
+                     className="text-gray-500 border-gray-300 hover:bg-green-50 hover:text-green-600  hover:border-green-200 cursor-pointer"
                      variant="outline"
                      disabled={hizo_horas_extras}
                      size={"icon"}

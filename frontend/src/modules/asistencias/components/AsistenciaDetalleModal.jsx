@@ -97,7 +97,7 @@ export default function AsistenciaDetailDialog({ asistenciaId }) {
             {asistenciaId ? (
                <DialogTrigger asChild>
                   <TooltipTrigger asChild>
-                     <Button variant="outline" size="icon">
+                     <Button variant="outline" size="icon" className="text-gray-500 border-gray-300 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200">
                         <Eye className="h-4 w-4" />
                      </Button>
                   </TooltipTrigger>

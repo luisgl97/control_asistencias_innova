@@ -78,7 +78,6 @@ const GestionUsuarios = () => {
       setLoading(true)
       try {
          const res = await usuarioService.activarUsuario(id);
-         console.log(res);
          await fetchUsuarios();
          toast.success('Usuario Activado')
       } catch (error) {

@@ -25,7 +25,7 @@ const ModalEliminarUsuario = ({ id, nombres, cargarDatos }) => {
          toast.success("Usuario desactivado");
          handleClose();
       } catch (error) {
-         console.log(error);
+         console.error(error);
          
          toast.error("Hubo un error");
       } finally {

@@ -74,7 +74,7 @@ const HeaderAsistencias = () => {
                                  navigate("/usuarios");
                               }}
                            >
-                              Trabajadores
+                              Usuarios
                            </Button>
                            <Button
                               variant="ghost "
