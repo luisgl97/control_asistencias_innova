@@ -104,21 +104,21 @@ class SequelizeRegistrosDiariosRepository {
    return RegistrosDiarios.destroy({ where: { obra_id, usuario_id, fecha } });
   }
 
-  async crearRegistroDiario({ obra_id, usuario_id, fecha, descripcion_tarea, asignador_por }) {
+  async crearRegistroDiario({ obra_id, usuario_id, fecha, descripcion_tarea, asignado_por }) {
   
   return RegistrosDiarios.create({
     obra_id,
     usuario_id,
     fecha, // si es DATEONLY, asegúrate 'YYYY-MM-DD'
     descripcion_tarea,
-    asignador_por,
+    asignado_por,
   });
 }
 
-  async actualizarRegistroDiario({ obra_id, usuario_id, fecha, descripcion_tarea, asignador_por }) {
+  async actualizarRegistroDiario({ obra_id, usuario_id, fecha, descripcion_tarea, asignado_por }) {
 
   return RegistrosDiarios.update(
-    { descripcion_tarea, asignador_por },
+    { descripcion_tarea, asignado_por },
     { where: { obra_id, usuario_id, fecha } }
   );
 }

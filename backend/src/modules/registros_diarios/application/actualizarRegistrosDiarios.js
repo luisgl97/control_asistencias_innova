@@ -1,4 +1,4 @@
-module.exports = async (asignador_por, registroDiarioData, registrosDiariosRepository) => {
+module.exports = async (asignado_por, registroDiarioData, registrosDiariosRepository) => {
   const { obra_id, lista_usuarios_ids, fecha, descripcion_tarea } = registroDiarioData;
 
   if (!Array.isArray(lista_usuarios_ids) || lista_usuarios_ids.length === 0) {
@@ -19,7 +19,7 @@ module.exports = async (asignador_por, registroDiarioData, registrosDiariosRepos
   const aActualizar = [...frontSet].filter(id => prevSet.has(id)).filter(id => {
     const previo = registrosPrevios.find(r => r.usuario_id === id);
     return (
-      previo.asignador_por !== asignador_por ||
+      previo.asignado_por !== asignado_por ||
       previo.fecha !== fecha ||
       previo.descripcion_tarea !== descripcion_tarea
     );
@@ -34,12 +34,12 @@ for (const id of aEliminar) {
 for (const id of aCrear) {
  
  
-await registrosDiariosRepository.crearRegistroDiario({ obra_id, usuario_id: id, fecha, descripcion_tarea, asignador_por });
+await registrosDiariosRepository.crearRegistroDiario({ obra_id, usuario_id: id, fecha, descripcion_tarea, asignado_por });
 }
 
 for (const id of aActualizar) {
   
-  await registrosDiariosRepository.actualizarRegistroDiario({ obra_id, usuario_id: id, fecha, descripcion_tarea, asignador_por });
+  await registrosDiariosRepository.actualizarRegistroDiario({ obra_id, usuario_id: id, fecha, descripcion_tarea, asignado_por });
 }
 
   return { codigo: 200, respuesta: { mensaje: "Registros diarios actualizados exitosamente", estado: true } };

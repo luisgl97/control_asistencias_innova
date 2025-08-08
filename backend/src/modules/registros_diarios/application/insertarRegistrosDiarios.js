@@ -1,4 +1,4 @@
-module.exports = async (asignador_por, registroDiarioData, registrosDiariosRepository) => {
+module.exports = async (asignado_por, registroDiarioData, registrosDiariosRepository) => {
 
     const {obra_id, lista_usuarios_ids, fecha, descripcion_tarea } = registroDiarioData;
 
@@ -15,7 +15,7 @@ module.exports = async (asignador_por, registroDiarioData, registrosDiariosRepos
     const listaRegistros = lista_usuarios_ids?.map(usuario_id => ({
       usuario_id: usuario_id,
       obra_id: obra_id,
-      asignador_por: asignador_por,
+      asignado_por: asignado_por,
       fecha: fecha,
       descripcion_tarea: descripcion_tarea
     }))
