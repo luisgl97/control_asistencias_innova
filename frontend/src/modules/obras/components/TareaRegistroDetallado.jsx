@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { ClipboardList, Plus, Trash2, User, UserMinus, Users } from 'lucide-react'
+import { ClipboardList, Trash2, User, UserMinus, Users } from 'lucide-react'
 const TareaRegistroDetallado = ({
     tareas,
     agregarTarea,

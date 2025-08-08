@@ -1,13 +1,12 @@
 import { Button } from "@/components/ui/button";
 import {
     Card,
-    CardDescription,
     CardHeader,
     CardTitle
 } from "@/components/ui/card";
 import { ListTodo } from "lucide-react";
-import ListaTareasDiario from "../components/ListaTareasDiario";
 import { useNavigate } from "react-router-dom";
+import ListaTareasDiario from "../components/ListaTareasDiario";
 
 const GestionObras = () => {
     const navigate = useNavigate();
@@ -21,11 +20,6 @@ const GestionObras = () => {
                             <CardTitle className="text-2xl font-bold">
                                 Registro diario de Tareas en Obras
                             </CardTitle>
-                            <CardDescription>
-                                Administra las obras del sistema ( 4
-                                obras registrados
-                                )
-                            </CardDescription>
                         </div>
                         <Button
                             className="gap-2 bg-innova-blue hover:bg-innova-blue/90"

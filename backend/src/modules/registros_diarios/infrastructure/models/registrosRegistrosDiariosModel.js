@@ -24,6 +24,14 @@ const RegistrosDiarios = sequelize.define(
     descripcion_tarea: {
       type: DataTypes.STRING(255),
     },
+    asignado_por: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: "usuarios",
+        key: "id",
+      },
+    },
   },
   {
     tableName: "registros_diarios",
@@ -39,8 +47,8 @@ RegistrosDiarios.associate = (models) => {
   });
 
   RegistrosDiarios.belongsTo(models.usuarios, {
-    foreignKey: "asignador_por",
-    as: "asignado_por",
+    foreignKey: "asignado_por",
+    as: "asignador",
   });
 
   RegistrosDiarios.belongsTo(models.obras, {
@@ -50,3 +58,4 @@ RegistrosDiarios.associate = (models) => {
 };
 
 module.exports = { RegistrosDiarios };
+

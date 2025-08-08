@@ -1,26 +1,16 @@
-import { Button } from "@/components/ui/button";
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardFooter,
-    CardHeader,
-    CardTitle,
-} from "@/components/ui/card";
 
-import { Loader2, Loader2Icon, LocateFixed, Map } from "lucide-react";
-import { use, useEffect, useRef, useState } from "react";
+import { Loader2Icon } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import InputConEtiquetaFlotante from "../../../shared/components/InputConEtiquetaFlotante";
 
 // !! Necesario para que los íconos de Leaflet se muestren correctamente
-import { Circle, MapContainer, Marker, Popup, TileLayer, useMapEvents } from "react-leaflet";
 import L from "leaflet";
 import icon from "leaflet/dist/images/marker-icon.png";
 import iconShadow from "leaflet/dist/images/marker-shadow.png";
+import { Circle, MapContainer, Marker, Popup, TileLayer, useMapEvents } from "react-leaflet";
 import { toast } from "sonner";
+import AgregarObraForm from "../components/form/AgregarObraForm";
 import { getCoordsFromAddress } from "../services/getCoordsFromAddress";
-import AgregarObraForm from "../components/AgregarObraForm";
 import obraService from "../services/obraService";
 
 let DefaultIcon = L.icon({
@@ -97,9 +87,9 @@ const RegistroObras = () => {
         try {
             console.log("entro a el fetch")
             setIsLoading(true);
-            const {data, status} = await obraService.obtnerObraConId(id);
-            console.log(data)
-            if(status === 200) {
+            setIsLoadingMap(true);
+            const { data, status } = await obraService.obtnerObraConId(id);
+            if (status === 200) {
                 setForm({
                     ...data.obra,
                     latitud: parseFloat(data.obra.latitud),
@@ -107,10 +97,12 @@ const RegistroObras = () => {
                 });
                 setPosition([data.obra.latitud, data.obra.longitud]);
                 setLatitudIncial([data.obra.latitud, data.obra.longitud]);
+                setZoom(20);
             }
         } catch (error) {
-
+            toast.error("Hubo un error al obtener la obra");
         } finally {
+            setIsLoadingMap(false);
             setIsLoading(false);
         }
     }
@@ -155,7 +147,6 @@ const RegistroObras = () => {
     };
 
     useEffect(() => {
-        console.log("adwdawd")
         if (id !== null) {
             fetchObra();
         }
@@ -221,7 +212,7 @@ const RegistroObras = () => {
                 />
                 {
                     form.latitud && form.longitud && showRadio &&
-                    renderDegradadoZona([form.latitud, form.longitud], 50, 4)
+                    renderDegradadoZona([form.latitud, form.longitud], 30, 4)
                 }
                 <MapClickHandler setForm={setForm} position={position} setPosition={setPosition} />
             </MapContainer>
@@ -237,14 +228,26 @@ const RegistroObras = () => {
                 latitud: form.latitud ? form.latitud.toString() : "",
                 longitud: form.longitud ? form.longitud.toString() : "",
             }
-            const {status,data,} = await obraService.crear(dataForm);
-            if (status === 201) {
-                toast.success(data.mensaje);
-                setForm({...claves});
-                navigate("/obras")
-            } else {
-                toast.error("Error al registrar la obra");
+            if(form.id !== null) {
+                const { status, data, } = await obraService.actualizar(dataForm);
+                if (status === 200) {
+                    toast.success(data.mensaje);
+                    setForm({ ...claves });
+                    navigate("/obras")
+                } else {
+                    toast.error("Error al registrar la obra");
+                }
+            }else{
+                const { status, data, } = await obraService.crear(dataForm);
+                if (status === 201) {
+                    toast.success(data.mensaje);
+                    setForm({ ...claves });
+                    navigate("/obras")
+                } else {
+                    toast.error("Error al registrar la obra");
+                }
             }
+
         } catch (error) {
             toast.error("Hubo un error al crear la obra");
         } finally {
