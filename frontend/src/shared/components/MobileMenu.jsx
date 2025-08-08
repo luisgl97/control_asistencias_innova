@@ -2,7 +2,16 @@
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ClipboardList, Clock, Menu, User, Users2, X } from "lucide-react";
+import {
+   Building,
+   ClipboardList,
+   Clock,
+   Menu,
+   Notebook,
+   User,
+   Users2,
+   X,
+} from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -25,7 +34,7 @@ const MobileMenu = ({ user, logout }) => {
             variant="default"
             size="icon"
             onClick={toggleMobileMenu}
-            className="fixed bottom-6 right-6 z-50 sm:hidden w-14 h-14 rounded-full shadow-lg bg-innova-blue hover:bg-innova-blue/90 transition-all duration-200"
+            className="fixed bottom-24 right-6 z-50 sm:hidden w-14 h-14 rounded-full shadow-lg bg-innova-blue hover:bg-innova-blue/90 transition-all duration-200"
          >
             {isMobileMenuOpen ? (
                <X className="w-6 h-6 text-white" />
@@ -80,25 +89,47 @@ const MobileMenu = ({ user, logout }) => {
                {/* Menu Actions */}
                <div className="space-y-4">
                   {user.rol !== "LIDER TRABAJADOR" && (
-                     <Button
-                        variant="outline"
-                        className="w-full justify-start bg-transparent"
-                        onClick={() => {
-                           // Aquí puedes agregar navegación a perfil
-                           navigate("/usuarios");
-                           closeMobileMenu();
-                        }}
-                     >
-                        <Users2 className="w-4 h-4 mr-2" />
-                        Usuarios
-                     </Button>
+                     <>
+                        <Button
+                           variant="outline"
+                           className="w-full justify-start bg-transparent"
+                           onClick={() => {
+                              navigate("/usuarios");
+                              closeMobileMenu();
+                           }}
+                        >
+                           <Users2 className="w-4 h-4 mr-2" />
+                           Usuarios
+                        </Button>
+                        <Button
+                           variant="outline"
+                           className="w-full justify-start bg-transparent"
+                           onClick={() => {
+                              navigate("/obras");
+                              closeMobileMenu();
+                           }}
+                        >
+                           <Building className="w-4 h-4 mr-2" />
+                           Obras
+                        </Button>
+                        <Button
+                           variant="outline"
+                           className="w-full justify-start bg-transparent"
+                           onClick={() => {
+                              navigate("/registro-diario");
+                              closeMobileMenu();
+                           }}
+                        >
+                           <Notebook className="w-4 h-4 mr-2" />
+                           Registro Diario
+                        </Button>
+                     </>
                   )}
                   {user.rol === "LIDER TRABAJADOR" && (
                      <Button
                         variant="outline"
                         className="w-full justify-start bg-transparent"
                         onClick={() => {
-                           // Aquí puedes agregar navegación a perfil
                            navigate("/");
                            closeMobileMenu();
                         }}
@@ -112,7 +143,6 @@ const MobileMenu = ({ user, logout }) => {
                      variant="outline"
                      className="w-full justify-start bg-transparent"
                      onClick={() => {
-                        // Aquí puedes agregar navegación a perfil
                         navigate("/asistencias");
                         closeMobileMenu();
                      }}

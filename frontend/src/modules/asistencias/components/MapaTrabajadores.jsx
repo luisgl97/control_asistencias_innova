@@ -308,7 +308,7 @@ const MapaTrabajadores = () => {
                })}
             </MapContainer>
          </section>
-         <Button className={'fixed md:hidden bottom-24  z-50 right-9 bg-innova-blue text-white'} size={'icon'} variant={'outline'} onClick={scrollToTop}>
+         <Button className={'fixed md:hidden bottom-12  z-50 right-8.5 bg-innova-blue text-white'} size={'icon'} variant={'outline'} onClick={scrollToTop}>
             <ArrowUp/>
          </Button>
       </article>

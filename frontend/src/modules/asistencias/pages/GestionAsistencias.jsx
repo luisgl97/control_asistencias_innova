@@ -29,7 +29,7 @@ export default function GestionAsistencias() {
             defaultValue="dia"
             className="w-full max-w-7xl flex items-start space-y-2"
          >
-            <TabsList className="grid grid-cols-2 md:grid-none md:flex  w-full md:w-auto h-auto space-x-2 bg-white">
+            <TabsList className="grid grid-cols-2 md:grid-none md:flex  w-full md:w-auto h-auto space-x-2 bg-white gap-2 md:gap-0">
                <TabsTrigger
                   className="w-full bg-neutral-200/80  data-[state=active]:bg-innova-blue data-[state=active]:text-white"
                   disabled={isLoading}

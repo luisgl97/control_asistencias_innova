@@ -19,7 +19,14 @@ import {
 } from "@/components/ui/table";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Search, UserPlus, Edit, Trash2, Mail, UserCheck2Icon } from "lucide-react";
+import {
+   Search,
+   UserPlus,
+   Edit,
+   Trash2,
+   Mail,
+   UserCheck2Icon,
+} from "lucide-react";
 import usuarioService from "../services/usuarioService";
 import { useNavigate } from "react-router-dom";
 import ModalEliminarUsuario from "../components/ModalEliminarUsuario";
@@ -75,18 +82,17 @@ const GestionUsuarios = () => {
    }, [searchTerm, usuarios]);
 
    const activarUsuario = async (id) => {
-      setLoading(true)
+      setLoading(true);
       try {
          const res = await usuarioService.activarUsuario(id);
          await fetchUsuarios();
-         toast.success('Usuario Activado')
+         toast.success("Usuario Activado");
       } catch (error) {
-         toast.error('Error al activar usuario')
+         toast.error("Error al activar usuario");
       } finally {
-         setLoading(false)
+         setLoading(false);
       }
-
-   }
+   };
 
    const getRoleBadgeVariant = (rol) => {
       switch (rol) {
@@ -154,23 +160,25 @@ const GestionUsuarios = () => {
       <div className="w-full max-w-7xl mx-auto space-y-6 mt-2">
          <Card className="shadow-none outline-none border-none">
             <CardHeader>
-               <div className="flex items-center justify-between">
+               <div className="flex flex-col items-start md:flex-row md:items-center md:justify-between gap-4">
                   <div>
-                     <CardTitle className="text-2xl font-bold">
+                     <CardTitle className="text-2xl font-bold text-left">
                         Gestión de Usuarios
                      </CardTitle>
-                     <CardDescription>
+                     <CardDescription className="text-left">
                         Administra los usuarios del sistema ({usuarios.length}{" "}
                         usuarios registrados)
                      </CardDescription>
                   </div>
-                  <Button
-                     className="gap-2 bg-innova-blue hover:bg-innova-blue/90"
-                     onClick={() => navigate("/usuarios/registrar")}
-                  >
-                     <UserPlus className="h-4 w-4" />
-                     Nuevo Usuario
-                  </Button>
+                  <div className="flex justify-end ">
+                     <Button
+                        className="gap-2 bg-innova-blue hover:bg-innova-blue/90"
+                        onClick={() => navigate("/usuarios/registrar")}
+                     >
+                        <UserPlus className="h-4 w-4" />
+                        Nuevo Usuario
+                     </Button>
+                  </div>
                </div>
             </CardHeader>
             <CardContent>
@@ -264,9 +272,8 @@ const GestionUsuarios = () => {
                                     )}
                                  </TableCell>
                                  <TableCell>
-
                                     <span className="text-sm bg-muted px-2 py-1 rounded">
-                                       {usuario.estado?"Activo":"Inactivo"}
+                                       {usuario.estado ? "Activo" : "Inactivo"}
                                     </span>
                                  </TableCell>
                                  <TableCell className={"flex gap-3"}>
@@ -288,16 +295,18 @@ const GestionUsuarios = () => {
                                           nombres={`${usuario.nombres} ${usuario.apellidos}`}
                                           cargarDatos={fetchUsuarios}
                                        />
-                                    ) : (<Button
-                                       variant="outline"
-                                       size={"icon"}
-                                       className="size-7"
-                                       onClick={() => activarUsuario(usuario.id)}
-                                    >
-                                       <UserCheck2Icon className="size-3.5 text-green-700" />
-                                    </Button>)}
-
-
+                                    ) : (
+                                       <Button
+                                          variant="outline"
+                                          size={"icon"}
+                                          className="size-7"
+                                          onClick={() =>
+                                             activarUsuario(usuario.id)
+                                          }
+                                       >
+                                          <UserCheck2Icon className="size-3.5 text-green-700" />
+                                       </Button>
+                                    )}
                                  </TableCell>
                               </TableRow>
                            ))
