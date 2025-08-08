@@ -19,8 +19,13 @@ const app = express();
 // Habilitamos la ruta pública para que puedan acceder al PDF mediante un link o QR
 const path = require("path");
 
+const allowedOrigins = process.env.NODE_ENV === "production"
+  ? process.env.CORS_ORIGINS : ['http://localhost:5173', "https://bkr0vv5n-5173.br"];
+
+  
+
 app.use("/reportes", cors({
-  origin: process.env.NODE_ENV === "production" ? JSON.parse(process.env.CORS_ORIGINS): ['http://localhost:5173',"https://bkr0vv5n-5173.br"],
+  origin: allowedOrigins,
   methods: ["GET"],
 }));
 
@@ -33,7 +38,7 @@ const API_BASE_URL = process.env.API_URL || "http://localhost:4001/api";
 
 // ✅ Aplicar middlewares globales
 app.use(cors({
-  origin: process.env.NODE_ENV === "production" ? JSON.parse(process.env.CORS_ORIGINS): ['http://localhost:5173',"https://bkr0vv5n-5173.br"], // Cambia esto a tu frontend en producción
+  origin: allowedOrigins, // Cambia esto a tu frontend en producción
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
   allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true
