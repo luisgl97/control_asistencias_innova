@@ -20,7 +20,7 @@ const app = express();
 const path = require("path");
 
 app.use("/reportes", cors({
-  origin: ["http://localhost:5173"],
+  origin: process.env.NODE_ENV === "production" ? JSON.parse(process.env.CORS_ORIGINS): ['http://localhost:5173',"https://bkr0vv5n-5173.br"],
   methods: ["GET"],
 }));
 
@@ -33,7 +33,7 @@ const API_BASE_URL = process.env.API_URL || "http://localhost:4001/api";
 
 // ✅ Aplicar middlewares globales
 app.use(cors({
-  origin: ['http://localhost:5173',"https://bkr0vv5n-5173.brs.devtunnels.ms"], // Cambia esto a tu frontend en producción
+  origin: process.env.NODE_ENV === "production" ? JSON.parse(process.env.CORS_ORIGINS): ['http://localhost:5173',"https://bkr0vv5n-5173.br"], // Cambia esto a tu frontend en producción
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
   allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true
@@ -79,7 +79,7 @@ console.log(`🔀 API corriendo en: ${API_BASE_PATH}`);
 
 
 // 📌 Ruta de prueba para verificar el estado del backend
-app.get("/", (req, res) => {
+app.get("/api/status", (req, res) => {
     res.json({ message: `🚀 Backend de Innova corriendo en ${API_BASE_URL}` });
 });
 
