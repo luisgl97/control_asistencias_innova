@@ -98,14 +98,15 @@ const RegistroObras = () => {
             console.log("entro a el fetch")
             setIsLoading(true);
             const {data, status} = await obraService.obtnerObraConId(id);
+            console.log(data)
             if(status === 200) {
                 setForm({
-                    ...data.datos,
-                    latitud: parseFloat(data.datos.latitud),
-                    longitud: parseFloat(data.datos.longitud),
+                    ...data.obra,
+                    latitud: parseFloat(data.obra.latitud),
+                    longitud: parseFloat(data.obra.longitud),
                 });
-                setPosition([data.datos.latitud, data.datos.longitud]);
-                setLatitudIncial([data.datos.latitud, data.datos.longitud]);
+                setPosition([data.obra.latitud, data.obra.longitud]);
+                setLatitudIncial([data.obra.latitud, data.obra.longitud]);
             }
         } catch (error) {
 
@@ -253,7 +254,7 @@ const RegistroObras = () => {
 
 
     return (
-        <div className="max-w-7xl mx-auto flex pb-[100px] md:pb-0  flex-col md:flex-row  items-start">
+        <div className="max-w-7xl mx-auto flex pb-[100px] md:pb-0  flex-col md:flex-row  items-start gap-x-3">
             <div className="w-full  md:w-5/12  flex p-5 md:p-0 items-end justify-end">
                 <AgregarObraForm
                     handleChange={handleChange}

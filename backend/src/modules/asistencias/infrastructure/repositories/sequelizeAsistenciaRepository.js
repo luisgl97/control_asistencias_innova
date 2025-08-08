@@ -110,7 +110,6 @@ class SequelizeAsistenciaRepository {
     const asistencia = await Asistencia.findByPk(id); // Busca el asistencia por ID
     if (!asistencia) {
       // Si no se encuentra el asistencia, retorna null
-      //console.log("❌ Asistencia no encontrado");
       return null;
     }
 
@@ -713,11 +712,6 @@ class SequelizeAsistenciaRepository {
     }
 
     const permisoData = permiso.get({ plain: true });
-
-    console.log({
-      asistenciaData,
-      permisoData,
-    });
 
     const resultado = {
       asistencia: {

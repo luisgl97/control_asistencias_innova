@@ -93,6 +93,7 @@ class SequelizeUsuarioRepository {
   }
 
   async listarUsuariosPorCargo(cargo) {
+    
     const usuarios = await Usuario.findAll({
       where: { cargo },
       attributes: {
@@ -104,8 +105,8 @@ class SequelizeUsuarioRepository {
 
   async listarUsuariosTrabajadores() {
     const usuarios = await Usuario.findAll({
-      where: { rol: ["TRABAJADOR", "LIDER TRABAJADOR"] },
-      attributes: ["id", "dni", "nombres", "apellidos", "cargo"],
+      where: { rol: "TRABAJADOR" },
+      attributes: ["id", "dni", "nombres","apellidos", "cargo"],
     });
     return usuarios;
   }

@@ -20,7 +20,6 @@ module.exports = async (asignador_por, registroDiarioData, registrosDiariosRepos
       descripcion_tarea: descripcion_tarea
     }))
 
-
     const registrosDiariosGuardados = await registrosDiariosRepository.insertarRegistrosDiarios(listaRegistros)
 
   return {

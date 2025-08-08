@@ -27,7 +27,6 @@ const AuthController = {
             estado: respuesta.estado,
          });
       } catch (error) {
-         console.log("error", error);
          res.status(500).json({
             mensaje: "Error en login",
             error: error.message,

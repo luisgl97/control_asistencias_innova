@@ -1,11 +1,23 @@
 import { useState } from "react";
 import asistenciaService from "../service/asistenciaService";
-import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import {
+   AlertDialog,
+   AlertDialogContent,
+   AlertDialogHeader,
+   AlertDialogTitle,
+   AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
+import { CalendarClock, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import {
+   Tooltip,
+   TooltipContent,
+   TooltipProvider,
+   TooltipTrigger,
+} from "@/components/ui/tooltip";
 
-const ModalHorasExtras = ({ nombres, id, cargarDatos,hizo_horas_extras }) => {
+const ModalHorasExtras = ({ nombres, id, cargarDatos, hizo_horas_extras }) => {
    const [open, setOpen] = useState(false);
    const [isLoading, setLoading] = useState(false);
    const handleClose = () => {
@@ -26,21 +38,29 @@ const ModalHorasExtras = ({ nombres, id, cargarDatos,hizo_horas_extras }) => {
    };
    return (
       <AlertDialog open={open} onOpenChange={setOpen}>
-         <AlertDialogTrigger asChild>
-            <Button
-               className="bg-green-50 text-green-700 border-green-200 cursor-pointer"
-               variant="outline"
-               disabled={hizo_horas_extras}
-            >
-               <span className="text-xs">H Extras</span>
-            </Button>
-         </AlertDialogTrigger>
+         <Tooltip>
+            <AlertDialogTrigger asChild>
+               <TooltipTrigger asChild>
+                  <Button
+                     className="text-gray-500 border-gray-300 hover:bg-green-50 hover:text-green-600  hover:border-green-200 cursor-pointer"
+                     variant="outline"
+                     disabled={hizo_horas_extras}
+                     size={"icon"}
+                  >
+                     <CalendarClock />
+                  </Button>
+               </TooltipTrigger>
+            </AlertDialogTrigger>
+            <TooltipContent>
+               <p>Activar horas extras</p>
+            </TooltipContent>
+         </Tooltip>
          <AlertDialogContent>
             <AlertDialogHeader className="text-start">
                <AlertDialogTitle> Habilitar horas extras </AlertDialogTitle>
             </AlertDialogHeader>
             <div>
-               Haga click en Aceptar para habiliar horas extras al trabajador{" "}
+               Haga click en Aceptar para habilitar horas extras a{" "}
                <span className="font-semibold">"{nombres}"</span>
             </div>
 

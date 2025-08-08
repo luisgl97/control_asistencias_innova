@@ -88,11 +88,11 @@ const TablaObras = ({ searchTerm, filteredObras }) => {
                                         >
                                             <ListChecks className="size-3.5 text-green-500" />
                                         </Button>
-                                        <ModalEliminarObra
+                                        {/* <ModalEliminarObra
                                             id={obra.id}
                                             nombres={`${obra.nombre}`}
                                         // cargarDatos={fetchUsuarios}
-                                        />
+                                        /> */}
                                     </TableCell>
                                 </TableRow>
                             ))

@@ -1,41 +1,26 @@
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Textarea } from "@/components/ui/textarea"
-import { Building2, Calendar, ClipboardList, Plus, Save, Trash2, User, UserMinus, UserPlus, Users } from 'lucide-react'
-import { useEffect, useState } from "react"
-import obraService from "../services/obraService"
 import usuarioService from "@/modules/usuarios/services/usuarioService"
+import { Save } from 'lucide-react'
+import { useEffect, useState } from "react"
+import InformeGeneralTareaRegistrar from "../components/InformeGeneralTareaRegistrar"
+import TareaRegistroDetallado from "../components/TareaRegistroDetallado"
+import TrabajadoresRegistrarTarea from "../components/TrabajadoresRegistrarTarea"
+import obraService from "../services/obraService"
+import { toast } from "sonner"
+import { useNavigate } from "react-router-dom"
 
-const trabajadoresDisponibles = [
-  { id: 1, nombre: "Pepito Perez", dni: "75756507", especialidad: "Albañil" },
-  { id: 2, nombre: "Luisa Lopez", dni: "75756407", especialidad: "Electricista" },
-  { id: 3, nombre: "Maria Gomez", dni: "75756327", especialidad: "Plomero" },
-  { id: 4, nombre: "Andres Gomez", dni: "21328539", especialidad: "Soldador" },
-  { id: 5, nombre: "Carlos Rodriguez", dni: "12345678", especialidad: "Carpintero" },
-  { id: 6, nombre: "Ana Martinez", dni: "87654321", especialidad: "Electricista" },
-  { id: 7, nombre: "Pedro Sanchez", dni: "11223344", especialidad: "Albañil" },
-  { id: 8, nombre: "Laura Fernandez", dni: "44332211", especialidad: "Arquitecta" },
-  { id: 9, nombre: "Miguel Torres", dni: "55667788", especialidad: "Ingeniero" },
-  { id: 10, nombre: "Sofia Ruiz", dni: "88776655", especialidad: "Supervisora" },
-]
 
 const RegistrarTarea = () => {
-  // ?? FORM STATE
-  const [registro_diario, setRegistroDiario] = useState({
-    obra: "",
-    dia: "",
-    nro_tarea: "",
-    nro_trabajadores_asignados: "",
-    tareas: []
-  })
+  // ?? Navegacion
+  const navigate = useNavigate();
 
   // ?? DATA STATE
   const [trabajadores, setTrabajadores] = useState([])
   const [obras, setObras] = useState([])
 
+
+  // ?? friltro
+  const [trabajadoresFiltrados, setTrabajadoresFiltrados] = useState([])
+  const [textFiltroTrabajador, setTextFiltroTrabajador] = useState("")
 
   const [fecha, setFecha] = useState("")
   const [obraSeleccionada, setObraSeleccionada] = useState("")
@@ -48,18 +33,18 @@ const RegistrarTarea = () => {
     const obtenerDatosIniciales = async () => {
       try {
         // ** obtener obras
-        const {status: statusO,data: dataO} = await obraService.listarObras()
+        const { status: statusO, data: dataO } = await obraService.listarObras()
         // ** obtener trabajadores
-        if(statusO === 200) {
+        if (statusO === 200) {
           setObras(dataO.datos)
         }
-        const{status: statusT, data: dataT} = await usuarioService.getUsuariosAllTrabajadores()
-        if(statusT === 200) {
-          console.log("trabajadores", dataT.datos)
+        const { status: statusT, data: dataT } = await usuarioService.getUsuariosAllTrabajadores()
+        if (statusT === 200) {
           setTrabajadores(dataT.datos)
+          setTrabajadoresFiltrados(dataT.datos)
         }
       } catch (error) {
-        console.error(error)
+        toast.error("Error al obtener los datos iniciales")
       }
     }
     obtenerDatosIniciales()
@@ -106,261 +91,122 @@ const RegistrarTarea = () => {
     ))
   }
 
-  const trabajadoresAsignados = tareas.flatMap(tarea => tarea.trabajadores.map(t => t.id))
-  const trabajadoresLibres = trabajadores.filter(t => !trabajadoresAsignados.includes(t.id))
 
-  const guardarRegistro = () => {
+  const guardarRegistro = async () => {
     const registro = {
-      fecha,
-      obra: obras.find(o => o.id.toString() === obraSeleccionada),
-      tareas: tareas.filter(t => t.descripcion.trim() !== "")
+      fecha: fecha,
+      obra_id: obraSeleccionada,
+      descripcion_tarea: tareas[0].descripcion.trim() !== "" ? tareas[0].descripcion : "",
+      lista_usuarios_ids: tareas.flatMap(t => t.trabajadores.map(t => t.id)),
     }
-    console.log("Registro guardado:", registro)
-    // Aquí iría la lógica para guardar en la base de datos
-    alert("Registro de tareas guardado exitosamente!")
+
+    try {
+      const { data, status } = await obraService.RegistrarTarea(registro)
+      // Aquí iría la lógica para guardar en la base de datos
+      if (status === 201) {
+        toast.success(data.mensaje)
+        navigate("/registro-diario")
+      }
+
+    } catch (error) {
+      toast.error(error.response.data.mensaje)
+    }
   }
 
   const esFormularioValido = fecha && obraSeleccionada && tareas.some(t => t.descripcion.trim() !== "")
 
+  const handlerFiltro = (e) => {
+    setTextFiltroTrabajador(e.target.value)
+  }
+
+  const normalize = (s = "") =>
+    s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+
+  useEffect(() => {
+    const q = normalize(textFiltroTrabajador);
+
+    // si no hay texto, mostrar todos
+    if (!q) {
+      setTrabajadoresFiltrados(trabajadores);
+      return;
+    }
+
+    const filtrados = trabajadores.filter((trabajador) => {
+      const nombreCompleto = `${trabajador.nombres ?? ""} ${trabajador.apellidos ?? ""}`;
+      const nombreNorm = normalize(nombreCompleto);
+      const cargoNorm = normalize(trabajador.cargo ?? "");
+      const dniStr = String(trabajador.dni ?? "");
+
+      return (
+        nombreNorm.includes(q) ||
+        cargoNorm.includes(q) ||
+        dniStr.includes(textFiltroTrabajador) // aquí uso el texto crudo para DNI
+      );
+    });
+
+    setTrabajadoresFiltrados(filtrados);
+  }, [textFiltroTrabajador, trabajadores]);
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-6">
+    <div className="bg-white p-6">
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
         <div className="mb-2">
           <h1 className="text-3xl font-bold text-slate-800 mb-2">Registrar Nueva Tarea</h1>
-          <p className="text-slate-600">Asigna tareas y trabajadores a los proyectos de construcción</p>
+          <p className="text-slate-600">Asigna tareas y trabajadores a los proyectos </p>
         </div>
-
-
 
         {/* Asignación de Tareas y Trabajadores */}
-        <div className="flex gap-4 items-start">
-          <div className="flex flex-col gap-4 w-5/12">
+        <div className="flex gap-4 h-full">
+          <div className="flex flex-col gap-4 w-8/12">
             {/* Información General */}
-            <Card className="flex flex-col gap-4 w-full shadow-lg  border-2 border-slate-200 bg-white/80 backdrop-blur-sm">
-              <CardHeader className="text-slate-700">
-                <CardTitle className="flex items-center space-x-2">
-                  <Calendar className="h-5 w-5" />
-                  <span>Información General</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-6">
-                <div className="flex flex-col gap-6">
-                  <div className="space-y-2">
-                    <Label htmlFor="fecha" className="text-slate-700 font-medium">Fecha de la Tarea</Label>
-                    <Input
-                      id="fecha"
-                      type="date"
-                      value={fecha}
-                      onChange={(e) => setFecha(e.target.value)}
-                      className="border-slate-300 focus:border-blue-500"
-                    />
-                  </div>
-                  <div className="space-y-2 w-full">
-                    <Label htmlFor="obra" className="text-slate-700 font-medium">Seleccionar Obra</Label>
-                    <Select value={obraSeleccionada} onValueChange={setObraSeleccionada} className="w-full">
-                      <SelectTrigger className="border-slate-300 focus:border-blue-500 w-full">
-                        <SelectValue placeholder="Selecciona una obra" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {obras.map((obra) => (
-                          <SelectItem key={obra.id} value={obra.id.toString()} className="w-full">
-                            <div className="flex items-center space-x-2 w-full">
-                              <Building2 className="h-4 w-4" />
-                              <span className="flex-1">{obra.nombre}</span>
-                            </div>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <InformeGeneralTareaRegistrar
+              obras={obras}
+              obraSeleccionada={obraSeleccionada}
+              setObraSeleccionada={setObraSeleccionada}
+              fecha={fecha}
+              setFecha={setFecha}
+            />
 
+
+            {/* Tareas */}
+            <TareaRegistroDetallado
+              tareas={tareas}
+              agregarTarea={agregarTarea}
+              eliminarTarea={eliminarTarea}
+              removerTrabajador={removerTrabajador}
+              actualizarDescripcionTarea={actualizarDescripcionTarea}
+            />
+
+
+          </div>
+
+          <div className="flex flex-col  gap-4 w-4/12 h-full">
             {/* Trabajadores Disponibles */}
-            <div className="shadow-lg w-full border-0 flex flex-col  rounded-xl">
-              <Card className="shadow-lg border-2  backdrop-blur-sm">
-                <CardHeader className="text-slate-700">
-                  <CardTitle className="flex items-center space-x-2">
-                    <Users className="h-5 w-5" />
-                    <span>Trabajadores Disponibles</span>
-                  </CardTitle>
-                  <p className="text-gray-600 text-md mt-1">
-                    {trabajadores.length} de {trabajadoresDisponibles.length} disponibles
-                  </p>
-                </CardHeader>
-                <Input
-                    type="search"
-                    placeholder="Buscar trabajador"
-                    className="px-9 border-2 mx-7 rounded-lg "
-                  // value={filtro}
-                  // onChange={(e) => setFiltro(e.target.value)}
-                  />
-                <CardContent className="p-4">
+            <TrabajadoresRegistrarTarea
+              trabajadores={trabajadores}
+              trabajadoresFiltrados={trabajadoresFiltrados}
+              textFiltroTrabajador={textFiltroTrabajador}
+              handlerFiltro={handlerFiltro}
+              tareas={tareas}
+              asignarTrabajador={asignarTrabajador}
+            />
 
-
-                  <div className="space-y-3 max-h-96 overflow-y-auto">
-                    {trabajadoresLibres.length === 0 ? (
-                      <div className="text-center py-8 text-slate-500">
-                        <Users className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                        <p>Todos los trabajadores están asignados</p>
-                      </div>
-                    ) : (
-                      trabajadoresLibres.map((trabajador) => (
-                        <div key={trabajador.id} className="border border-slate-200 rounded-lg p-3 hover:border-purple-300 transition-colors bg-white">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center space-x-3">
-                              <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
-                                <User className="h-4 w-4 text-purple-600" />
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <p className="font-medium text-slate-800 truncate">{trabajador.nombre}</p>
-                                <p className="text-sm text-slate-500 truncate">{trabajador.especialidad}</p>
-                                <p className="text-xs text-slate-400">DNI: {trabajador.dni}</p>
-                              </div>
-                            </div>
-                          </div>
-
-                          <div className="space-y-1">
-                            <p className="text-xs text-slate-600 mb-2">Asignar a tarea:</p>
-                            <div className="flex flex-wrap gap-1">
-                              {tareas.map((tarea, index) => (
-                                <Button
-                                  key={tarea.id}
-                                  onClick={() => asignarTrabajador(tarea.id, trabajador)}
-                                  variant="outline"
-                                  size="sm"
-                                  className="text-xs h-7 px-2 border-purple-200 text-purple-600 hover:bg-purple-50 hover:border-purple-300"
-                                  disabled={!tarea.descripcion.trim()}
-                                >
-                                  <UserPlus className="h-3 w-3 mr-1" />
-                                  Tarea {index + 1}
-                                </Button>
-                              ))}
-                            </div>
-                          </div>
-                        </div>
-                      ))
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
+            {/* Botón Guardar */}
+            <div className="flex w-full justify-center">
+              <button
+                onClick={guardarRegistro}
+                // disabled={!esFormularioValido}
+                className="bg-blue-600 cursor-pointer hover:to-blue-800 text-white px-8 py-3 text-lg font-semibold shadow-lg rounded-lg flex items-center"
+              >
+                <Save className="h-5 w-5 mr-2" />
+                Guardar Registro de Tareas
+              </button>
             </div>
           </div>
-
-          {/* Tareas */}
-          <div className="hadow-lg w-7/12 border-2 border-slate-200 bg-white/80 backdrop-blur-sm rounded-xl">
-            <Card className="shadow-lg border-0 bg-white/80 backdrop-blur-sm">
-              <CardHeader className="text-slate-700">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="flex items-center space-x-2">
-                    <ClipboardList className="h-5 w-5" />
-                    <span>Tareas Asignadas</span>
-                  </CardTitle>
-                  <Button
-                    onClick={agregarTarea}
-                    variant="ghost"
-                    size="sm"
-                    className="text-green-600 border-1 cursor-pointer border-green-600"
-                  >
-                    <Plus className="h-4 w-4 mr-1" />
-                    Agregar Tarea
-                  </Button>
-                </div>
-              </CardHeader>
-              <CardContent className="p-6 space-y-6">
-                {tareas.map((tarea, index) => (
-                  <div key={tarea.id} className="border border-slate-200 rounded-xl p-6 bg-slate-50/50">
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="flex items-center space-x-3">
-                        <div className="flex items-center justify-center w-8 h-8 bg-green-100 text-green-600 rounded-full font-semibold text-sm">
-                          {index + 1}
-                        </div>
-                        <h3 className="text-lg font-semibold text-slate-800">Tarea {index + 1}</h3>
-                      </div>
-                      {tareas.length > 1 && (
-                        <Button
-                          onClick={() => eliminarTarea(tarea.id)}
-                          variant="ghost"
-                          size="sm"
-                          className="text-red-500 hover:text-red-700 hover:bg-red-50"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      )}
-                    </div>
-
-                    <div className="space-y-4">
-                      <div>
-                        <Label className="text-slate-700 font-medium">Descripción de la Tarea</Label>
-                        <Textarea
-                          value={tarea.descripcion}
-                          onChange={(e) => actualizarDescripcionTarea(tarea.id, e.target.value)}
-                          placeholder="Describe la tarea a realizar..."
-                          className="mt-2 border-slate-300 focus:border-green-500"
-                          rows={3}
-                        />
-                      </div>
-
-                      <div>
-                        <Label className="text-slate-700 font-medium flex items-center space-x-2 mb-3">
-                          <Users className="h-4 w-4" />
-                          <span>Trabajadores Asignados ({tarea.trabajadores.length})</span>
-                        </Label>
-                        <div className="space-y-2 max-h-40 overflow-y-auto">
-                          {tarea.trabajadores.length === 0 ? (
-                            <div className="text-center py-8 text-slate-500">
-                              <Users className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                              <p>No hay trabajadores asignados</p>
-                              <p className="text-sm">Selecciona trabajadores de la lista</p>
-                            </div>
-                          ) : (
-                            tarea.trabajadores.map((trabajador) => (
-                              <div key={trabajador.id} className="flex items-center justify-between bg-white border border-slate-200 rounded-lg p-3">
-                                <div className="flex items-center space-x-3">
-                                  <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                                    <User className="h-4 w-4 text-green-600" />
-                                  </div>
-                                  <div>
-                                    <p className="font-medium text-slate-800">{trabajador.nombre}</p>
-                                    <p className="text-sm text-slate-500">{trabajador.especialidad} • DNI: {trabajador.dni}</p>
-                                  </div>
-                                </div>
-                                <Button
-                                  onClick={() => removerTrabajador(tarea.id, trabajador.id)}
-                                  variant="ghost"
-                                  size="sm"
-                                  className="text-red-500 hover:text-red-700 hover:bg-red-50"
-                                >
-                                  <UserMinus className="h-4 w-4" />
-                                </Button>
-                              </div>
-                            ))
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
-          </div>
-
-
         </div>
 
-        {/* Botón Guardar */}
-        <div className="flex justify-end">
-          <Button
-            onClick={guardarRegistro}
-            disabled={!esFormularioValido}
-            className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-8 py-3 text-lg font-semibold shadow-lg"
-          >
-            <Save className="h-5 w-5 mr-2" />
-            Guardar Registro de Tareas
-          </Button>
-        </div>
+
       </div>
     </div>
   )

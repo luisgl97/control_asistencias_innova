@@ -22,7 +22,6 @@ const PermisoController = {
 
       res.status(codigo).json(respuesta);
     } catch (error) {
-      console.log("error", error);
       res.status(500).json({ error: error.message, estado: false });
     }
   },
@@ -33,7 +32,6 @@ const PermisoController = {
      
       res.status(codigo).json(respuesta);
     } catch (error) {
-      console.log(error);
       res.status(500).json({ error: error.message, estado: false });
     }
   },
@@ -65,7 +63,6 @@ const PermisoController = {
 
       res.status(codigo).json(respuesta);
     } catch (error) {
-      console.log("error", error);
       res.status(500).json({ error: error.message, estado: false });
     }
   },

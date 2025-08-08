@@ -70,7 +70,7 @@ export default function LoginPage() {
    };
 
    return (
-      <div className="min-h-[100dvh] bg-gradient-to-br from-[#1b274a] to-[#1b274a] flex flex-col">
+      <div className="min-h-[100dvh] bg-innova-blue flex flex-col">
          {/* Main content */}
          <div className="flex-1 flex items-center justify-center p-4">
             <Card className="w-full max-w-md shadow-xl border-0 bg-white backdrop-blur-sm">
@@ -159,7 +159,7 @@ export default function LoginPage() {
 
                      <Button
                         type="submit"
-                        className="w-full h-12 bg-gradient-to-r bg-orange-500  hover:bg-orange-550 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] relative overflow-hidden group"
+                        className="w-full h-12 bg-gradient-to-r bg-innova-orange  hover:bg-orange-550 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] relative overflow-hidden group"
                         disabled={isLoading}
                      >
                         {isLoading ? "Iniciando sesión..." : "Iniciar Sesión"}

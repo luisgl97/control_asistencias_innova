@@ -16,7 +16,6 @@ const RegistrosDiariosController = {
             const { codigo, respuesta } = await obtenerRegistrosDiarios(registrosDiariosRepository);
             res.status(codigo).json(respuesta);
         } catch (error) {
-            console.log(error);
             res.status(500).json({ error: error.message, estado: false });
         }
     },
@@ -29,7 +28,6 @@ const RegistrosDiariosController = {
             const { codigo, respuesta } = await insertarRegistrosDiarios(asignado_por, req.body, registrosDiariosRepository);
             res.status(codigo).json(respuesta);
         } catch (error) {
-            console.log(error);
             res.status(500).json({ error: error.message, estado: false });
         }
     },
@@ -43,7 +41,6 @@ const RegistrosDiariosController = {
             const { codigo, respuesta } = await obtenerRegistrosDiariosPorFecha(fecha, registrosDiariosRepository);
             res.status(codigo).json(respuesta);
         } catch (error) {
-            console.log(error);
             res.status(500).json({ error: error.message, estado: false });
         }
     },

@@ -4,11 +4,19 @@ const usuarioSchema = (edicion = false) =>
    yup.object({
       nombres: yup
          .string()
+         .matches(
+            /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/,
+            "Los nombres solo deben contener letras"
+         )
          .min(2, "Debe tener al menos 2 caracteres")
          .required("Los nombres son obligatorios"),
 
       apellidos: yup
          .string()
+         .matches(
+            /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/,
+            "Los apellidos solo deben contener letras"
+         )
          .min(2, "Debe tener al menos 2 caracteres")
          .required("Los apellidos son obligatorios"),
 
@@ -32,7 +40,10 @@ const usuarioSchema = (edicion = false) =>
 
       filial_id: yup.string().required("Debe seleccionar una filial"),
       rol: yup.string().required("Debe seleccionar un rol"),
-      dni: yup.string().required("Debe Ingresar el DNI"),
+      dni: yup
+         .string()
+         .matches(/^[0-9]+$/, "El DNI solo debe contener números")
+         .required("Debe Ingresar el DNI"),
       tipo_documento: yup.string().required("Seleccione el Tipo de Doc."),
       cargo: yup
          .string()

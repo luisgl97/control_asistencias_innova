@@ -16,11 +16,16 @@ import useReportes from "../hooks/useReporte";
 import JSZip from "jszip";
 import { saveAs } from "file-saver";
 import { toast } from "sonner";
+import {
+   Tooltip,
+   TooltipContent,
+   TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 const Reportes = () => {
    const [anio, setAnio] = useState("");
    const [mes, setMes] = useState("");
-   
+
    const { user } = useAuth();
    const {
       isLoading,
@@ -31,7 +36,7 @@ const Reportes = () => {
       emitirIndividual,
       emitirMasivo,
    } = useReportes(user);
-   
+
    const anioActual = new Date().getFullYear();
    const anioInicio = 2025;
    const cantidadAnios = Math.min(anioActual - anioInicio + 1, 5);
@@ -122,31 +127,35 @@ const Reportes = () => {
                         onClick={async () => {
                            try {
                               const zip = new JSZip();
-                              
+
                               for (const r of resultados) {
                                  const response = await fetch(r.url);
 
                                  if (!response.ok) {
-                                    console.error(`Error descargando ${r.url}: ${response.status}`);
+                                    console.error(
+                                       `Error descargando ${r.url}: ${response.status}`
+                                    );
                                     continue;
                                  }
 
                                  const blob = await response.blob();
-                                 
+
                                  const nombre = r.trabajador
                                     .replace(/ /g, "_")
                                     .replace(/[^\w]/g, "");
-                                 
+
                                  const archivoFinal = `${nombre}_${anio}-${mes}.pdf`;
 
                                  zip.file(archivoFinal, blob);
                               }
 
-                              const content = await zip.generateAsync({ type: "blob" });
+                              const content = await zip.generateAsync({
+                                 type: "blob",
+                              });
                               saveAs(content, `reportes_${mes}_${anio}.zip`);
                            } catch (error) {
                               console.error("Error al generar ZIP:", error);
-                              toast.error("Error al generar ZIP")
+                              toast.error("Error al generar ZIP");
                            }
                         }}
                      >
@@ -175,29 +184,63 @@ const Reportes = () => {
                      </thead>
                      <tbody>
                         {resultados.map((r, idx) => (
-                           <tr key={idx} className="border-t border-zinc-200 dark:border-zinc-700">
-                              <td className="p-2 font-medium">{r.trabajador}</td>
-                              <td className="p-2 text-xs font-mono break-all">{r.hash}</td>
+                           <tr
+                              key={idx}
+                              className="border-t border-zinc-200 dark:border-zinc-700"
+                           >
+                              <td className="p-2 font-medium">
+                                 {r.trabajador}
+                              </td>
+                              <td className="p-2 text-xs font-mono break-all">
+                                 {r.hash}
+                              </td>
                               <td className="p-2">
-                                 <div className="flex flex-nowrap flex-wrap sm:flex-nowrap gap-2 items-center">
-                                    <Button variant="outline" size="icon" onClick={() => setPDFSeleccionado(r.url)}>
-                                       <Eye className="h-4 w-4" />
-                                    </Button>
+                                 <div className="flex flex-nowrap  sm:flex-nowrap gap-2 items-center">
+                                    <Tooltip>
+                                       <TooltipTrigger asChild>
+                                          <Button
+                                             variant="outline"
+                                             size="icon"
+                                             onClick={() =>
+                                                setPDFSeleccionado(r.url)
+                                             }
+                                          >
+                                             <Eye className="h-4 w-4" />
+                                          </Button>
+                                       </TooltipTrigger>
+                                       <TooltipContent>
+                                          <span>Previsualizar PDF</span>
+                                       </TooltipContent>
+                                    </Tooltip>
 
                                     <a href={r.url} download target="_blank">
-                                       <Button variant="outline" size="icon">
-                                          <FileDown className="h-4 w-4" />
-                                       </Button>
+                                       <Tooltip>
+                                          <TooltipTrigger asChild>
+                                             <Button
+                                                variant="outline"
+                                                size="icon"
+                                             >
+                                                <FileDown className="h-4 w-4" />
+                                             </Button>
+                                          </TooltipTrigger>
+                                          <TooltipContent>
+                                             <span>Descargar PDF</span>
+                                          </TooltipContent>
+                                       </Tooltip>
                                     </a>
 
                                     {r.yaEmitido ? (
-                                       <span className="text-green-600 text-xs font-bold">Emitido</span>
+                                       <span className="text-green-600 text-xs font-bold">
+                                          Emitido
+                                       </span>
                                     ) : (
                                        <Button
                                           variant="destructive"
                                           size="sm"
                                           disabled={isLoading}
-                                          onClick={() => emitirIndividual(r, anio, mes)}
+                                          onClick={() =>
+                                             emitirIndividual(r, anio, mes)
+                                          }
                                        >
                                           Emitir Oficial
                                        </Button>

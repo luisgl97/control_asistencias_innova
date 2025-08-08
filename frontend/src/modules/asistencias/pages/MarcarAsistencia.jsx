@@ -29,6 +29,7 @@ import { fecha_hora_asistencia } from "../libs/fecha_hora_asistencia";
 import { obtenerCoordenadas } from "../libs/obtenerCoordenadas";
 import { calcularDistanciaEnMetros } from "../libs/calcularDistancias";
 import { obtenerUbicacionesSimuladas } from "../mocks/obras_simuladas";
+import MisObrasAsignadas from "../components/MisObrasAsignadas";
 
 export default function MarcarAsistencia() {
    const { user, loading } = useAuth();
@@ -43,9 +44,10 @@ export default function MarcarAsistencia() {
    const [ubicacionLoading, setUbicacionLoading] = useState(true);
    const [ubicacionError, setUbicacionError] = useState(null);
    const [asistencia, setAsistencia] = useState({});
-   const [obras,setObras]=useState([])
+   const [obras, setObras] = useState([]);
+   const [obrasSiguiente, setObrasSiguiente] = useState([]);
 
-   const fecha_active = new Date(); // o la que venga del backend
+   const fecha_active = new Date();
    const esSabado =
       fecha_active.toLocaleDateString("es-PE", {
          timeZone: "America/Lima",
@@ -64,157 +66,127 @@ export default function MarcarAsistencia() {
             hora_inicio_refrigerio: res.data.datos.hora_inicio_refrigerio,
             hora_fin_refrigerio: res.data.datos.hora_fin_refrigerio,
          });
-         console.log(res.data.datos);
-         
+         setObras(res.data.datos.obras_asignadas_del_dia);
+         setObrasSiguiente(res.data.datos.obras_asignadas_de_maniana);
          setAsistencia(res.data.datos);
       } catch (error) {
          console.error(error);
       }
    };
 
-   const obtenerUbicacion = () => {
+   const obtenerUbicacionActual = async () => {
       setUbicacionLoading(true);
       setUbicacionError(null);
-
-      if (!navigator.geolocation) {
-         setUbicacionError(
-            "La geolocalización no está soportada en este navegador"
+      try {
+         const { lat, lng } = await obtenerCoordenadas();
+         const response = await axios.get(
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`
          );
-         setUbicacionLoading(false);
-         return;
-      }
-
-      navigator.geolocation.getCurrentPosition(
-         async (position) => {
-            try {
-               const { latitude, longitude } = position.coords;
-               const response = await axios.get(
-                  `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=18&addressdetails=1`
-               );
-
-               if (response.data) {
-                  setUbicacion({
-                     latitude,
-                     longitude,
-                     display_name: response.data.display_name,
-                  });
-               }
-            } catch (error) {
-               setUbicacionError("Error al obtener la dirección");
-               console.error("Error al obtener dirección:", error);
-            } finally {
-               setUbicacionLoading(false);
-            }
-         },
-         (error) => {
-            let errorMessage = "Error al obtener la ubicación";
-            switch (error.code) {
-               case error.PERMISSION_DENIED:
-                  errorMessage = "Permiso de ubicación denegado";
-                  break;
-               case error.POSITION_UNAVAILABLE:
-                  errorMessage = "Ubicación no disponible";
-                  break;
-               case error.TIMEOUT:
-                  errorMessage = "Tiempo de espera agotado";
-                  break;
-            }
-            setUbicacionError(errorMessage);
-            setUbicacionLoading(false);
-         },
-         {
-            enableHighAccuracy: true,
-            timeout: 10000,
-            maximumAge: 300000,
+         if (response.data) {
+            setUbicacion({
+               latitude: lat,
+               longitude: lng,
+               display_name: response.data.display_name,
+            });
          }
-      );
+      } catch (error) {
+         console.error(error);
+         setUbicacionError("Error al obtener la ubicación");
+      } finally {
+         setUbicacionLoading(false);
+      }
    };
 
    useEffect(() => {
       if (user) {
          fetchVerificarAsistencia();
-         obtenerUbicacion();
+         obtenerUbicacionActual();
       }
    }, [user]);
 
-   const marcarAsistenciaIngreso = async () => {
-      // setAccionEnProceso(true);
+   const construccionDataDeEnvio = async () => {
       if (!ubicacion) {
          toast.error("Ubicación no disponible");
-         return;
+         return null;
       }
       let posicion;
       try {
          posicion = await obtenerCoordenadas();
       } catch (error) {
          toast.error("No se pudo obtener la ubicación");
-         setAccionEnProceso(false);
+         return null;
+      }
+      let obraEncontrada = null;
 
-         return;
+      for (const obra of obras) {
+         const distancia = calcularDistanciaEnMetros(
+            posicion.lat,
+            posicion.lng,
+            obra.latitud,
+            obra.longitud
+         );
+         if (distancia < 60) {
+            obraEncontrada = obra;
+            break;
+         }
       }
-      // console.log(posicion);
-      
-      const ubicacionesSimuladas = await obtenerUbicacionesSimuladas()
-      for (const ubicacion of ubicacionesSimuladas) {
-         const distancia = calcularDistanciaEnMetros(ubicacion.latitude, ubicacion.longitude, "-13.043236969844097", '-76.42447451225563');
-         console.log('Distancia es: ', distancia);
-
+      if (!obraEncontrada) {
+         toast.error("Usted no se encuentra en el rango de la obra.");
+         return null;
       }
-      // const ubicacion_ingreso = {
-      //    lat: posicion.lat,
-      //    lng: posicion.lng,
-      //    direccion: ubicacion.display_name,
-      // };
-      //    const { fecha_a, hora_a } = fecha_hora_asistencia();
-      //    try {
-      //       const response = await asistenciaService.registrarIngreso({
-      //          fecha: fecha_a,
-      //          hora_ingreso: hora_a,
-      //          ubicacion_ingreso,
-      //          observacion_ingreso: "",
-      //       });
-      //       toast.success("Asistencia guardada con éxito");
-      //       fetchVerificarAsistencia(); // Actualizar estado
-      //    } catch (error) {
-      //       console.log(error);
-      //       toast.error("Error al guardar la asistencia");
-      //    } finally {
-      //       setAccionEnProceso(false);
-      //    }
-   };
-   const marcarAsistenciaSalida = async () => {
-      setAccionEnProceso(true);
-
-      if (!ubicacion) {
-         toast.error("Ubicación no disponible");
-         return;
-      }
-      const { fecha_a, hora_a } = fecha_hora_asistencia();
-      let posicion;
-      try {
-         posicion = await obtenerCoordenadas();
-      } catch (error) {
-         toast.error("No se pudo obtener la ubicación");
-         setAccionEnProceso(false);
-         return;
-      }
-      const ubicacion_salida = {
+      return {
          lat: posicion.lat,
          lng: posicion.lng,
          direccion: ubicacion.display_name,
+         obra_id: obraEncontrada.id,
+         obra_nombre: obraEncontrada.nombre,
+         obra_direccion: obraEncontrada.direccion,
       };
+   };
+   const marcarAsistenciaIngreso = async () => {
+      setAccionEnProceso(true);
+      const datosUbicacion = await construccionDataDeEnvio();
+      if (!datosUbicacion) {
+         setAccionEnProceso(false);
+         return;
+      }
+      const { fecha_a, hora_a } = fecha_hora_asistencia();
+      try {
+         const response = await asistenciaService.registrarIngreso({
+            fecha: fecha_a,
+            hora_ingreso: hora_a,
+            ubicacion_ingreso: datosUbicacion,
+            observacion_ingreso: "",
+         });
+         toast.success("Asistencia guardada con éxito");
+         fetchVerificarAsistencia(); // Actualizar estado
+      } catch (error) {
+         console.error(error);
+         toast.error("Error al guardar la asistencia");
+      } finally {
+         setAccionEnProceso(false);
+      }
+   };
+   const marcarAsistenciaSalida = async () => {
+      setAccionEnProceso(true);
+      const datosUbicacion = await construccionDataDeEnvio();
+      if (!datosUbicacion) {
+         setAccionEnProceso(false);
+         return;
+      }
 
+      const { fecha_a, hora_a } = fecha_hora_asistencia();
       try {
          const response = await asistenciaService.registrarSalida({
             fecha: fecha_a,
             hora_salida: hora_a,
-            ubicacion_salida,
+            ubicacion_salida: datosUbicacion,
             observacion_salida: "",
          });
          toast.success("Asistencia guardada con éxito");
          fetchVerificarAsistencia(); // Actualizar estado
       } catch (error) {
-         console.log(error);
+         console.error(error);
          toast.error("Error al guardar la asistencia");
       } finally {
          setAccionEnProceso(false);
@@ -239,7 +211,7 @@ export default function MarcarAsistencia() {
          toast.success("Inicio de refrigerio guardado con éxito");
          fetchVerificarAsistencia();
       } catch (error) {
-         console.log(error);
+         console.error(error);
          toast.error("Se produjo un error");
       } finally {
          setAccionEnProceso(false);
@@ -262,12 +234,13 @@ export default function MarcarAsistencia() {
          toast.success("Fin de refrigerio guardado con éxito");
          fetchVerificarAsistencia();
       } catch (error) {
-         console.log(error);
+         console.error(error);
          toast.error("Se produjo un error");
       } finally {
          setAccionEnProceso(false);
       }
    };
+
    if (ubicacionLoading) {
       return (
          <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -297,7 +270,7 @@ export default function MarcarAsistencia() {
                      Error de ubicación
                   </h3>
                   <p className="text-gray-600 text-sm mb-4">{ubicacionError}</p>
-                  <Button onClick={obtenerUbicacion} className="w-full">
+                  <Button onClick={obtenerUbicacionActual} className="w-full">
                      <MapPin className="w-4 h-4 mr-2" />
                      Intentar nuevamente
                   </Button>
@@ -317,11 +290,14 @@ export default function MarcarAsistencia() {
 
                <Card className="bg-gradient-to-r from-innova-blue/95 to-innova-blue border-0 shadow-lg gap-4">
                   <CardHeader className="text-white ">
-                     <div className="flex items-center space-x-2 mb-2">
-                        <Clock className="w-6 h-6" />
-                        <h2 className="text-xl sm:text-2xl font-bold">
-                           Marcar Asistencia
-                        </h2>
+                     <div className="flex justify-between mb-2">
+                        <div className="flex items-center space-x-2 ">
+                           <Clock className="w-6 h-6" />
+                           <h2 className="text-xl sm:text-2xl font-bold">
+                              Marcar Asistencia
+                           </h2>
+                        </div>
+                        <MisObrasAsignadas obrasHoy={obras} obrasSiguiente={obrasSiguiente}/>
                      </div>
                      <p className="text-blue-100 text-sm sm:text-base">
                         Registra tu entrada o salida del trabajo
@@ -382,8 +358,9 @@ export default function MarcarAsistencia() {
                            </div>
 
                            <div
-                              className={`grid ${esSabado ? "grid-cols-1" : "grid-cols-2"
-                                 }  gap-3 mt-6`}
+                              className={`grid ${
+                                 esSabado ? "grid-cols-1" : "grid-cols-2"
+                              }  gap-3 mt-6`}
                            >
                               {!esSabado && (
                                  <>
@@ -429,6 +406,9 @@ export default function MarcarAsistencia() {
                                  }
                                  ubicacion={ubicacion}
                                  id={asistencia.asistencia_id}
+                                 construccionDataDeEnvio={
+                                    construccionDataDeEnvio
+                                 }
                                  fetchVerificarAsistencia={
                                     fetchVerificarAsistencia
                                  }
@@ -512,9 +492,9 @@ export default function MarcarAsistencia() {
                            <span className="font-medium text-innova-blue">
                               {asistencia.ingreso.hora && asistencia.salida.hora
                                  ? diferenciaHoras(
-                                    asistencia.ingreso.hora,
-                                    asistencia.salida.hora
-                                 )
+                                      asistencia.ingreso.hora,
+                                      asistencia.salida.hora
+                                   )
                                  : "Pendiente"}
                            </span>
                         </div>

@@ -28,9 +28,8 @@ const estilos = {
    "FALTA JUSTIFICADA": "bg-yellow-50 text-yellow-700 border-yellow-200",
 };
 
-
 const AsistenciaPordia = () => {
-   const { user } = useAuth()
+   const { user } = useAuth();
    const [datosAsistencia, setDatosAsistencia] = useState([]);
    const [datosAsistenciaGuard, setDatosAsistenciaGuard] = useState([]);
    const [cargando, setCargando] = useState(true);
@@ -38,7 +37,7 @@ const AsistenciaPordia = () => {
    const [fechaSeleccionada, setFechaSeleccionada] = useState(
       new Date().toISOString().split("T")[0]
    );
-   const [nombreTrabajador, setNombreTrabajador] = useState("")
+   const [nombreTrabajador, setNombreTrabajador] = useState("");
    const cargarDatos = async () => {
       try {
          setCargando(true);
@@ -46,10 +45,8 @@ const AsistenciaPordia = () => {
          const res = await asistenciaService.asistenciasDelDia({
             fecha: fechaSeleccionada,
          });
-         console.log(res.data.datos);
-
          setDatosAsistencia(res.data.datos);
-         setDatosAsistenciaGuard(res.data.datos)
+         setDatosAsistenciaGuard(res.data.datos);
       } catch (err) {
          setError(
             "Error al cargar los datos de asistencia. Por favor, intenta nuevamente."
@@ -60,7 +57,6 @@ const AsistenciaPordia = () => {
       }
    };
 
-
    useEffect(() => {
       if (fechaSeleccionada) {
          cargarDatos();
@@ -68,14 +64,16 @@ const AsistenciaPordia = () => {
    }, [fechaSeleccionada]);
 
    useEffect(() => {
-      let copy = [...datosAsistenciaGuard]
+      let copy = [...datosAsistenciaGuard];
       if (nombreTrabajador) {
          copy = copy.filter((t) =>
-            normalizarTexto(t.trabajador).includes(normalizarTexto(nombreTrabajador))
+            normalizarTexto(t.trabajador).includes(
+               normalizarTexto(nombreTrabajador)
+            )
          );
       }
-      setDatosAsistencia(copy)
-   }, [nombreTrabajador, datosAsistenciaGuard])
+      setDatosAsistencia(copy);
+   }, [nombreTrabajador, datosAsistenciaGuard]);
 
    if (cargando) {
       return (
@@ -126,13 +124,19 @@ const AsistenciaPordia = () => {
                   </div>
                   <div className="flex items-center gap-2 flex-wrap md:flex-nowrap">
                      <Calendar className="h-4 w-4" />
-                     <Label htmlFor="fecha" className="text-sm whitespace-nowrap">Fecha:</Label>
+                     <Label
+                        htmlFor="fecha"
+                        className="text-sm whitespace-nowrap"
+                     >
+                        Fecha:
+                     </Label>
                      <Input
                         id="fecha"
                         type="date"
                         value={fechaSeleccionada}
                         onChange={(e) => setFechaSeleccionada(e.target.value)}
                         className="w-full md:w-auto"
+                        max={new Date().toISOString().slice(0, 10)}
                      />
                   </div>
                </div>
@@ -172,21 +176,14 @@ const AsistenciaPordia = () => {
                                  </p>
                               </TableCell>
                               <TableCell className="text-center">
-                                 {trabajador.estado == "SIN REGISTRO" ? (
-                                    <ModalJustificarFalta
-                                       fecha_dia={trabajador.fecha}
-                                       id={trabajador.id}
-                                       cargarDatos={cargarDatos}
-                                    />
-                                 ) : (
-                                    <Badge
-                                       variant="outline"
-                                       className={`${estilos[trabajador.estado]
-                                          } text-xs`}
-                                    >
-                                       {trabajador.estado}
-                                    </Badge>
-                                 )}
+                                 <Badge
+                                    variant="outline"
+                                    className={`${
+                                       estilos[trabajador.estado]
+                                    } text-xs`}
+                                 >
+                                    {trabajador.estado}
+                                 </Badge>
                               </TableCell>
                               <TableCell className="text-center">
                                  <Badge
@@ -214,9 +211,19 @@ const AsistenciaPordia = () => {
                               </TableCell>
 
                               <TableCell className="text-center space-x-2">
-                                 {(trabajador.asistencia_id &&
-                                    trabajador.estado !==
-                                    "FALTA JUSTIFICADA" && user.rol !== "LIDER TRABAJADOR") && (
+                                 <AsistenciaDetailDialog
+                                    asistenciaId={trabajador.asistencia_id}
+                                 />
+                                 {trabajador.estado === "SIN REGISTRO" && (
+                                    <ModalJustificarFalta
+                                       fecha_dia={trabajador.fecha}
+                                       id={trabajador.id}
+                                       cargarDatos={cargarDatos}
+                                    />
+                                 )}
+                                 {trabajador.asistencia_id &&
+                                    trabajador.estado !== "FALTA JUSTIFICADA" &&
+                                    user.rol !== "LIDER TRABAJADOR" && (
                                        <ModalHorasExtras
                                           cargarDatos={cargarDatos}
                                           id={trabajador.asistencia_id}
@@ -226,7 +233,6 @@ const AsistenciaPordia = () => {
                                           }
                                        />
                                     )}
-                                 <AsistenciaDetailDialog asistenciaId={trabajador.asistencia_id} />
                               </TableCell>
                            </TableRow>
                         ))}

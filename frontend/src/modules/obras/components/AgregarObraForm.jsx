@@ -24,7 +24,7 @@ const AgregarObraForm = ({
     const navigate = useNavigate()
 
     return (
-        <Card className="md:mt-8 min-h-[10vh] mx-auto self-end border-2 border-gray-300 shadow-md">
+        <Card className="md:mt-8 min-h-[10vh] w-full  border-2 border-gray-300 shadow-md">
             <CardHeader>
                 <CardTitle>Registrar Obra</CardTitle>
                 <CardDescription>
@@ -53,7 +53,7 @@ const AgregarObraForm = ({
                         </section>
 
                         <section className="w-full col-span-2">
-                            <div className="flex gap-2">
+                            <div className="flex gap-2 w-full">
                                 <InputConEtiquetaFlotante
                                     handleChange={handleChange}
                                     label={"Direccion"}
@@ -75,7 +75,7 @@ const AgregarObraForm = ({
                             )}
                         </section>
 
-                        <section className="w-full">
+                        {/* <section className="w-full">
                             <InputConEtiquetaFlotante
                                 handleChange={handleChange}
                                 label={"Latitud"}
@@ -101,11 +101,11 @@ const AgregarObraForm = ({
                                     * {errores.longitud}
                                 </p>
                             )}
-                        </section>
+                        </section> */}
 
-                        <section className="w-full flex flex-col">
-                            <label className="flex items-center space-x-2">
-                                <span>Ubicación en el mapa</span>
+                        <section className="w-full flex flex-col col-span-2">
+                            <label className="flex items-center space-x-2 py-1 pl2">
+                                <span>Ver Radio</span>
                             </label>
                             <button
                                 onClick={(e) => handleRadioChange(e)}

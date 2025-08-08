@@ -21,7 +21,6 @@ const ObraController = {
     
                 res.status(codigo).json(respuesta);
             } catch (error) {
-                console.log("error", error);
                 res.status(500).json({ error: error.message, estado: false });
             }
         },
@@ -31,7 +30,6 @@ const ObraController = {
             const { codigo, respuesta } = await obtenerObras(obraRepository);
             res.status(codigo).json(respuesta);
         } catch (error) {
-            console.log(error);
             res.status(500).json({ error: error.message, estado: false });
         }
     },
@@ -46,7 +44,6 @@ const ObraController = {
             );
             res.status(codigo).json(respuesta);
         } catch (error) {
-            console.log(error);
             res.status(500).json({ error: error.message, estado: false });
         }
     },
@@ -62,7 +59,6 @@ const ObraController = {
             );
             res.status(codigo).json(respuesta);
         } catch (error) {
-            console.log(error);
             res.status(500).json({ error: error.message, estado: false });
         }
     },
@@ -78,7 +74,6 @@ const ObraController = {
             );
             res.status(codigo).json(respuesta);
         } catch (error) {
-            console.log(error);
             res.status(500).json({ error: error.message, estado: false });
         }
     },

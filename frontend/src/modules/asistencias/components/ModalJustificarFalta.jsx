@@ -13,16 +13,21 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import SelectConEtiquetaFlotante from "@/shared/components/selectConEtiquetaFlotante";
-import { Loader2, XCircle } from "lucide-react";
+import { Loader2, Notebook, NotebookPen, XCircle } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import asistenciaService from "../service/asistenciaService";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/context/AuthContext";
+import {
+   Tooltip,
+   TooltipContent,
+   TooltipTrigger,
+} from "@/components/ui/tooltip";
 
-export function ModalJustificarFalta({ fecha_dia, id,cargarDatos }) {
-      const {user}=useAuth()
-   
+export function ModalJustificarFalta({ fecha_dia, id, cargarDatos }) {
+   const { user } = useAuth();
+
    const initForm = {
       observacion: "",
       fecha: fecha_dia,
@@ -43,7 +48,7 @@ export function ModalJustificarFalta({ fecha_dia, id,cargarDatos }) {
       try {
          setLoading(true);
          await asistenciaService.registrarFalta(form);
-         await cargarDatos()
+         await cargarDatos();
          toast.success("Falta Justificada registrada");
          handleClose();
       } catch (error) {
@@ -54,16 +59,21 @@ export function ModalJustificarFalta({ fecha_dia, id,cargarDatos }) {
    };
    return (
       <AlertDialog open={open} onOpenChange={setOpen}>
-         <AlertDialogTrigger asChild>
-            <Button
-               className="bg-red-50 text-red-700 border-red-200 cursor-pointer text-xs px-1.5 py-0.5"
-               variant="outline"
-               disabled={user.rol==="LIDER TRABAJADOR"}
-               size={"xs"}
-            >
-               <span className="text-xs">SIN REGISTRO</span>
-            </Button>
-         </AlertDialogTrigger>
+         <Tooltip>
+            <TooltipTrigger asChild>
+               <AlertDialogTrigger asChild>
+                  <Button
+                     className=" text-gray-500 border-gray-300 hover:bg-amber-50 hover:text-amber-600 hover:border-amber-200   cursor-pointer text-xs px-1.5 py-0.5"
+                     variant="outline"
+                     disabled={user.rol === "LIDER TRABAJADOR"}
+                     size={"icon"}
+                  >
+                     <NotebookPen />
+                  </Button>
+               </AlertDialogTrigger>
+            </TooltipTrigger>
+            <TooltipContent>Justificar falta</TooltipContent>
+         </Tooltip>
          <AlertDialogContent>
             <AlertDialogHeader className="text-start">
                <AlertDialogTitle>Falta Justificada</AlertDialogTitle>

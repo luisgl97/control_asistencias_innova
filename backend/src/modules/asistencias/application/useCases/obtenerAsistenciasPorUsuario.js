@@ -137,17 +137,6 @@ module.exports = async (idUsuario, fecha_inicio, fecha_fin, asistenciaRepository
         asistencias: listadoAsistenciaDelUsuario,
         resumen
     }
-    /* console.log("*****************************")
-    console.log("Informacion del usuario:");
-    console.log("Nombres y apellidos:", usuario.nombres, usuario.apellidos);
-    console.log("Rol:", usuario.rol);
-
-    console.table(listadoAsistenciaDelUsuario)
-    console.log("Resumen de asistencias:");
-    console.log("Total de asistencias:", resumen.asistencias);
-    console.log("Total de tardanzas:", resumen.tardanzas);
-    console.log("Total de observados:", resumen.observados);
-    console.log("Total de faltas:", resumen.faltas); */
 
     return {
         codigo: 200,

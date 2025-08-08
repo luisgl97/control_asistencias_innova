@@ -22,10 +22,10 @@ const ModalEliminarUsuario = ({ id, nombres, cargarDatos }) => {
          setLoading(true);
          const res=await usuarioService.eliminar(id);            
          await cargarDatos();
-         toast.success("Usuario eliminado");
+         toast.success("Usuario desactivado");
          handleClose();
       } catch (error) {
-         console.log(error);
+         console.error(error);
          
          toast.error("Hubo un error");
       } finally {

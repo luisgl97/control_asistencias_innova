@@ -24,7 +24,6 @@ const UsuarioController = {
 
             res.status(codigo).json(respuesta);
         } catch (error) {
-            console.log("error", error);
             res.status(500).json({ error: error.message, estado: false });
         }
     },
@@ -34,7 +33,6 @@ const UsuarioController = {
             const { codigo, respuesta } = await obtenerUsuarios(usuarioRepository);
             res.status(codigo).json(respuesta);
         } catch (error) {
-            console.log(error);
             res.status(500).json({ error: error.message, estado: false });
         }
     },
@@ -44,7 +42,6 @@ const UsuarioController = {
             const { codigo, respuesta } = await obtenerUsuariosTodos(usuarioRepository);
             res.status(codigo).json(respuesta);
         } catch (error) {
-            console.log(error);
             res.status(500).json({ error: error.message, estado: false });
         }
     },
@@ -88,7 +85,6 @@ const UsuarioController = {
             );
             res.status(codigo).json(respuesta);
         } catch (error) {
-            console.log('error', error)
             res.status(500).json({ error: error.message, estado: false });
         }
     },
@@ -102,7 +98,6 @@ const UsuarioController = {
             );
             res.status(codigo).json(respuesta);
         } catch (error) {
-            console.log('error', error);
             res.status(500).json({ error: error.message, estado: false });
         }
     },
@@ -113,7 +108,6 @@ const UsuarioController = {
             const { codigo, respuesta } = await listarUsuariosPorCargo(cargo, usuarioRepository);
             res.status(codigo).json(respuesta);
         } catch (error) {
-            console.log(error);
             res.status(500).json({ error: error.message, estado: false });
         }
     },
@@ -123,7 +117,6 @@ const UsuarioController = {
             const { codigo, respuesta } = await obtenerUsuariosAutorizanPermiso(usuarioRepository);
             res.status(codigo).json(respuesta);
         } catch (error) {
-            console.log(error);
             res.status(500).json({ error: error.message, estado: false });
         }
     },
@@ -132,7 +125,6 @@ const UsuarioController = {
             const { codigo, respuesta } = await obtenerUsuariosTrabajadores(usuarioRepository);
             res.status(codigo).json(respuesta);
         } catch (error) {
-            console.log(error);
             res.status(500).json({ error: error.message, estado: false });
         }
     },
@@ -142,12 +134,9 @@ const UsuarioController = {
 
             const { fecha_inicio, fecha_fin } = req.body;
 
-            console.log({fecha_inicio, fecha_fin});
-
             const { codigo, respuesta } = await obtenerUsuariosConMinimoUnaAsistenciaDelMes(fecha_inicio,fecha_fin, usuarioRepository);
             res.status(codigo).json(respuesta);
         } catch (error) {
-            console.log(error);
             res.status(500).json({ error: error.message, estado: false });
         }
     },

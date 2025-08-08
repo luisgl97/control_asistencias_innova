@@ -79,16 +79,16 @@ const UsuarioForm = () => {
                cargo: res.rol === "GERENTE" ? null : res.cargo,
             };
             await usuarioService.editar(datos, form.id);
-            toast.success("Se Edito el usuario exitosamente");
+            toast.success("El usuario fue editado exitosamente");
             fetchTrabajador();
          } else {
-
             await usuarioService.crear(form);
             navigate("/usuarios");
             toast.success("Se creó el usuario exitosamente");
          }
-      } catch (error) {
+                  setErrores(claves)
 
+      } catch (error) {
          if (error.name === "ValidationError") {
             const errors = {};
             error.inner.forEach((err) => {
