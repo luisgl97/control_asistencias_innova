@@ -1,7 +1,6 @@
 module.exports = async (obra_id, obraRepository) => {
     
     const obra = await obraRepository.obtenerPorId(obra_id);
-    console.log('obra', obra);
     if(!obra)
         return {
             codigo: 404,

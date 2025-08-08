@@ -2,7 +2,6 @@ const { formatearRegistros } = require("../infrastructure/services/formatearRegi
 
 module.exports = async (fecha, registrosDiariosRepository) => {
 
-    console.log('fechaaaa', fecha);
     const registrosDiariosPorFecha = await registrosDiariosRepository.obtenerRegistrosDiariosPorFecha(fecha);
 
     const registros = formatearRegistros(registrosDiariosPorFecha)
