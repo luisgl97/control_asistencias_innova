@@ -137,6 +137,7 @@ const UsuarioController = {
             const { codigo, respuesta } = await obtenerUsuariosConMinimoUnaAsistenciaDelMes(fecha_inicio,fecha_fin, usuarioRepository);
             res.status(codigo).json(respuesta);
         } catch (error) {
+            
             res.status(500).json({ error: error.message, estado: false });
         }
     },

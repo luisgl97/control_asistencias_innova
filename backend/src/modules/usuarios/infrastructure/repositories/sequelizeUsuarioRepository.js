@@ -1,8 +1,14 @@
 const db = require("../../../../models");
 const { Usuario } = require("../models/usuarioModel");
+
+
 const {
   Asistencia,
 } = require("../../../asistencias/infrastructure/models/asistenciaModel");
+const {
+  Filial
+} = require("../../../filiales/infrastructure/models/filialModel")
+
 const { Op, Sequelize } = require("sequelize");
 
 class SequelizeUsuarioRepository {
@@ -140,20 +146,40 @@ class SequelizeUsuarioRepository {
     ],
     group: ["usuario_id", "usuario.id", "usuario.nombres", "usuario.apellidos", "usuario.dni"], // Necesario para evitar errores con MySQL strict
     include: [
-      {
-        model: Usuario,
-        as: "usuario",
-        attributes: ["id", "nombres", "apellidos", "dni"],
+    {
+      model: Usuario,
+      as: "usuario",
+      attributes: {
+        exclude: ["password"], // excluye la contraseña
       },
-    ],
+      include: [
+        {
+          model: Filial,
+          as: "filial",
+          attributes: ["id", "ruc", "razon_social"], // lo que quieras traer de filial
+        },
+      ],
+    },
+  ],
     having: Sequelize.literal("COUNT(`asistencias`.`id`) >= 1"),
   });
 
   const usuariosConMinimoUnaAsistencia = usuarios.map(usuario => (({
     id: usuario?.usuario?.id,
+     dni: usuario?.usuario?.dni,
     nombres: usuario?.usuario?.nombres,
     apellidos: usuario?.usuario?.apellidos,
-    dni: usuario?.usuario?.dni,
+    email: usuario?.usuario?.email,
+    rol: usuario?.usuario?.rol,
+    cargo: usuario?.usuario?.cargo,
+    estado: usuario?.usuario?.estado, 
+    tipo_documento: usuario?.usuario?.tipo_documento,
+    filial: {
+      id: usuario?.usuario?.filial?.id,
+      ruc: usuario?.usuario?.filial?.ruc,
+      razon_social: usuario?.usuario?.filial?.razon_social
+    }
+    
   })))
   return usuariosConMinimoUnaAsistencia;
 }

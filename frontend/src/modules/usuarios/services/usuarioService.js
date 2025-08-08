@@ -9,6 +9,8 @@ const usuarioService = {
    getUsuariosAllTrabajadores: () => api.get("/usuarios/trabajadores"),
    getUsuario: (id) => api.get(`/usuarios/${id}`),
    activarUsuario: (id) => api.patch(`/usuarios/activar/${id}`),
+   getUsuariosConMinimoUnaAsistenciaDelMes: (data) => api.post("/usuarios/con-minimo-asistencia-del-mes", data)
 };
+
 
 export default usuarioService;

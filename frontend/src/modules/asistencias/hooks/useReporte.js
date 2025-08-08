@@ -17,7 +17,12 @@ export default function useReportes(usuarioLogueado) {
     const ultimoDia = new Date(anio, mes, 0).getDate();
     const fechaFin = `${anio}-${mes.padStart(2, "0")}-${ultimoDia}`;
 
-    const resT = await usuarioService.getUsuarios();
+    const dataPOST = {
+      fecha_inicio: fechaInicio,
+      fecha_fin: fechaFin
+    }
+
+    const resT = await usuarioService.getUsuariosConMinimoUnaAsistenciaDelMes(dataPOST);
     const trabajadores = resT.data.datos.filter(
       (t) => t.rol !== "GERENTE" && t.rol !== "ADMINISTRADOR"
     );
