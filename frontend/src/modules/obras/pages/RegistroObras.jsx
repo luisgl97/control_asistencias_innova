@@ -85,7 +85,6 @@ const RegistroObras = () => {
 
     const fetchObra = async () => {
         try {
-            console.log("entro a el fetch")
             setIsLoading(true);
             setIsLoadingMap(true);
             const { data, status } = await obraService.obtnerObraConId(id);

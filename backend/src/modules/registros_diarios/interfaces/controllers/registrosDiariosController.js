@@ -35,7 +35,6 @@ const RegistrosDiariosController = {
         try {
 
            const { fecha } = req.body;
-
             const { codigo, respuesta } = await obtenerRegistrosDiariosPorFecha(fecha, registrosDiariosRepository);
             res.status(codigo).json(respuesta);
         } catch (error) {

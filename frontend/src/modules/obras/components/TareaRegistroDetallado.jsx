@@ -88,7 +88,7 @@ const TareaRegistroDetallado = ({
                                                         </div>
                                                         <div>
                                                             <p className="font-medium text-slate-800">{trabajador.nombres} {trabajador.apellidos}</p>
-                                                            <p className="text-sm text-slate-500">{trabajador.cargo} • DNI: {trabajador.dni}</p>
+                                                            <p className="text-sm text-slate-500">{trabajador.cargo} • {trabajador.tipo_documento}: {trabajador.dni}</p>
                                                         </div>
                                                     </div>
                                                     <Button
