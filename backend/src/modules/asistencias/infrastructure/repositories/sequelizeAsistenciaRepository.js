@@ -1,10 +1,9 @@
-const { Op } = require("sequelize");
+const { Op, fn, col, where } = require("sequelize");
 const { Asistencia } = require("../models/asistenciaModel");
 const {
   Usuario,
 } = require("../../../usuarios/infrastructure/models/usuarioModel");
 const db = require("../../../../models");
-
 
 const {
   CONST_HORA_INICIO,
@@ -57,7 +56,6 @@ class SequelizeAsistenciaRepository {
   }
 
   async obtenerAsistenciasDelDia(fecha) {
-   
     // Obtener fecha actual en Lima para comparar
     const hoy = moment().tz("America/Lima").format("YYYY-MM-DD");
 
@@ -65,6 +63,9 @@ class SequelizeAsistenciaRepository {
       where: {
         rol: ["TRABAJADOR", "LIDER TRABAJADOR"],
         estado: true,
+        [Op.and]: [
+          where(fn("DATE", col("usuarios.createdAt")), "<=", fecha), // usar nombre real de tabla
+        ],
       },
       attributes: {
         exclude: ["password"],
@@ -93,6 +94,7 @@ class SequelizeAsistenciaRepository {
         id: usuario.id,
         asistencia_id: asistencia?.id || null,
         trabajador: `${usuario.nombres} ${usuario.apellidos}`,
+        tipo_documento: usuario.tipo_documento,
         dni: usuario.dni,
         fecha: fecha,
         hora_ingreso: asistencia?.hora_ingreso || "--",
@@ -121,10 +123,9 @@ class SequelizeAsistenciaRepository {
 
   // Registra el ingreso del usuario si aún no existe un registro para hoy
   async registrarIngreso(dataIngreso) {
-
-     // Fecha y hora actuales en Lima
-  const fecha = moment().tz("America/Lima").format("YYYY-MM-DD"); // para DATEONLY
-  const hora_ingreso   = moment().tz("America/Lima").format("HH:mm:ss");      // para campo hora_ingreso
+    // Fecha y hora actuales en Lima
+    const fecha = moment().tz("America/Lima").format("YYYY-MM-DD"); // para DATEONLY
+    const hora_ingreso = moment().tz("America/Lima").format("HH:mm:ss"); // para campo hora_ingreso
 
     // Verifica si ya existe una asistencia para la fecha proporcionada
     const yaRegistrado = await Asistencia.findOne({
@@ -168,10 +169,9 @@ class SequelizeAsistenciaRepository {
 
   // Registra la salida del usuario y calcula las horas extras si aplica
   async registrarSalida(dataSalida) {
-
-     // Fecha y hora actuales en Lima
-  const fecha = moment().tz("America/Lima").format("YYYY-MM-DD"); // para DATEONLY
-  const hora_salida   = moment().tz("America/Lima").format("HH:mm:ss");      // para campo hora_salida
+    // Fecha y hora actuales en Lima
+    const fecha = moment().tz("America/Lima").format("YYYY-MM-DD"); // para DATEONLY
+    const hora_salida = moment().tz("America/Lima").format("HH:mm:ss"); // para campo hora_salida
 
     // Buscar la asistencia de hoy del usuario
     const asistencia = await Asistencia.findOne({
@@ -287,6 +287,7 @@ class SequelizeAsistenciaRepository {
     const usuarios = await Usuario.findAll({
       where: {
         rol: ["TRABAJADOR", "LIDER TRABAJADOR"],
+        createdAt: { [Op.lte]: moment(fechaFin).endOf("day").toDate() }, // solo los que ya existían al final del rango
       },
     });
 
@@ -337,6 +338,7 @@ class SequelizeAsistenciaRepository {
       usuariosMap.set(usuario.id, {
         trabajador: `${usuario.nombres} ${usuario.apellidos}`,
         estado: usuario.estado,
+        createdAt: usuario.createdAt, // 👈 agregar esto
         asistenciaPorDia: {},
         asistencias: 0,
         tardanzas: 0,
@@ -450,10 +452,25 @@ class SequelizeAsistenciaRepository {
         ) {
           fila[`${diaSemana} (${fechaBonita})`] = "No aplica";
         } else {
-          const valor = user.asistenciaPorDia[fecha] || "Falta";
+          /* const valor = user.asistenciaPorDia[fecha] || "Falta";
           fila[`${diaSemana} (${fechaBonita})`] = valor;
           if (valor === "Falta" || valor === "🚫 Sin registro") {
             fila.faltas += 1;
+          } */
+
+          // Si el usuario fue creado después de esta fecha, no aplica
+          if (
+            moment(fecha, "YYYY-MM-DD").isBefore(
+              moment(user.createdAt, "YYYY-MM-DD")
+            )
+          ) {
+            fila[`${diaSemana} (${fechaBonita})`] = "No aplica";
+          } else {
+            const valor = user.asistenciaPorDia[fecha] || "Falta";
+            fila[`${diaSemana} (${fechaBonita})`] = valor;
+            if (valor === "Falta" || valor === "🚫 Sin registro") {
+              fila.faltas += 1;
+            }
           }
         }
       });
@@ -461,7 +478,7 @@ class SequelizeAsistenciaRepository {
       return fila;
     });
 
-    return resultado
+    return resultado;
   }
 
   // Verificar asistencia del usuario parar mostrar el boton de ingreso o salida en el frontend
@@ -677,7 +694,6 @@ class SequelizeAsistenciaRepository {
 
   // Obtener detalle asistencia del dia
   async obtenerDetalleAsistencia(asistencia_id) {
- 
     const asistencia = await Asistencia.findByPk(asistencia_id, {
       include: [
         {
