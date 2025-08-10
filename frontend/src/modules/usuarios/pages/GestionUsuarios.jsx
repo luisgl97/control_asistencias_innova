@@ -206,7 +206,7 @@ const GestionUsuarios = () => {
                            <TableHead className={"text-white"}>
                               Usuario
                            </TableHead>
-                           <TableHead className={"text-white"}>DNI</TableHead>
+                           <TableHead className={"text-white"}>DNI/CE</TableHead>
                            <TableHead className={"text-white"}>Email</TableHead>
                            <TableHead className={"text-white"}>Rol</TableHead>
                            <TableHead className={"text-white"}>Cargo</TableHead>
