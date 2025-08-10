@@ -17,7 +17,7 @@ const TablaObras = ({ searchTerm, filteredObras, fetchObras }) => {
 
 
     return (
-        <div className="md:px-20 px-3">
+        <div className=" px-3">
             <div className="rounded-md border ">
                 <Table className={"rounded-md overflow-hidden shadow-xl"}>
                     <TableHeader className="bg-innova-blue">
@@ -25,8 +25,7 @@ const TablaObras = ({ searchTerm, filteredObras, fetchObras }) => {
                             <TableHead className={"text-white"}>
                                 Obra
                             </TableHead>
-                            <TableHead className={"text-white"}>nombre</TableHead>
-                            <TableHead className={"text-white"}>direccion</TableHead>
+                            <TableHead className={"text-white"}>Direccion</TableHead>
                             <TableHead className={"text-white"}>
                                 Acciones
                             </TableHead>
@@ -48,14 +47,7 @@ const TablaObras = ({ searchTerm, filteredObras, fetchObras }) => {
                             filteredObras.map((obra, index) => (
 
                                 <TableRow key={obra.id} className={"hover:bg-innova-blue/10"}>
-                                    <TableCell>
-                                        <div className="flex flex-col">
-                                            <span className="font-medium">
-                                                {index + 1}
-                                            </span>
-                                        </div>
-                                    </TableCell>
-                                    <TableCell className="font-mono">
+                                    <TableCell className="font-medium">
                                         {obra.nombre}
                                     </TableCell>
                                     <TableCell>

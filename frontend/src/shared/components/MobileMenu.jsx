@@ -34,7 +34,7 @@ const MobileMenu = ({ user, logout }) => {
             variant="default"
             size="icon"
             onClick={toggleMobileMenu}
-            className="fixed bottom-24 right-6 z-50 sm:hidden w-14 h-14 rounded-full shadow-lg bg-innova-blue hover:bg-innova-blue/90 transition-all duration-200"
+            className="fixed bottom-10 left-8 z-50 sm:hidden w-14 h-14 rounded-full shadow-lg bg-innova-blue hover:bg-innova-blue/90 transition-all duration-200"
          >
             {isMobileMenuOpen ? (
                <X className="w-6 h-6 text-white" />
@@ -46,7 +46,7 @@ const MobileMenu = ({ user, logout }) => {
          {/* Mobile Menu Overlay */}
          {isMobileMenuOpen && (
             <div
-               className="fixed inset-0 bg-innova-blue/20 bg-opacity-50 z-40 sm:hidden"
+               className="fixed inset-0 bg-innova-blue/20 z-30 sm:hidden"
                onClick={closeMobileMenu}
             />
          )}
@@ -54,7 +54,7 @@ const MobileMenu = ({ user, logout }) => {
          {/* Mobile Menu Sidebar */}
          <div
             className={`
-          fixed top-0 left-0 h-full w-4/5 bg-white shadow-lg transform transition-transform duration-300 ease-in-out z-50 sm:hidden
+          fixed top-0 left-0 h-full w-4/5 bg-white shadow-lg transform transition-transform duration-300 ease-in-out z-40 sm:hidden
           ${isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"}
         `}
          >

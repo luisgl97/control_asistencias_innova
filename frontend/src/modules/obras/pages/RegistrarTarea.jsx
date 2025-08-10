@@ -51,7 +51,6 @@ const RegistrarTarea = () => {
           setFecha(data.datos.dia);
           setObraSeleccionada(data.datos.obra.id);
         }
-        console.log(data.datos);
       } catch (error) {
 
       }
@@ -251,21 +250,21 @@ const RegistrarTarea = () => {
             />
 
             {/* Botón Guardar */}
-            <div className="flex w-full justify-start gap-4 md:justify-center px-3 md:px-0">
+            <div className="flex w-full justify-end gap-4 md:justify-center px-3 md:px-0">
               <button
                 onClick={() => navigate("/registro-diario")}
-                className="bg-red-600 cursor-pointer hover:bg-red-800 text-white px-8 py-3 text-lg font-semibold shadow-lg rounded-lg flex items-center"
+                className=" cursor-pointer hover:bg-red-400 hover:text-white text-red-400 border-2 px-8 py-3 text-lg font-semibold shadow-lg rounded-lg flex items-center"
               >
-                <XCircle className="h-5 w-5 mr-2" />
+                <XCircle className="md:h-5 md:w-5 mr-2" />
                 <span className="hidden md:block">
                   Cancelar
                 </span>
               </button>
               <button
                 onClick={guardarRegistro}
-                className="bg-blue-600 cursor-pointer hover:to-blue-800 text-white px-8 py-3 text-lg font-semibold shadow-lg rounded-lg flex items-center"
+                className="bg-blue-500 hover:bg-blue-700 cursor-pointer text-white px-8 py-3 text-lg font-semibold shadow-lg rounded-lg flex items-center"
               >
-                <Save className="h-5 w-5 mr-2" />
+                <Save className="md:h-5 md:w-5 mr-2" />
                 {
                   id_registro_diario && dia ? (
                     <span className="hidden md:block">

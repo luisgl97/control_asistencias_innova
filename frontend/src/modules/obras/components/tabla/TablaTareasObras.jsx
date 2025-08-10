@@ -13,6 +13,18 @@ const TablaTareasObras = ({ tareas }) => {
         setExpandedIndex((prev) => (prev === index ? null : index));
     };
 
+    const toLocalDateOnly = (yyyyMmDd) => {
+        const [y, m, d] = yyyyMmDd.split("-").map(Number);
+        return new Date(y, m - 1, d); // Local midnight
+    };
+
+    const isTodayOrFuture = (yyyyMmDd) => {
+        const task = toLocalDateOnly(yyyyMmDd);
+        const now = new Date();
+        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        return task >= today;
+    };
+
     return (
         <div className="px-2 sm:px-4 md:px-6 bg-gradient-to-br">
             <div className="space-y-3 sm:space-y-4">
@@ -51,9 +63,8 @@ const TablaTareasObras = ({ tareas }) => {
                                     </div>
                                 </div>
 
-                                {/* Botones derecha (alineados y con mejor área táctil en móvil) */}
                                 <div className="flex flex-row items-center justify-end gap-1.5 sm:gap-2">
-                                    {new Date(tarea.dia) > new Date(Date.now() - 86400000) && (
+                                    {isTodayOrFuture(tarea.dia) && (
                                         <Button
                                             variant="ghost"
                                             size="icon"

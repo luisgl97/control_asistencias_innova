@@ -63,8 +63,9 @@ const ListarObras = () => {
                             <CardTitle className="text-xl md:text-2xl font-bold">
                                 Listado de Obras
                             </CardTitle>
-                            <CardDescription className={"text-xs md:text-sm"}>
-                                Administra las obras del sistema ( {totalObras} obras registradas )
+                            <CardDescription className={"text-xs md:text-sm flex flex-col md:flex-row "}>
+                                Administra las obras del sistema 
+                                <span>( {totalObras} obras registradas )</span>
                             </CardDescription>
                         </div>
                         <Button
@@ -90,7 +91,7 @@ const ListarObras = () => {
                         </div>
                     ) : (
                         <div className="flex flex-col">
-                            <div className="flex items-center gap-4 mb-6 px-3 md:px-20">
+                            <div className="flex items-center gap-4 mb-6 px-3 ">
                                 <div className="relative flex-1 max-w-sm">
                                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                                     <Input

@@ -14,16 +14,15 @@ const ListaTareasDiario = () => {
     const fetchListaTareasDiario = async () => {
         setLoading(true);
         const dataForm = {
-            fecha: fechaFiltro.toISOString().split('T')[0],
+            fecha: fechaFiltro,
         };
         try {
             const { data, status } = await obraService.listarRegistrosDiarios(dataForm);
-            console.log(data);
             if (status === 200) {
                 setTareas(data.datos);
             }
         } catch (error) {
-            console.log(error);
+            
         } finally {
             setLoading(false);
         }

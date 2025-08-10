@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { User, UserPlus, Users } from 'lucide-react'
 
 const TrabajadoresRegistrarTarea = ({ trabajadores, trabajadoresFiltrados, textFiltroTrabajador, handlerFiltro, tareas, asignarTrabajador, loading }) => {
+    let trabajadoresRestantes = (trabajadores.length - tareas[0].trabajadores.length);
     return (
         <div className=" shadow-lg w-full border-0 flex flex-col  rounded-xl">
             <div className="shadow-lg border-2  backdrop-blur-sm py-6 rounded-xl">
@@ -12,7 +13,7 @@ const TrabajadoresRegistrarTarea = ({ trabajadores, trabajadoresFiltrados, textF
                         <span>Trabajadores </span>
                     </CardTitle>
                     <p className="text-gray-600 text-md ml-4">
-                        {trabajadores.length} trabajadores
+                        Trabajadores disponibles {trabajadoresRestantes} de {trabajadores.length}
                     </p>
                 </CardHeader>
                 <input
@@ -44,7 +45,7 @@ const TrabajadoresRegistrarTarea = ({ trabajadores, trabajadoresFiltrados, textF
                                                     <div className="flex flex-col min-w-0">
                                                         <p className="font-medium text-slate-800 truncate">{trabajador.nombres} {trabajador.apellidos}</p>
                                                         <p className="text-sm text-slate-500 truncate">{trabajador.cargo}</p>
-                                                        <p className="text-xs text-slate-400">DNI: {trabajador.dni}</p>
+                                                        <p className="text-xs text-slate-400">{trabajador.tipo_documento}: {trabajador.dni}</p>
                                                     </div>
                                                 </div>
                                             </div>
