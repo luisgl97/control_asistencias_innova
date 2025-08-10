@@ -34,9 +34,11 @@ const AsistenciaPordia = () => {
    const [datosAsistenciaGuard, setDatosAsistenciaGuard] = useState([]);
    const [cargando, setCargando] = useState(true);
    const [error, setError] = useState(null);
-   const [fechaSeleccionada, setFechaSeleccionada] = useState(
-      new Date().toISOString().split("T")[0]
-   );
+   const hoy = new Date();
+hoy.setMinutes(hoy.getMinutes() - hoy.getTimezoneOffset());
+const [fechaSeleccionada, setFechaSeleccionada] = useState(
+  hoy.toISOString().split("T")[0]
+);
    const [nombreTrabajador, setNombreTrabajador] = useState("");
    const cargarDatos = async () => {
       try {

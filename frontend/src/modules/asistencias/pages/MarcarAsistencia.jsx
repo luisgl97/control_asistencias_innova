@@ -79,6 +79,7 @@ export default function MarcarAsistencia() {
       setUbicacionError(null);
       try {
          const { lat, lng } = await obtenerCoordenadas();
+
          const response = await axios.get(
             `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`
          );

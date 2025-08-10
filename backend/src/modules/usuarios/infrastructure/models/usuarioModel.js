@@ -54,6 +54,9 @@ const Usuario = sequelize.define(
         tipo_documento: {
       type: DataTypes.ENUM("DNI", "C.E."),
       defaultValue: "DNI"
+    },
+    fecha_baja: {
+      type: DataTypes.DATE,
     }
   },
   {

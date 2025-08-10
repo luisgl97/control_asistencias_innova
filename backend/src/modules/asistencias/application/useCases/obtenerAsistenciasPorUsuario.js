@@ -37,7 +37,7 @@ module.exports = async (idUsuario, fecha_inicio, fecha_fin, asistenciaRepository
         observados += 1;
         break;
       case "FALTA JUSTIFICADA":
-        faltas += 1;
+        observados += 1;
         break;
       default:
         // Si tiene estado desconocido, también lo puedes contar como falta u observado

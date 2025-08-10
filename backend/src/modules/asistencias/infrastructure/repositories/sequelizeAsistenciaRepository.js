@@ -95,11 +95,18 @@ class SequelizeAsistenciaRepository {
       ],
     });
 
-    // 3️⃣ Filtrar por fecha de primera asignación
-    const usuariosFiltrados = usuarios.filter((u) => {
-      const fechaInicio = fechaInicioPorUsuario[u.id];
-      return fechaInicio && fechaInicio <= fecha; // solo los que ya tienen asignación
-    });
+      // 3️⃣ Filtrar
+  const usuariosFiltrados = usuarios.filter((u) => {
+    const fechaInicio = fechaInicioPorUsuario[u.id];
+    if (!fechaInicio || fechaInicio > fecha) return false; // nunca asignado o asignado después
+
+    // si está inactivo y tiene fecha_baja definida, excluir si la fecha consultada es posterior
+    if (!u.estado && u.fecha_baja && moment(fecha).isAfter(moment(u.fecha_baja), "day")) {
+      return false;
+    }
+
+    return true;
+  });
 
     // 4️⃣ Construir listado
 
@@ -362,11 +369,14 @@ class SequelizeAsistenciaRepository {
       if (moment(fechaInicioObra).isAfter(fechaFin)) return; // su primer día está fuera del rango consultado
 
       const ultima = ultimaAsistenciaPorUsuario.get(usuario.id);
-     /*  if (
-        usuario.estado === false &&
-        (!ultima || moment(ultima).isBefore(fechaInicio))
-      )
-        return; */
+     // ❗ Si tiene fecha_baja, solo mostrarlo si su baja fue DESPUÉS del inicio del rango
+    if (
+      usuario.fecha_baja &&
+      moment(usuario.fecha_baja).isBefore(fechaInicio) &&
+      (!ultima || moment(ultima).isBefore(fechaInicio))
+    ) {
+      return; // ya estaba dado de baja antes del rango y sin asistencias en él
+    }
 
       usuariosMap.set(usuario.id, {
         trabajador: `${usuario.nombres} ${usuario.apellidos}`,

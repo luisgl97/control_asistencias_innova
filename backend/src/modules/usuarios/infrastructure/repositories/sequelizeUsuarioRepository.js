@@ -11,6 +11,11 @@ const {
 
 const { Op, Sequelize } = require("sequelize");
 
+const moment = require("moment");
+require("moment/locale/es"); // importa el idioma español
+require("moment-timezone");
+moment.locale("es"); // establece el idioma a español
+
 class SequelizeUsuarioRepository {
   getModel() {
     return require("../models/usuarioModel").Usuario; // Retorna el modelo de usuario
@@ -88,13 +93,16 @@ class SequelizeUsuarioRepository {
   async eliminarUsuario(id) {
     const usuario = await this.obtenerPorId(id);
     if (!usuario) return null;
-    return await usuario.update({ estado: false });
+    // Obtener fecha actual en Lima para comparar
+    const hoy = moment().tz("America/Lima").format("YYYY-MM-DD HH:mm:ss");
+await usuario.update({ estado: false, fecha_baja: hoy });
+ 
   }
 
   async activarUsuario(id) {
     const usuario = await this.obtenerPorId(id);
     if (!usuario) return null;
-    await usuario.update({ estado: true });
+    await usuario.update({ estado: true, fecha_baja: null });
     return usuario;
   }
 
