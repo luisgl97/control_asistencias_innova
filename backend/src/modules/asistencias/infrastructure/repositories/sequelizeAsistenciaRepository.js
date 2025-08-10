@@ -59,13 +59,28 @@ class SequelizeAsistenciaRepository {
     // Obtener fecha actual en Lima para comparar
     const hoy = moment().tz("America/Lima").format("YYYY-MM-DD");
 
+    // 1️⃣ Obtener fecha mínima de asignación por usuario
+    const primerosRegistros = await db.registros_diarios.findAll({
+      attributes: [
+        "usuario_id",
+        [fn("MIN", col("fecha")), "fecha_inicio_obra"],
+      ],
+      group: ["usuario_id"],
+      raw: true,
+    });
+
+    const fechaInicioPorUsuario = {};
+    primerosRegistros.forEach((r) => {
+      fechaInicioPorUsuario[r.usuario_id] = moment(r.fecha_inicio_obra).format(
+        "YYYY-MM-DD"
+      );
+    });
+
+    // 2️⃣ Obtener todos los usuarios activos que tienen asignación antes o igual a la fecha consultada
     const usuarios = await Usuario.findAll({
       where: {
         rol: ["TRABAJADOR", "LIDER TRABAJADOR"],
         estado: true,
-        [Op.and]: [
-          where(fn("DATE", col("usuarios.createdAt")), "<=", fecha), // usar nombre real de tabla
-        ],
       },
       attributes: {
         exclude: ["password"],
@@ -80,7 +95,15 @@ class SequelizeAsistenciaRepository {
       ],
     });
 
-    const listado = usuarios.map((usuario) => {
+    // 3️⃣ Filtrar por fecha de primera asignación
+    const usuariosFiltrados = usuarios.filter((u) => {
+      const fechaInicio = fechaInicioPorUsuario[u.id];
+      return fechaInicio && fechaInicio <= fecha; // solo los que ya tienen asignación
+    });
+
+    // 4️⃣ Construir listado
+
+    const listado = usuariosFiltrados.map((usuario) => {
       const asistencia = usuario.asistencias[0];
 
       // ⚙️ Decidir estado según si hay o no asistencia
@@ -284,36 +307,43 @@ class SequelizeAsistenciaRepository {
 
   // Obtiene el reporte de asistencias por fecha
   async obtenerReporteAsistencias(fechaInicio, fechaFin) {
+    // 1️⃣ Obtener la fecha mínima de asignación por usuario (su primer día real de trabajo)
+    const primerosRegistros = await db.registros_diarios.findAll({
+      attributes: [
+        "usuario_id",
+        [fn("MIN", col("fecha")), "fecha_inicio_obra"],
+      ],
+      group: ["usuario_id"],
+      raw: true,
+    });
+
+    const fechaInicioPorUsuario = {};
+    primerosRegistros.forEach((r) => {
+      fechaInicioPorUsuario[r.usuario_id] = moment(r.fecha_inicio_obra).format(
+        "YYYY-MM-DD"
+      );
+    });
+
+    // 2️⃣ Usuarios activos o que tuvieron asistencias en el rango
     const usuarios = await Usuario.findAll({
-      where: {
-        rol: ["TRABAJADOR", "LIDER TRABAJADOR"],
-        createdAt: { [Op.lte]: moment(fechaFin).endOf("day").toDate() }, // solo los que ya existían al final del rango
-      },
+      where: { rol: ["TRABAJADOR", "LIDER TRABAJADOR"] },
     });
 
     const asistencias = await Asistencia.findAll({
       where: {
-        fecha: {
-          [Op.between]: [fechaInicio, fechaFin],
-        },
+        fecha: { [Op.between]: [fechaInicio, fechaFin] },
       },
-      include: [
-        {
-          model: Usuario,
-          as: "usuario",
-        },
-      ],
+      include: [{ model: Usuario, as: "usuario" }],
       order: [["fecha", "ASC"]],
     });
 
     const usuariosMap = new Map();
     const ultimaAsistenciaPorUsuario = new Map();
 
-    // Agrupar asistencias por usuario y registrar la última fecha
+    // 3️⃣ Registrar última asistencia por usuario
     asistencias.forEach((asistencia) => {
       if (!asistencia.usuario) return;
       const usuarioId = asistencia.usuario.id;
-
       if (!ultimaAsistenciaPorUsuario.has(usuarioId)) {
         ultimaAsistenciaPorUsuario.set(usuarioId, asistencia.fecha);
       } else {
@@ -325,9 +355,12 @@ class SequelizeAsistenciaRepository {
       }
     });
 
-    // Inicializar estructura por usuario
+    // 4️⃣ Inicializar estructura filtrando por primer día en registros_diarios
     usuarios.forEach((usuario) => {
-      // Si el usuario está inactivo y no tiene asistencias dentro del rango, ignorarlo
+      const fechaInicioObra = fechaInicioPorUsuario[usuario.id];
+      if (!fechaInicioObra) return; // nunca ha sido asignado
+      if (moment(fechaInicioObra).isAfter(fechaFin)) return; // su primer día está fuera del rango consultado
+
       const ultima = ultimaAsistenciaPorUsuario.get(usuario.id);
       if (
         usuario.estado === false &&
@@ -338,18 +371,17 @@ class SequelizeAsistenciaRepository {
       usuariosMap.set(usuario.id, {
         trabajador: `${usuario.nombres} ${usuario.apellidos}`,
         estado: usuario.estado,
-        createdAt: usuario.createdAt, // 👈 agregar esto
         asistenciaPorDia: {},
         asistencias: 0,
         tardanzas: 0,
         faltas: 0,
         observados: 0,
-        ultimaFechaAsistencia:
-          ultimaAsistenciaPorUsuario.get(usuario.id) || null,
+        fechaInicioObra,
+        ultimaFechaAsistencia: ultima || null,
       });
     });
 
-    // Procesar asistencias
+    // 5️⃣ Procesar asistencias
     asistencias.forEach((asistencia) => {
       const usuarioId = asistencia.usuario?.id;
       if (!usuariosMap.has(usuarioId)) return;
@@ -358,6 +390,9 @@ class SequelizeAsistenciaRepository {
       const fechaKey = moment(asistencia.fecha)
         .tz("America/Lima")
         .format("YYYY-MM-DD");
+
+      // Saltar registros previos a su primer día de trabajo
+      if (fechaKey < usuarioData.fechaInicioObra) return;
 
       const entrada = asistencia.hora_ingreso
         ? moment(asistencia.hora_ingreso, "HH:mm:ss").format("HH:mm")
@@ -396,16 +431,18 @@ class SequelizeAsistenciaRepository {
             : usuarioData.tardanzas++;
           break;
         case "FALTA JUSTIFICADA":
+          
           usuarioData.asistenciaPorDia[fechaKey] = "📄 Falta Justificada";
-          usuarioData.faltas += 1;
+          usuarioData.observados += 1;
           break;
         default:
-          usuarioData.asistenciaPorDia[fechaKey] = "🚫 Sin registro";
-          usuarioData.faltas += 1;
+          /* usuarioData.asistenciaPorDia[fechaKey] = "🚫 Sin registro";
+          usuarioData.faltas += 1; */
           break;
       }
     });
 
+    // 6️⃣ Crear días del rango
     const diasDelRango = [];
     let fechaCursor = moment(fechaInicio).tz("America/Lima");
     const fechaFinMoment = moment(fechaFin).tz("America/Lima");
@@ -420,28 +457,37 @@ class SequelizeAsistenciaRepository {
             .locale("es")
             .format("dddd")
             .toLowerCase(),
-          fecha: fechaCursor.format("YYYY-MM-DD"),
+          fecha: fechaFormateada,
           fechaBonita: fechaCursor.format("DD-MM-YYYY"),
         });
       }
       fechaCursor = fechaCursor.add(1, "day");
     }
 
+    // 7️⃣ Armar resultado
     const resultado = Array.from(usuariosMap.values()).map((user) => {
       const fila = {
         trabajador: user.trabajador,
         asistencias: user.asistencias,
         tardanzas: user.tardanzas,
         observados: user.observados,
-        faltas: 0,
+        faltas: user.faltas,
       };
 
+       const hoy = moment().tz("America/Lima").format("YYYY-MM-DD");
+
       diasDelRango.forEach(({ diaSemana, fecha, fechaBonita }) => {
-        const hoy = moment().tz("America/Lima").format("YYYY-MM-DD");
+       
         const fechaReporte = moment(fecha, "YYYY-MM-DD");
         const ultimaFechaAsistencia = user.ultimaFechaAsistencia
           ? moment(user.ultimaFechaAsistencia, "YYYY-MM-DD")
           : null;
+
+        // 🔹 Saltar días previos a su primer día de trabajo
+        if (fecha < user.fechaInicioObra) {
+          fila[`${diaSemana} (${fechaBonita})`] = "No aplica";
+          return;
+        }
 
         if (fecha > hoy) {
           fila[`${diaSemana} (${fechaBonita})`] = "Pendiente";
@@ -452,25 +498,20 @@ class SequelizeAsistenciaRepository {
         ) {
           fila[`${diaSemana} (${fechaBonita})`] = "No aplica";
         } else {
-          /* const valor = user.asistenciaPorDia[fecha] || "Falta";
-          fila[`${diaSemana} (${fechaBonita})`] = valor;
-          if (valor === "Falta" || valor === "🚫 Sin registro") {
-            fila.faltas += 1;
-          } */
+          let valor = user.asistenciaPorDia[fecha];
 
-          // Si el usuario fue creado después de esta fecha, no aplica
-          if (
-            moment(fecha, "YYYY-MM-DD").isBefore(
-              moment(user.createdAt, "YYYY-MM-DD")
-            )
-          ) {
-            fila[`${diaSemana} (${fechaBonita})`] = "No aplica";
-          } else {
-            const valor = user.asistenciaPorDia[fecha] || "Falta";
-            fila[`${diaSemana} (${fechaBonita})`] = valor;
-            if (valor === "Falta" || valor === "🚫 Sin registro") {
-              fila.faltas += 1;
+          if (!valor) {
+            if (fecha === hoy) {
+              valor = "Sin registro";
+            } else {
+              valor = "Falta";
             }
+          }
+
+          fila[`${diaSemana} (${fechaBonita})`] = valor;
+
+          if (valor === "Falta") {
+            fila.faltas += 1;
           }
         }
       });
