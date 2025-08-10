@@ -80,7 +80,7 @@ class SequelizeAsistenciaRepository {
     const usuarios = await Usuario.findAll({
       where: {
         rol: ["TRABAJADOR", "LIDER TRABAJADOR"],
-        estado: true,
+        //estado: true,
       },
       attributes: {
         exclude: ["password"],
@@ -362,11 +362,11 @@ class SequelizeAsistenciaRepository {
       if (moment(fechaInicioObra).isAfter(fechaFin)) return; // su primer día está fuera del rango consultado
 
       const ultima = ultimaAsistenciaPorUsuario.get(usuario.id);
-      if (
+     /*  if (
         usuario.estado === false &&
         (!ultima || moment(ultima).isBefore(fechaInicio))
       )
-        return;
+        return; */
 
       usuariosMap.set(usuario.id, {
         trabajador: `${usuario.nombres} ${usuario.apellidos}`,
@@ -477,44 +477,27 @@ class SequelizeAsistenciaRepository {
        const hoy = moment().tz("America/Lima").format("YYYY-MM-DD");
 
       diasDelRango.forEach(({ diaSemana, fecha, fechaBonita }) => {
-       
-        const fechaReporte = moment(fecha, "YYYY-MM-DD");
-        const ultimaFechaAsistencia = user.ultimaFechaAsistencia
-          ? moment(user.ultimaFechaAsistencia, "YYYY-MM-DD")
-          : null;
+      if (fecha < user.fechaInicioObra) {
+        fila[`${diaSemana} (${fechaBonita})`] = "No aplica";
+        return;
+      }
 
-        // 🔹 Saltar días previos a su primer día de trabajo
-        if (fecha < user.fechaInicioObra) {
-          fila[`${diaSemana} (${fechaBonita})`] = "No aplica";
-          return;
-        }
+      let valor = user.asistenciaPorDia[fecha];
 
-        if (fecha > hoy) {
-          fila[`${diaSemana} (${fechaBonita})`] = "Pendiente";
-        } else if (
-          !user.estado &&
-          ultimaFechaAsistencia &&
-          fechaReporte.isAfter(ultimaFechaAsistencia, "day")
-        ) {
-          fila[`${diaSemana} (${fechaBonita})`] = "No aplica";
+      if (!valor) {
+        if (fecha === hoy) {
+          valor = "Sin registro";
         } else {
-          let valor = user.asistenciaPorDia[fecha];
-
-          if (!valor) {
-            if (fecha === hoy) {
-              valor = "Sin registro";
-            } else {
-              valor = "Falta";
-            }
-          }
-
-          fila[`${diaSemana} (${fechaBonita})`] = valor;
-
-          if (valor === "Falta") {
-            fila.faltas += 1;
-          }
+          valor = "Falta";
         }
-      });
+      }
+
+      fila[`${diaSemana} (${fechaBonita})`] = valor;
+
+      if (valor === "Falta") {
+        fila.faltas += 1;
+      }
+    });
 
       return fila;
     });
