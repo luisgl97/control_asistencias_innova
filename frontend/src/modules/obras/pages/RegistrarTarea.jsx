@@ -250,7 +250,7 @@ const RegistrarTarea = () => {
             />
 
             {/* Botón Guardar */}
-            <div className="flex w-full justify-start gap-4 md:justify-center px-3 md:px-0">
+            <div className="flex w-full justify-end gap-4 md:justify-center px-3 md:px-0">
               <button
                 onClick={() => navigate("/registro-diario")}
                 className=" cursor-pointer hover:bg-red-400 hover:text-white text-red-400 border-2 px-8 py-3 text-lg font-semibold shadow-lg rounded-lg flex items-center"
