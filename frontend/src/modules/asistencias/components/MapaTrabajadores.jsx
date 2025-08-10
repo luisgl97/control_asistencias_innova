@@ -170,7 +170,7 @@ const MapaTrabajadores = () => {
             </Select>
          </section>
 
-         <section className="h-[480px] md:h-auto">
+         <section className="h-[70dvh] md:h-[80vh] px-2 md:px-0">
             <MapContainer
                center={[-12.1268, -77.0167]}
                zoom={15}
