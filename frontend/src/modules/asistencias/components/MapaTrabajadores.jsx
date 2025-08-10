@@ -170,11 +170,11 @@ const MapaTrabajadores = () => {
             </Select>
          </section>
 
-         <section>
+         <section className="h-[480px] md:h-auto">
             <MapContainer
                center={[-12.1268, -77.0167]}
                zoom={15}
-               style={{ height: "100vh", width: "100%", zIndex: 1 }}
+               className="h-full w-full z-0"
             >
                <TileLayer
                   url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"

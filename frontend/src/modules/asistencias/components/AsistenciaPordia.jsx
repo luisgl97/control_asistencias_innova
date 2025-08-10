@@ -45,6 +45,8 @@ const AsistenciaPordia = () => {
          const res = await asistenciaService.asistenciasDelDia({
             fecha: fechaSeleccionada,
          });
+         console.log(res.data.datos);
+         
          setDatosAsistencia(res.data.datos);
          setDatosAsistenciaGuard(res.data.datos);
       } catch (err) {
@@ -116,7 +118,7 @@ const AsistenciaPordia = () => {
                   </div>
                   <div className="w-full md:w-auto">
                      <Input
-                        placeholder="Nombre trabajador"
+                        placeholder="Buscar trabajador"
                         value={nombreTrabajador}
                         onChange={(e) => setNombreTrabajador(e.target.value)}
                         className="w-full md:min-w-[200px]"
@@ -172,7 +174,7 @@ const AsistenciaPordia = () => {
                                  {trabajador.trabajador}
                                  <br />
                                  <p className="text-xs">
-                                    DNI: {trabajador.dni}
+                                    {trabajador.tipo_documento}: {trabajador.dni}
                                  </p>
                               </TableCell>
                               <TableCell className="text-center">

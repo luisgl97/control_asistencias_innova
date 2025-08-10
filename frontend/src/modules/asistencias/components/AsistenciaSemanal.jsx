@@ -219,7 +219,7 @@ export default function AsistenciaSemanal() {
 
                   <div className="w-full md:w-auto">
                      <Input
-                        placeholder="Nombre trabajador"
+                        placeholder="Buscar trabajador"
                         value={nombreTrabajador}
                         onChange={(e) => setNombreTrabajador(e.target.value)}
                         className="w-full md:min-w-[200px]"
