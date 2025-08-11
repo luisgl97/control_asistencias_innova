@@ -1,5 +1,5 @@
 // 🚀 BLOQUEO TOTAL DE 'UNDICI' Y WEBASSEMBLY DESDE EL CORE
-process.env.UNDIICI_NO_WASM = "1";
+process.env.UNDICI_NO_WASM = "1";
 process.env.UNDICI_DISABLE_GLOBAL = "true";
 process.env.WASM_DISABLE = "1";
 process.env.NODE_NO_WARNINGS = "1";
@@ -21,12 +21,14 @@ const path = require("path");
 
 const USE_ORIGIN=process.env.NODE_ENV === "production" ?[process.env.CORS_ORIGINS_PROD]:["http://localhost:5173"];
 
-app.use("/reportes", cors({
+const REPORTES_BASE_PATH = process.env.NODE_ENV === "production" ? "/backend/reportes" : "/reportes";
+
+app.use(REPORTES_BASE_PATH, cors({
   origin: USE_ORIGIN,
   methods: ["GET"],
 }));
 
-app.use("/reportes", express.static(path.join(__dirname, "../public/reportes")));  
+app.use(REPORTES_BASE_PATH, express.static(path.join(__dirname, "../public/reportes")));  
 
 
 // 🔥 Detectamos si estamos en producción o desarrollo

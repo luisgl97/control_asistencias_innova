@@ -57,3 +57,5 @@ node_modules/
 # Ignorar archivos temporales y de cache
 .DS_Store
 Thumbs.db
+#Ingonorar la carpeta public dentro del backend:
+/backend/public/*
