@@ -38,6 +38,10 @@ const calcularHashSHA256 = async (arrayBuffer) => {
 
 // Función principal para generar PDF por cada trabajador con hash + QR
 export const generarPDFMasivoConQR = async (asistenciasPorTrabajador, mes, anio, creadoPor = 1) => {
+    const API_URL =
+   import.meta.env.MODE === "production"
+      ? "https://marcate.grupoinnova.pe/backend"
+      : "http://localhost:4001";
     const imageBase64 = await toBase64("/images/logo_azul.png");
     const marcateLogoBase64 = await toBase64(logotipo);
     
@@ -243,7 +247,7 @@ export const generarPDFMasivoConQR = async (asistenciasPorTrabajador, mes, anio,
                     const hashFinal = await calcularHashSHA256(bufferTemp);
 
                     // Generamos QR con la URL destino del archivo
-                    const urlPDF = `${window.location.origin}/reportes/${carpeta}/${nombreArchivo}`;
+                    const urlPDF = `${API_URL}/reportes/${carpeta}/${nombreArchivo}`;
                     const qrDataUrl = await QRCode.toDataURL(urlPDF);
 
                      // Regeneramos PDF definitivo con hash real
