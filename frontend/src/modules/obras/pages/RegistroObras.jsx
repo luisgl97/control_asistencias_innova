@@ -10,7 +10,7 @@ import iconShadow from "leaflet/dist/images/marker-shadow.png";
 import { Circle, MapContainer, Marker, Popup, TileLayer, useMapEvents } from "react-leaflet";
 import { toast } from "sonner";
 import AgregarObraForm from "../components/form/AgregarObraForm";
-import { getCoordsFromAddress } from "../services/getCoordsFromAddress";
+import localizacionService from "../services/localizacionService";
 import obraService from "../services/obraService";
 
 let DefaultIcon = L.icon({
@@ -116,16 +116,15 @@ const RegistroObras = () => {
         setIsLoading(true);
         try {
             setIsLoadingMap(true);
-            const result = await getCoordsFromAddress(form.direccion);
+            const { data, status } = await localizacionService.obtenerLatitudLongitud(form.direccion);
 
-            if (result && result.lat && result.lng) {
-                const coords = [result.lat, result.lng];
-
+            if (status === 200) {
+                const coords = [data.lat, data.lng];
                 setLatitudIncial(coords); // actualiza centro
                 setForm((prevForm) => ({
                     ...prevForm,
-                    latitud: result.lat,
-                    longitud: result.lng,
+                    latitud: data.lat,
+                    longitud: data.lng,
                 }));
                 setPosition(coords);
 
@@ -158,7 +157,7 @@ const RegistroObras = () => {
     }
 
     const handleChange = (e) => {
-        if (e.target.name === "nombre" ||e.target.name === "direccion") {
+        if (e.target.name === "nombre" || e.target.name === "direccion") {
             setForm((prevForm) => ({
                 ...prevForm,
                 [e.target.name]: e.target.value.toUpperCase(),
@@ -227,7 +226,7 @@ const RegistroObras = () => {
                 latitud: form.latitud ? form.latitud.toString() : "",
                 longitud: form.longitud ? form.longitud.toString() : "",
             }
-            if(form.id !== null) {
+            if (form.id !== null) {
                 const { status, data, } = await obraService.actualizar(dataForm);
                 if (status === 200) {
                     toast.success(data.mensaje);
@@ -236,7 +235,7 @@ const RegistroObras = () => {
                 } else {
                     toast.error("Error al registrar la obra");
                 }
-            }else{
+            } else {
                 const { status, data, } = await obraService.crear(dataForm);
                 if (status === 201) {
                     toast.success(data.mensaje);
