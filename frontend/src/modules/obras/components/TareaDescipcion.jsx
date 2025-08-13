@@ -2,7 +2,6 @@ import { ClipboardList, User, Users } from 'lucide-react'
 import { Badge } from "@/components/ui/badge"
 
 const TareaDescipcion = ({ tarea, index }) => {
-
     return (
         <div key={index} className="border border-slate-200 rounded-xl p-6 hover:border-blue-300 transition-colors bg-slate-50/50">
             <div className="flex items-start justify-end">

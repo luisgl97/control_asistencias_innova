@@ -1,11 +1,11 @@
 import { Button } from "@/components/ui/button";
 import { CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Building2, Calendar, ChevronDown, ChevronRight, Edit3, Users } from "lucide-react";
+import { Building2, Calendar, ChevronDown, ChevronRight, Copy, Edit3, Users } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import TareaDescipcion from "../TareaDescipcion";
 
-const TablaTareasObras = ({ tareas }) => {
+const TablaTareasObras = ({ tareas, copyToClipboard }) => {
     const [expandedIndex, setExpandedIndex] = useState(null);
     const navigate = useNavigate();
 
@@ -24,6 +24,7 @@ const TablaTareasObras = ({ tareas }) => {
         const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
         return task >= today;
     };
+
 
     return (
         <div className="px-2 sm:px-4 md:px-6 bg-gradient-to-br">
@@ -64,6 +65,20 @@ const TablaTareasObras = ({ tareas }) => {
                                 </div>
 
                                 <div className="flex flex-row items-center justify-end gap-1.5 sm:gap-2">
+
+
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="text-white hover:bg-white/20 h-9 w-9 sm:h-8 sm:w-8"
+                                        onClick={() => copyToClipboard(tarea, index, "uno")}
+                                        aria-label="Copiar información"
+                                        title="Copiar información"
+                                    >
+                                        <Copy className="h-4 w-4" />
+                                    </Button>
+
+
                                     {isTodayOrFuture(tarea.dia) && (
                                         <Button
                                             variant="ghost"
