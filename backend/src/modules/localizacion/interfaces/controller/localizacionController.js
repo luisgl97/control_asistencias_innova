@@ -5,7 +5,6 @@ const LocalizacionController = {
     obtenerLatLong: async (req, res) => {
         try {
             const { direccion } = req.body;
-            console.log("la direccion",direccion)
             if (!direccion || typeof direccion !== 'string' || !direccion.trim()) {
                 return res.status(400).json({ mensaje: 'El campo "direccion" es requerido' });
             }
