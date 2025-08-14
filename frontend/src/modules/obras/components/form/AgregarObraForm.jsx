@@ -19,7 +19,8 @@ const AgregarObraForm = ({
     buscarUbicacion,
     handleRadioChange,
     showRadio,
-    handleSubmit
+    handleSubmit,
+    isLoadingBtnSave
 }) => {
     const navigate = useNavigate()
 
@@ -131,7 +132,7 @@ const AgregarObraForm = ({
                     className="bg-blue-500 hover:bg-blue-700  transition-all text-white cursor-pointer"
                     type="submit"
                     form="form-usuario"
-                    disabled={isLoading}
+                    disabled={isLoading || isLoadingBtnSave}
                     onClick={handleSubmit}
                 >
                     {isLoading ? (

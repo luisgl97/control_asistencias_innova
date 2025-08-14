@@ -1,5 +1,5 @@
 import usuarioService from "@/modules/usuarios/services/usuarioService"
-import { Save, XCircle } from 'lucide-react'
+import { CookingPot, Save, XCircle } from 'lucide-react'
 import { useEffect, useState } from "react"
 import { useNavigate, useSearchParams } from "react-router-dom"
 import { toast } from "sonner"
@@ -7,6 +7,7 @@ import InformeGeneralTareaRegistrar from "../components/InformeGeneralTareaRegis
 import TareaRegistroDetallado from "../components/TareaRegistroDetallado"
 import TrabajadoresRegistrarTarea from "../components/TrabajadoresRegistrarTarea"
 import obraService from "../services/obraService"
+import validarTarea from "../utils/validarTarea"
 
 
 const RegistrarTarea = () => {
@@ -27,6 +28,7 @@ const RegistrarTarea = () => {
 
   // ?? loading
   const [loading, setLoading] = useState(false);
+  const [isLoadingBtnSave, setIsLoadingBtnSave] = useState(false); // ** Desactiva el boton de guardar
 
   // ?? friltro
   const [trabajadoresFiltrados, setTrabajadoresFiltrados] = useState([])
@@ -42,6 +44,7 @@ const RegistrarTarea = () => {
   useEffect(() => {
     const obtenerRegistroDiarioPorId = async () => {
       try {
+        setIsLoadingBtnSave(true);
         const { data, status } = await obraService.obtenerRegistroDiarioPorId({ obra_id: id_registro_diario, fecha: dia });
         if (status === 200) {
           setObraObtenida(data.datos);
@@ -53,6 +56,8 @@ const RegistrarTarea = () => {
         }
       } catch (error) {
 
+      } finally {
+        setIsLoadingBtnSave(false);
       }
     }
     obtenerRegistroDiarioPorId()
@@ -61,6 +66,7 @@ const RegistrarTarea = () => {
   useEffect(() => {
     const obtenerDatosIniciales = async () => {
       // setFecha()
+      setIsLoadingBtnSave(true);
       setLoading(true)
       try {
         // ** obtener obras
@@ -79,6 +85,7 @@ const RegistrarTarea = () => {
       }
       finally {
         setLoading(false)
+        setIsLoadingBtnSave(false);
       }
     }
     obtenerDatosIniciales()
@@ -87,12 +94,15 @@ const RegistrarTarea = () => {
   useEffect(() => {
     const obtenerObrasRegistradas = async () => {
       try {
+        setIsLoadingBtnSave(true);
         const { data, status } = await obraService.listarRegistrosDiarios({ fecha });
         if (status === 200) {
           setObrasRegistradas(data.datos.map(item => item.obra.id));
         }
       } catch (error) {
         toast.error("Error al obtener obras registradas");
+      } finally {
+        setIsLoadingBtnSave(false);
       }
     }
     obtenerObrasRegistradas()
@@ -149,10 +159,18 @@ const RegistrarTarea = () => {
     }
 
     try {
+      setIsLoadingBtnSave(true)
+
+      const resultadoValidacion = validarTarea(tareas[0]);
+      if (!resultadoValidacion.valido) {
+        toast.error(resultadoValidacion.mensaje);
+        return;
+      }
       if (id_registro_diario && dia) {
         const { data, status } = await obraService.actualizarTarea(registro)
         if (status === 200) {
           toast.success(data.mensaje)
+          setTareas([])
           navigate("/registro-diario")
         }
       } else {
@@ -160,11 +178,15 @@ const RegistrarTarea = () => {
         // Aquí iría la lógica para guardar en la base de datos
         if (status === 201) {
           toast.success(data.mensaje)
+          setTareas([])
           navigate("/registro-diario")
         }
       }
     } catch (error) {
+      // console.log(error)
       toast.error(error.response.data.mensaje)
+    } finally {
+      setIsLoadingBtnSave(false)
     }
   }
 
@@ -262,7 +284,11 @@ const RegistrarTarea = () => {
               </button>
               <button
                 onClick={guardarRegistro}
-                className="bg-blue-500 hover:bg-blue-700 cursor-pointer text-white px-8 py-3 text-lg font-semibold shadow-lg rounded-lg flex items-center"
+                disabled={isLoadingBtnSave}
+                className={`
+                  ${isLoadingBtnSave ? "bg-gray-200 text-gray-500" : "bg-blue-500 hover:bg-blue-700"}
+                  cursor-pointer text-white px-8 py-3 text-lg font-semibold shadow-lg rounded-lg flex items-center
+                `}
               >
                 <Save className="md:h-5 md:w-5 mr-2" />
                 {

@@ -79,12 +79,14 @@ const RegistroObras = () => {
     // ?? Loading
     const [isLoading, setIsLoading] = useState(false); // ** Guarada el estado de carga
     const [isLoadingMap, setIsLoadingMap] = useState(false); // ** Render del Mapa despues de buscar
+    const [isLoadingBtnSave, setIsLoadingBtnSave] = useState(false); // ** Desactiva el boton de guardar
 
     const mapRef = useRef();
 
 
     const fetchObra = async () => {
         try {
+            setIsLoadingBtnSave(true);
             setIsLoading(true);
             setIsLoadingMap(true);
             const { data, status } = await obraService.obtnerObraConId(id);
@@ -103,6 +105,7 @@ const RegistroObras = () => {
         } finally {
             setIsLoadingMap(false);
             setIsLoading(false);
+            setIsLoadingBtnSave(false);
         }
     }
 
@@ -115,6 +118,7 @@ const RegistroObras = () => {
         }
         setIsLoading(true);
         try {
+            setIsLoadingBtnSave(true);
             setIsLoadingMap(true);
             const { data, status } = await localizacionService.obtenerLatitudLongitud(form.direccion);
 
@@ -141,6 +145,7 @@ const RegistroObras = () => {
         } finally {
             setIsLoading(false);
             setIsLoadingMap(false);
+            setIsLoadingBtnSave(false);
         }
     };
 
@@ -218,6 +223,7 @@ const RegistroObras = () => {
     }
 
     const handleSubmit = async (e) => {
+        setIsLoadingBtnSave(true);
         e.preventDefault();
         setIsLoading(true);
         try {
@@ -250,6 +256,7 @@ const RegistroObras = () => {
             toast.error("Hubo un error al crear la obra");
         } finally {
             setIsLoading(false);
+            setIsLoadingBtnSave(false);
         }
     }
 
@@ -266,6 +273,7 @@ const RegistroObras = () => {
                     handleRadioChange={handleRadioChange}
                     showRadio={showRadio}
                     handleSubmit={handleSubmit}
+                    isLoadingBtnSave={isLoadingBtnSave}
                 />
             </div>
 
