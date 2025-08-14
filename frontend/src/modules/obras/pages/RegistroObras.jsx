@@ -98,7 +98,7 @@ const RegistroObras = () => {
                 });
                 setPosition([data.obra.latitud, data.obra.longitud]);
                 setLatitudIncial([data.obra.latitud, data.obra.longitud]);
-                setZoom(20);
+                setZoom(18);
             }
         } catch (error) {
             toast.error("Hubo un error al obtener la obra");
@@ -136,7 +136,7 @@ const RegistroObras = () => {
                 if (mapRef.current) {
                     mapRef.current.setView(coords, 16); // ** zoom
                 }
-                setZoom(20);
+                setZoom(18);
             } else {
                 toast.error("No se pudo localizar la dirección.");
             }
