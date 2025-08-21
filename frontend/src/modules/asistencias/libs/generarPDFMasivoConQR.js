@@ -213,9 +213,9 @@ export const generarPDFMasivoConQR = async (asistenciasPorTrabajador, mes, anio,
                                     { maxWidth: qrWidth - 40 }
                                 );
 
-                                doc.setTextColor(200, 0, 0); 
+                                doc.setTextColor(0, 0, 0); 
                                 doc.setFontSize(8);
-                                doc.text("DOCUMENTO EMITIDO OFICIALMENTE", qrX + 2, qrY + 38);
+                                doc.text("DOCUMENTO EMITIDO POR GRUPO INNOVA", qrX + 2, qrY + 38);
                                 doc.setTextColor(0);
                             }
                         }
