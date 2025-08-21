@@ -64,6 +64,7 @@ class SequelizeRegistrosDiariosRepository {
         }
       ]
     });
+
     return registrosDiarios;
   }
 
@@ -123,6 +124,9 @@ class SequelizeRegistrosDiariosRepository {
   );
 }
 
+async eliminarRegistroDiario(obra_id, fecha) {
+  return RegistrosDiarios.destroy({ where: { obra_id, fecha } });
+}
 
 }
 

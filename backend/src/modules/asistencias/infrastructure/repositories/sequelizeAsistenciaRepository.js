@@ -789,6 +789,16 @@ class SequelizeAsistenciaRepository {
       asistencia: resultado,
     };
   }
+
+  // Obtener asistencias por lista de usuarios y fecha
+  async obtenerAsistenciasPorListaDeUsuariosYFecha(usuarios, fecha) {
+    return await Asistencia.findAll({
+      where: {
+        usuario_id: usuarios,
+        fecha: fecha,
+      },
+    });
+  }
 }
 
 module.exports = SequelizeAsistenciaRepository;

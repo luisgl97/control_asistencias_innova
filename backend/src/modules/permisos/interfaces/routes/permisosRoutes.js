@@ -16,6 +16,8 @@ router.get("/usuario/:id", permisoController.obtenerPermisosPorUsuarioId);
 router.post("/registrar-salida-anticipada", permisoController.registrarPermisoSalidaAnticipada);
 
 // 🔒 Ruta protegida, solo para usuarios con rol de gerente o administrador
-router.post('/autorizar-falta-justificada', autorizarRol(["GERENTE", "ADMINISTRADOR", "LIDER TRABAJADOR"]), permisoController.autorizarPermisoFaltaJustificada);
+router.post('/autorizar-falta-justificada', autorizarRol(["GERENTE", "ADMINISTRADOR"]), permisoController.autorizarPermisoFaltaJustificada);
+router.post('/autorizar-tardanza-justificada', autorizarRol(["GERENTE", "ADMINISTRADOR"]), permisoController.autorizarPermisoTardanzaJustificada);
+
 
 module.exports = router;
