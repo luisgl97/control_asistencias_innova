@@ -19,7 +19,7 @@ const app = express();
 // Habilitamos la ruta pública para que puedan acceder al PDF mediante un link o QR
 const path = require("path");
 
-const USE_ORIGIN=process.env.NODE_ENV === "production" ?[process.env.CORS_ORIGINS_PROD]:["http://localhost:5173"];
+const USE_ORIGIN=process.env.NODE_ENV === "production" ?[process.env.CORS_ORIGINS_PROD, process.env.CORS_ORIGINS_BACKEND_ERP]:["http://localhost:5173","http://localhost:3001"];
 
 const REPORTES_BASE_PATH = process.env.NODE_ENV === "production" ? "/backend/reportes" : "/reportes";
 
@@ -29,7 +29,6 @@ app.use(REPORTES_BASE_PATH, cors({
 }));
 
 app.use(REPORTES_BASE_PATH, express.static(path.join(__dirname, "../public/reportes")));  
-
 
 // 🔥 Detectamos si estamos en producción o desarrollo
 const PORT = process.env.PORT || 4001;
