@@ -21,6 +21,7 @@ import { useAuth } from "@/context/AuthContext";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { normalizarTexto } from "../libs/mormalizarTextoBusqueda";
+import { ModalJustificarPermiso } from "./ModalJustificarPermiso";
 
 const estilos = {
    ASISTIO: "bg-green-50 text-green-700 border-green-200",
@@ -47,6 +48,7 @@ const [fechaSeleccionada, setFechaSeleccionada] = useState(
          const res = await asistenciaService.asistenciasDelDia({
             fecha: fechaSeleccionada,
          });
+         console.log(res.data.datos);
          
          setDatosAsistencia(res.data.datos);
          setDatosAsistenciaGuard(res.data.datos);
@@ -217,11 +219,22 @@ const [fechaSeleccionada, setFechaSeleccionada] = useState(
                                  <AsistenciaDetailDialog
                                     asistenciaId={trabajador.asistencia_id}
                                  />
-                                 {trabajador.estado === "SIN REGISTRO" && (
-                                    <ModalJustificarFalta
+                                 {(trabajador.estado === "SIN REGISTRO"||trabajador.estado === "FALTA") && (
+                                    <ModalJustificarPermiso
                                        fecha_dia={trabajador.fecha}
                                        id={trabajador.id}
                                        cargarDatos={cargarDatos}
+                                       tipo={"FALTA"}
+                                    />
+                                 )}
+                                 {(trabajador.estado === "TARDANZA") && (
+                                    <ModalJustificarPermiso
+                                       fecha_dia={trabajador.fecha}
+                                       id={trabajador.id}
+                                       cargarDatos={cargarDatos}
+                                       tipo={"TARDANZA"}
+                                       asistencia_id={trabajador.asistencia_id}
+
                                     />
                                  )}
                                  {trabajador.asistencia_id &&
