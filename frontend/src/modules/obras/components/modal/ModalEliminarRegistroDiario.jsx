@@ -26,14 +26,14 @@ const ModalEliminarRegistroDiario = ({
             fecha: fecha,
             obra_id: id,
          };
-         console.log(payLoad);
+        
          const res=await obraService.eliminarRegistroDiario(payLoad);
-         console.log('La respuesta es. ',res);
+         
          await fetchListaTareasDiario()
          setOpen(false);
          toast.success("Registro eliminado exitosamente");
       } catch (error) {
-        console.log(error);
+        
         if(error?.response?.data?.mensaje){
             toast.error(error?.response?.data?.mensaje);
         }else{
@@ -51,9 +51,9 @@ const ModalEliminarRegistroDiario = ({
                size="icon"
                aria-label="Eliminar registro"
                title="Eliminar registro"
-               className={"text-white hover:bg-white/20 h-9 w-9 sm:h-8 sm:w-8"}
+               className="text-white cursor-pointer hover:bg-white/20 hover:text-white h-9 w-9 sm:h-8 sm:w-8"
             >
-               <Trash className="h4 w-4"/>
+               <Trash className="size-4.5"/>
             </Button>
          </AlertDialogTrigger>
 

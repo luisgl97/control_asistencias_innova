@@ -40,7 +40,7 @@ module.exports = async (obra_id, fecha ,registrosDiariosRepository, asistenciasR
         };
     }
    
-    await registrosDiariosRepository.eliminarRegistroDiario(obra_id, fecha);
+    await registrosDiariosRepository.eliminarTareaRegistroDiario(obra_id, fecha);
     
     return {
         codigo: 200,

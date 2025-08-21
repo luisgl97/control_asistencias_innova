@@ -126,7 +126,7 @@ export default function MarcarAsistencia() {
             obra.latitud,
             obra.longitud
          );
-         if (distancia < 60) {
+         if (distancia <100) {
             obraEncontrada = obra;
             break;
          }

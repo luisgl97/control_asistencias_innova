@@ -48,8 +48,7 @@ const [fechaSeleccionada, setFechaSeleccionada] = useState(
          const res = await asistenciaService.asistenciasDelDia({
             fecha: fechaSeleccionada,
          });
-         console.log(res.data.datos);
-         
+     
          setDatosAsistencia(res.data.datos);
          setDatosAsistenciaGuard(res.data.datos);
       } catch (err) {

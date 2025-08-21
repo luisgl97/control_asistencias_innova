@@ -28,8 +28,9 @@ module.exports = async (asignado_por, registroDiarioData, registrosDiariosReposi
   // Ejecutar cambios de forma secuencial
 for (const id of aEliminar) {
 
-  await registrosDiariosRepository.eliminarRegistroDiario({ obra_id, usuario_id: id, fecha });
+  await registrosDiariosRepository.eliminarRegistroDiario({ obra_id, usuario_id: id, fecha: fecha });
 }
+
 
 for (const id of aCrear) {
  

@@ -60,9 +60,9 @@ export function ModalJustificarPermiso({
       const payLoad = { ...form };
       if (tipo === "TARDANZA" && asistencia_id) {
          payLoad.asistencia_id = asistencia_id;
-         console.log(payLoad);
+         
       }
-      console.log(payLoad);
+      
       
       try {
          setLoading(true);
@@ -71,7 +71,7 @@ export function ModalJustificarPermiso({
             toast.success("Falta Justificada registrada");
          } else if (tipo === "TARDANZA") {
             const res=await asistenciaService.registrarTardanzaJustificada(payLoad);
-            console.log(res);
+            
             toast.success("Tardanza Justificada registrada");
          } else {
             toast.warning("El tipo de permiso no existe");

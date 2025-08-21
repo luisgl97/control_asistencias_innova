@@ -6,6 +6,7 @@ import {
    ChevronDown,
    ChevronRight,
    Copy,
+   CopyPlus,
    Edit3,
    Users,
 } from "lucide-react";
@@ -33,6 +34,16 @@ const TablaTareasObras = ({ tareas, copyToClipboard,fetchListaTareasDiario }) =>
       const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
       return task >= today;
    };
+
+   const duplicarTarea = (tarea) => {
+        let dublicado = {
+            id: 1,
+            descripcion: tarea.tarea_descripcion,
+            trabajadores: tarea.trabajadores.map(({ rol, ...rest }) => rest)
+        };
+        navigate("/registro-diario/registrar", { state: dublicado });
+    };
+
 
 
    return (
@@ -84,24 +95,36 @@ const TablaTareasObras = ({ tareas, copyToClipboard,fetchListaTareasDiario }) =>
                               fetchListaTareasDiario={fetchListaTareasDiario}
                            />
 
+                             <Button
+                                        variant="ghost"
+                                        size="icon"
+                                       className="text-white cursor-pointer hover:bg-white/20 hover:text-white h-9 w-9 sm:h-8 sm:w-8"
+                                        onClick={() => duplicarTarea(tarea)}
+                                        aria-label="Duplicar"
+                                        title="Duplicar"
+                                    >
+                                        <CopyPlus className="size-4.5" />
+                                    </Button>
+
+
                            <Button
                               variant="ghost"
                               size="icon"
-                              className="text-white hover:bg-white/20 h-9 w-9 sm:h-8 sm:w-8"
+                              className="text-white cursor-pointer hover:bg-white/20 hover:text-white h-9 w-9 sm:h-8 sm:w-8"
                               onClick={() =>
                                  copyToClipboard(tarea, index, "uno")
                               }
                               aria-label="Copiar información"
                               title="Copiar información"
                            >
-                              <Copy className="h-4 w-4" />
+                              <Copy className="size-4.5" />
                            </Button>
 
                            {isTodayOrFuture(tarea.dia) && (
                               <Button
                                  variant="ghost"
                                  size="icon"
-                                 className="text-white hover:bg-white/20 h-9 w-9 sm:h-8 sm:w-8 mr-2 md:mr-8"
+                                 className="text-white cursor-pointer hover:bg-white/20 hover:text-white h-9 w-9 sm:h-8 sm:w-8"
                                  onClick={() =>
                                     navigate(
                                        `/registro-diario/registrar?id_registro_diario=${tarea.obra.id}&dia=${tarea.dia}`
@@ -110,7 +133,7 @@ const TablaTareasObras = ({ tareas, copyToClipboard,fetchListaTareasDiario }) =>
                                  aria-label="Editar registro"
                                  title="Editar registro"
                               >
-                                 <Edit3 className="h-4 w-4" />
+                                 <Edit3 className="size-4.5" />
                               </Button>
                            )}
 
@@ -118,7 +141,7 @@ const TablaTareasObras = ({ tareas, copyToClipboard,fetchListaTareasDiario }) =>
                               onClick={() => toggleExpand(index)}
                               variant="ghost"
                               size="icon"
-                              className="text-white hover:bg-white/20 h-9 w-9 sm:h-8 sm:w-8 transition-all duration-200"
+                              className="text-white cursor-pointer hover:bg-white/20 hover:text-white h-9 w-9 sm:h-8 sm:w-8 transition-all duration-200"
                               aria-label={
                                  expandedIndex === index
                                     ? "Contraer"

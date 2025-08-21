@@ -101,7 +101,7 @@ class SequelizeRegistrosDiariosRepository {
   }
 
   async eliminarRegistroDiario({ obra_id, usuario_id, fecha }) {
-   
+ 
    return RegistrosDiarios.destroy({ where: { obra_id, usuario_id, fecha } });
   }
 
@@ -124,9 +124,36 @@ class SequelizeRegistrosDiariosRepository {
   );
 }
 
-async eliminarRegistroDiario(obra_id, fecha) {
+async eliminarTareaRegistroDiario(obra_id, fecha) {
   return RegistrosDiarios.destroy({ where: { obra_id, fecha } });
 }
+
+async obtenerRegistrosDiarioPorListaTrabajadoresObraYFecha(lista_usuarios, obra_id, fecha) {
+    
+    const registrosDiarios = await RegistrosDiarios.findAll({
+      where: {
+        fecha,
+        obra_id,
+        usuario_id: lista_usuarios
+      },
+      include: [
+        {
+          model: db.obras,
+          as: "obra"
+        },
+        {
+          model: db.usuarios,
+          as: "usuario",
+          attributes: {
+            exclude: ["password"]
+          }
+        }
+      ]
+    });
+
+    return registrosDiarios;
+  }
+
 
 }
 
