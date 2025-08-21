@@ -36,6 +36,7 @@ function formatearRegistros(registros) {
       const trabajadores = itemsDeTarea.map((reg) => ({
         id: reg.usuario.id,
         dni: reg.usuario.dni,
+        tipo_documento: reg.usuario.tipo_documento,
         nombres: reg.usuario.nombres,
         apellidos: reg.usuario.apellidos,
         rol: reg.usuario.rol,

@@ -4,6 +4,7 @@ import { Label } from "@/components/ui/label";
 import { Calendar } from "lucide-react";
 import { Calendar22 } from "./ui/Calendar22";
 import ObraAutocomplete from "./ObraAutocomplete";
+import { useEffect } from "react";
 
 const InformeGeneralTareaRegistrar = ({
     obras,
@@ -14,6 +15,10 @@ const InformeGeneralTareaRegistrar = ({
     obrasRegistradas,
     obraObtenida,
 }) => {
+
+    useEffect(() => {
+        setObraSeleccionada(null);
+    },[fecha])
     return (
         <Card className="flex flex-col gap-4 w-full shadow-lg border-2 border-slate-200 bg-white/80 backdrop-blur-sm">
             <CardHeader className="text-slate-700">

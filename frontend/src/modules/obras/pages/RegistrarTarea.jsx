@@ -1,7 +1,7 @@
 import usuarioService from "@/modules/usuarios/services/usuarioService"
 import { CookingPot, Save, XCircle } from 'lucide-react'
 import { useEffect, useState } from "react"
-import { useNavigate, useSearchParams } from "react-router-dom"
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom"
 import { toast } from "sonner"
 import InformeGeneralTareaRegistrar from "../components/InformeGeneralTareaRegistrar"
 import TareaRegistroDetallado from "../components/TareaRegistroDetallado"
@@ -19,6 +19,10 @@ const RegistrarTarea = () => {
   // ?? Navegacion
   const navigate = useNavigate();
 
+  // ?? Duplicado
+  const location = useLocation();
+  const datosRecibidos = location.state;
+
   // ?? DATA STATE
   const [trabajadores, setTrabajadores] = useState([])
   const [obras, setObras] = useState([])
@@ -35,11 +39,16 @@ const RegistrarTarea = () => {
   const [textFiltroTrabajador, setTextFiltroTrabajador] = useState("")
 
   const [fecha, setFecha] = useState(new Date())
-  const [obraSeleccionada, setObraSeleccionada] = useState([])
+  const [obraSeleccionada, setObraSeleccionada] = useState(null)
   const [tareas, setTareas] = useState([
     { id: 1, descripcion: "", trabajadores: [] }
   ])
 
+  useEffect(() => {
+    if (datosRecibidos) {
+      setTareas([datosRecibidos])
+    }
+  }, [datosRecibidos])
 
   useEffect(() => {
     const obtenerRegistroDiarioPorId = async () => {
@@ -153,19 +162,19 @@ const RegistrarTarea = () => {
   const guardarRegistro = async () => {
     const registro = {
       fecha: obraObtenida.dia ? obraObtenida.dia : fecha,
-      obra_id: obraSeleccionada,
+      obra_id: id_registro_diario ? Number(id_registro_diario) : obraSeleccionada,
       descripcion_tarea: tareas[0].descripcion.trim() !== "" ? tareas[0].descripcion : "",
       lista_usuarios_ids: tareas.flatMap(t => t.trabajadores.map(t => t.id)),
     }
 
     try {
       setIsLoadingBtnSave(true)
-
-      const resultadoValidacion = validarTarea(tareas[0]);
+      const resultadoValidacion = validarTarea(tareas[0], registro.obra_id);
       if (!resultadoValidacion.valido) {
         toast.error(resultadoValidacion.mensaje);
         return;
       }
+
       if (id_registro_diario && dia) {
         const { data, status } = await obraService.actualizarTarea(registro)
         if (status === 200) {
@@ -183,8 +192,7 @@ const RegistrarTarea = () => {
         }
       }
     } catch (error) {
-      // console.log(error)
-      toast.error(error.response.data.mensaje)
+      toast.error("Hubo un error, por favor revisa los datos")
     } finally {
       setIsLoadingBtnSave(false)
     }

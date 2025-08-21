@@ -1,4 +1,7 @@
-const validarTarea = (tarea) => {
+const validarTarea = (tarea,obraSeleccionada ) => {
+    if(!obraSeleccionada ){
+        return { valido: false, mensaje: "Debe seleccionar una obra." };
+    }
     if (!tarea.descripcion || tarea.descripcion.trim() === "") {
         return { valido: false, mensaje: "La descripción de la tarea no puede estar vacía." };
     }

@@ -98,7 +98,7 @@ const RegistroObras = () => {
                 });
                 setPosition([data.obra.latitud, data.obra.longitud]);
                 setLatitudIncial([data.obra.latitud, data.obra.longitud]);
-                setZoom(18);
+                setZoom(19);
             }
         } catch (error) {
             toast.error("Hubo un error al obtener la obra");
@@ -136,7 +136,7 @@ const RegistroObras = () => {
                 if (mapRef.current) {
                     mapRef.current.setView(coords, 16); // ** zoom
                 }
-                setZoom(18);
+                setZoom(19);
             } else {
                 toast.error("No se pudo localizar la dirección.");
             }
@@ -212,7 +212,8 @@ const RegistroObras = () => {
                 <TileLayer
                     attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                      maxZoom={22}
+                    maxZoom={20}
+
                 />
                 {
                     form.latitud && form.longitud && showRadio &&

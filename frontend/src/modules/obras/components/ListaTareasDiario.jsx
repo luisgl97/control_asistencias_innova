@@ -1,5 +1,5 @@
 import { Input } from "@/components/ui/input";
-import { Calendar, Copy, Frown } from "lucide-react";
+import { Calendar, Clipboard, Copy, Frown } from "lucide-react";
 import { Calendar22 } from "./ui/Calendar22";
 import { Label } from "@radix-ui/react-dropdown-menu";
 import { useEffect, useState } from "react";
@@ -94,8 +94,8 @@ ${t?.trabajadores
 
     return (
         <div className="flex flex-col">
-            <div className="flex flex-wrap w-full px-6 py-4 items-center justify-between md:flex-nowrap">
-                <div className="flex w-full md:w-auto md:flex-initial">
+            <div className="flex flex-wrap w-full px-2 py-4 items-center justify-between md:flex-nowrap ">
+                <div className="flex w-full md:w-auto md:flex-initial p-1">
                     <Label className="mr-4 text-lg font-semibold">
                         Fecha de la Tarea:
                     </Label>
@@ -105,23 +105,23 @@ ${t?.trabajadores
                         blockPast={false}
                     />
                 </div>
-                <div className="flex items-center  gap-x-3">
+                <div className="flex w-full md:w-auto  mt-2 p-1 md:mt-0  gap-x-3">
                     {tareas.length > 0 && (
                         <Button
                             variant="ghost"
                             size="icon"
-                            className="text-white bg-gray-800 hover:bg-gray-600 hover:text-white/80 cursor-pointer w-auto px-3 flex"
+                            className="text-white bg-gray-800 hover:bg-gray-600 hover:text-white/80 cursor-pointer w-auto px-2 md:px-3 flex"
                             onClick={() => copyToClipboard(tareas, 1, "todo")}
                             aria-label="Copiar información"
                             title="Copiar información"
                         >
-                            <span>Copiar Información</span>
-                            <Copy className="h-4 w-4" />
+                            <span >Copiar Información</span>
+                            <Clipboard className="h-4 w-4" />
                         </Button>
                     )}
 
-                    <div className="flex items-center justify-end w-full md:w-auto md:flex-initial md:ml-auto md:mt-0 mt-4">
-                        <span className="text-sm font-semibold">
+                    <div className="flex items-center justify-center md:justify-end w-full md:w-auto md:flex-initial md:ml-auto md:mt-0">
+                        <span className="text-md  font-semibold ">
                             Total de Registros: {tareas.length}
                         </span>
                     </div>
