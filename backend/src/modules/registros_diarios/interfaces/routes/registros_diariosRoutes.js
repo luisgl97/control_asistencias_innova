@@ -15,6 +15,7 @@ router.get("/",  autorizarRol(["GERENTE", "ADMINISTRADOR"]), registrosDiariosCon
 router.post("/",  autorizarRol(["GERENTE", "ADMINISTRADOR"]), registrosDiariosController.insertarRegistrosDiarios);
 router.post("/por-fecha",  autorizarRol(["GERENTE", "ADMINISTRADOR"]), registrosDiariosController.obtenerRegistrosDiariosPorFecha);
 router.post("/por-obra",  autorizarRol(["GERENTE", "ADMINISTRADOR"]), registrosDiariosController.obtenerRegistroDiarioPorObraYFecha);
-router.put("/", autorizarRol(["GERENTE", "ADMINISTRADOR"]), registrosDiariosController.actualizarRegistrosDiarios)
+router.put("/", autorizarRol(["GERENTE", "ADMINISTRADOR"]), registrosDiariosController.actualizarRegistrosDiarios);
+router.post("/eliminar", autorizarRol(["GERENTE", "ADMINISTRADOR"]), registrosDiariosController.eliminarRegistroDiario);
 
 module.exports = router;
