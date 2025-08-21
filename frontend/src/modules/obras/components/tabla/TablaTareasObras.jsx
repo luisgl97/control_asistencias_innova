@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
 import { Building2, Calendar, ChevronDown, ChevronRight, Clipboard, CopyPlus, Edit3, Users } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -143,6 +144,7 @@ const TablaTareasObras = ({ tareas, copyToClipboard }) => {
             </div>
         </div>
     );
+
 };
 
 export default TablaTareasObras;

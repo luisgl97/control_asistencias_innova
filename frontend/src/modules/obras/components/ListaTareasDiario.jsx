@@ -139,7 +139,7 @@ ${t?.trabajadores
                     <div className="h-4 bg-gray-200 rounded w-1/2 animate-pulse"></div>
                 </div>
             ) : tareas.length > 0 ? (
-                <TablaTareasObras tareas={tareas} copyToClipboard={copyToClipboard} />
+                <TablaTareasObras tareas={tareas} copyToClipboard={copyToClipboard} fetchListaTareasDiario={fetchListaTareasDiario}/>
             ) : (
                 <div className="flex flex-col items-center text-gray-600 py-16">
                     <Frown className="w-12 h-12" />

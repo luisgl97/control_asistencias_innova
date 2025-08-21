@@ -11,6 +11,7 @@ const obraService = {
     actualizarTarea: (data) => api.put(`/registros_diarios`, data),
     listarRegistrosDiarios: (fecha) => api.post(`/registros_diarios/por-fecha`, fecha),
     obtenerRegistroDiarioPorId: (filtro) => api.post(`/registros_diarios/por-obra`, filtro),
+    eliminarRegistroDiario:(data)=>api.post('/registros_diarios/eliminar',data)
 
 };
 export default obraService;

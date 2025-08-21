@@ -56,8 +56,10 @@ class Asistencia {
         "ubicacion_ingreso",
         "ubicacion_salida",
         "horas_extras",
-        "observaciones_ingreso",
-        "observaciones_salida",
+        "estado",
+        "hizo_horas_extras",
+        "hora_inicio_refrigerio",
+        "hora_fin_refrigerio",
       ].some(
         (campo) =>
           datos[campo] !== undefined &&
