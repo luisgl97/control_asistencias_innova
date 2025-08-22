@@ -1,3 +1,5 @@
+const { parsearToJson } = require("../../../utils/parseToJson");
+
 module.exports = async (obra_id, fecha ,registrosDiariosRepository, asistenciasRepository) => {
 
     // Validar que la tarea no tenga asistencias asociadas
@@ -24,8 +26,11 @@ module.exports = async (obra_id, fecha ,registrosDiariosRepository, asistenciasR
 
     const asistenciasDeLaObraEnLaFecha = asistenciasLimpias.filter(asistencia => {
 
-        const obra_id_1 = asistencia.ubicacion_ingreso?.obra_id;
-        const obra_id_2 = asistencia.ubicacion_salida?.obra_id;
+        const ubicacion_ingreso = parsearToJson(asistencia.ubicacion_ingreso);
+        const ubicacion_salida = parsearToJson(asistencia.ubicacion_salida);
+
+        const obra_id_1 = ubicacion_ingreso?.obra_id;
+        const obra_id_2 = ubicacion_salida?.obra_id;
 
         return obra_id_1 == obra_id || obra_id_2 == obra_id;
     });
