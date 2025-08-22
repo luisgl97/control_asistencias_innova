@@ -23,6 +23,8 @@ import asistenciaService from "../service/asistenciaService";
 import { getRangoSemanaActual } from "../libs/getRangoSemanaActual";
 import { Input } from "@/components/ui/input";
 import { normalizarTexto } from "../libs/mormalizarTextoBusqueda";
+import SelectConEtiquetaFlotante from "@/shared/components/selectConEtiquetaFlotante";
+import { opciones_filiales_asistencia } from "@/modules/usuarios/utils/optionsUsuarioForm";
 
 function esFechaFutura(fechaStr) {
    const hoy = new Date(
@@ -118,13 +120,14 @@ export default function AsistenciaSemanal() {
    const [numeroSemana, setNumeroSemana] = useState("...loading");
    const [nombreTrabajador, setNombreTrabajador] = useState("");
    const [desactivar, setDesactivar] = useState(false);
+   const [filial, setFilial] = useState(0);
    const cargarDatos = async () => {
       try {
          const { fecha_fin, fecha_inicio, numero_semana, desactivar } =
             getRangoSemanaActual(offset);
-         const data=getRangoSemanaActual(offset+1);
+         const data = getRangoSemanaActual(offset + 1);
          if (data.desactivar) {
-            setDesactivar(true)
+            setDesactivar(true);
          }
          setError(null);
 
@@ -170,8 +173,11 @@ export default function AsistenciaSemanal() {
             )
          );
       }
+      if (filial) {
+         copy = copy.filter((t) => t.filial_id === Number(filial));
+      }
       setDatosAsistencia(copy);
-   }, [nombreTrabajador, datosAsistenciaGuard]);
+   }, [nombreTrabajador, datosAsistenciaGuard, filial]);
 
    if (cargando) {
       return (
@@ -206,50 +212,65 @@ export default function AsistenciaSemanal() {
    return (
       <div className="w-full ">
          <Card>
-            <CardHeader className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-               <section className="flex flex-col gap-2 md:flex-row md:items-center md:gap-8 w-full">
-                  <div className="flex-1 min-w-[200px]">
-                     <CardTitle className="text-lg md:text-2xl">
-                        Control de Asistencias Semanal
-                     </CardTitle>
-                     <CardDescription>
-                        Registro semanal de asistencias, tardanzas y
-                        observaciones del personal
-                     </CardDescription>
-                  </div>
+            <CardHeader className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+               {/* Título y descripción */}
+               <section className="w-full md:w-auto md:min-w-96">
+                  <CardTitle className="text-lg md:text-2xl">
+                     Control de Asistencias Semanal
+                  </CardTitle>
+                  <CardDescription>
+                     Registro semanal de asistencias, tardanzas y observaciones
+                     del personal
+                  </CardDescription>
+               </section>
 
-                  <div className="w-full md:w-auto">
+               {/* Filtros y acciones */}
+               <article className="w-full grid grid-cols-1 gap-4 md:grid-cols-3 max-w-3xl ">
+                  {/* Buscar trabajador */}
+                  <div className="w-full ">
+                     <SelectConEtiquetaFlotante
+                        value={filial}
+                        onChange={(name, value) => setFilial(value)}
+                        name="filial_id"
+                        label="Busca por filial"
+                        opciones={opciones_filiales_asistencia}
+                     />
+                  </div>
+                  <div className="w-full">
                      <Input
                         placeholder="Buscar trabajador"
                         value={nombreTrabajador}
                         onChange={(e) => setNombreTrabajador(e.target.value)}
-                        className="w-full md:min-w-[200px]"
+                        className="w-full"
                      />
                   </div>
-               </section>
 
-               <section className="flex items-center justify-end gap-2 mt-2 md:mt-0">
-                  <Button
-                     onClick={() => setOffset(offset - 1)}
-                     size="icon"
-                     variant="outline"
-                     aria-label="Semana anterior"
-                  >
-                     <ArrowLeft />
-                  </Button>
-                  <span className="text-sm font-medium truncate">
-                     {numeroSemana}
-                  </span>
-                  <Button
-                     onClick={() => setOffset(offset + 1)}
-                     size="icon"
-                     variant="outline"
-                     aria-label="Semana siguiente"
-                     disabled={desactivar}
-                  >
-                     <ArrowRight />
-                  </Button>
-               </section>
+                  {/* Filtrar por filial */}
+
+                  {/* Navegación de semana */}
+                  <div className="flex items-center justify-between md:justify-between gap-2 w-full">
+                     <Button
+                        onClick={() => setOffset(offset - 1)}
+                        size="icon"
+                        variant="outline"
+                        aria-label="Semana anterior"
+                     >
+                        <ArrowLeft />
+                     </Button>
+                     <span className="text-sm font-medium truncate">
+                        {numeroSemana}
+                     </span>
+                     <Button
+                        onClick={() => setOffset(offset + 1)}
+                        size="icon"
+                        variant="outline"
+                        aria-label="Semana siguiente"
+                        disabled={desactivar}
+                     >
+                        <ArrowRight />
+                     </Button>
+                  </div>
+               </article>
             </CardHeader>
 
             <CardContent>

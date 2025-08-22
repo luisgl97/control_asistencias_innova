@@ -22,6 +22,8 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { normalizarTexto } from "../libs/mormalizarTextoBusqueda";
 import { ModalJustificarPermiso } from "./ModalJustificarPermiso";
+import SelectConEtiquetaFlotante from "@/shared/components/selectConEtiquetaFlotante";
+import { opciones_filiales_asistencia } from "@/modules/usuarios/utils/optionsUsuarioForm";
 
 const estilos = {
    ASISTIO: "bg-green-50 text-green-700 border-green-200",
@@ -36,10 +38,11 @@ const AsistenciaPordia = () => {
    const [cargando, setCargando] = useState(true);
    const [error, setError] = useState(null);
    const hoy = new Date();
-hoy.setMinutes(hoy.getMinutes() - hoy.getTimezoneOffset());
-const [fechaSeleccionada, setFechaSeleccionada] = useState(
-  hoy.toISOString().split("T")[0]
-);
+   const [filial, setFilial] = useState(0);
+   hoy.setMinutes(hoy.getMinutes() - hoy.getTimezoneOffset());
+   const [fechaSeleccionada, setFechaSeleccionada] = useState(
+      hoy.toISOString().split("T")[0]
+   );
    const [nombreTrabajador, setNombreTrabajador] = useState("");
    const cargarDatos = async () => {
       try {
@@ -76,8 +79,11 @@ const [fechaSeleccionada, setFechaSeleccionada] = useState(
             )
          );
       }
+      if(filial){         
+         copy=copy.filter((t)=>(t.filial_id===Number(filial)))
+      }
       setDatosAsistencia(copy);
-   }, [nombreTrabajador, datosAsistenciaGuard]);
+   }, [nombreTrabajador, datosAsistenciaGuard,filial]);
 
    if (cargando) {
       return (
@@ -113,36 +119,48 @@ const [fechaSeleccionada, setFechaSeleccionada] = useState(
          <Card className="">
             <CardHeader>
                <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between md:gap-6">
-                  <div className="flex-1 min-w-[200px]">
+                  <section className="flex-1 min-w-[200px]">
                      <CardTitle className="text-lg md:text-2xl">
                         Control de Asistencias Diarias
                      </CardTitle>
-                  </div>
-                  <div className="w-full md:w-auto">
-                     <Input
-                        placeholder="Buscar trabajador"
-                        value={nombreTrabajador}
-                        onChange={(e) => setNombreTrabajador(e.target.value)}
-                        className="w-full md:min-w-[200px]"
+                  </section>
+
+                  <section className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-4">
+                     <SelectConEtiquetaFlotante
+                        value={filial}
+                        onChange={(name, value) => setFilial(value)}
+                        name="filial_id"
+                        label="Busca por  filial"
+                        opciones={opciones_filiales_asistencia}
                      />
-                  </div>
-                  <div className="flex items-center gap-2 flex-wrap md:flex-nowrap">
-                     <Calendar className="h-4 w-4" />
-                     <Label
-                        htmlFor="fecha"
-                        className="text-sm whitespace-nowrap"
-                     >
-                        Fecha:
-                     </Label>
-                     <Input
-                        id="fecha"
-                        type="date"
-                        value={fechaSeleccionada}
-                        onChange={(e) => setFechaSeleccionada(e.target.value)}
-                        className="w-full md:w-auto"
-                        max={new Date().toISOString().slice(0, 10)}
-                     />
-                  </div>
+                     <div className="w-full md:w-auto">
+                        <Input
+                           placeholder="Buscar trabajador"
+                           value={nombreTrabajador}
+                           onChange={(e) => setNombreTrabajador(e.target.value)}
+                           className="w-full md:min-w-[200px]"
+                        />
+                     </div>
+                     <div className="flex items-center gap-2 flex-wrap md:flex-nowrap">
+                        <Calendar className="h-4 w-4" />
+                        <Label
+                           htmlFor="fecha"
+                           className="text-sm whitespace-nowrap"
+                        >
+                           Fecha:
+                        </Label>
+                        <Input
+                           id="fecha"
+                           type="date"
+                           value={fechaSeleccionada}
+                           onChange={(e) =>
+                              setFechaSeleccionada(e.target.value)
+                           }
+                           className="w-full md:w-auto"
+                           max={new Date().toISOString().slice(0, 10)}
+                        />
+                     </div>
+                  </section>
                </div>
             </CardHeader>
 
@@ -176,7 +194,8 @@ const [fechaSeleccionada, setFechaSeleccionada] = useState(
                                  {trabajador.trabajador}
                                  <br />
                                  <p className="text-xs">
-                                    {trabajador.tipo_documento}: {trabajador.dni}
+                                    {trabajador.tipo_documento}:{" "}
+                                    {trabajador.dni}
                                  </p>
                               </TableCell>
                               <TableCell className="text-center">
@@ -218,7 +237,8 @@ const [fechaSeleccionada, setFechaSeleccionada] = useState(
                                  <AsistenciaDetailDialog
                                     asistenciaId={trabajador.asistencia_id}
                                  />
-                                 {(trabajador.estado === "SIN REGISTRO"||trabajador.estado === "FALTA") && (
+                                 {(trabajador.estado === "SIN REGISTRO" ||
+                                    trabajador.estado === "FALTA") && (
                                     <ModalJustificarPermiso
                                        fecha_dia={trabajador.fecha}
                                        id={trabajador.id}
@@ -226,14 +246,13 @@ const [fechaSeleccionada, setFechaSeleccionada] = useState(
                                        tipo={"FALTA"}
                                     />
                                  )}
-                                 {(trabajador.estado === "TARDANZA") && (
+                                 {trabajador.estado === "TARDANZA" && (
                                     <ModalJustificarPermiso
                                        fecha_dia={trabajador.fecha}
                                        id={trabajador.id}
                                        cargarDatos={cargarDatos}
                                        tipo={"TARDANZA"}
                                        asistencia_id={trabajador.asistencia_id}
-
                                     />
                                  )}
                                  {trabajador.asistencia_id &&
