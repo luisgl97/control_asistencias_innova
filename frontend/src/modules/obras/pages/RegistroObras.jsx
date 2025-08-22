@@ -216,7 +216,7 @@ const RegistroObras = () => {
                 />
                 {
                     form.latitud && form.longitud && showRadio &&
-                    renderDegradadoZona([form.latitud, form.longitud], 60, 4)
+                    renderDegradadoZona([form.latitud, form.longitud], 100, 4)
                 }
                 <MapClickHandler setForm={setForm} position={position} setPosition={setPosition} />
             </MapContainer>
