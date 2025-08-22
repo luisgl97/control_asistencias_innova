@@ -15,6 +15,12 @@ export const opciones_roles = [
 export const opciones_cargo = [
    { value: "MONTADOR", label: "Montador" },
    { value: "ALMACEN", label: "Almacen" },
+   { value: "TECNICO DE ELEVADORES", label: "Técnico de elevadores" },
+   { value: "SOLDADOR", label: "Soldador"},
+   { value: "TECNICO ELECTRICISTA", label: "Técnico electricista" },
+   { value: "ESTIBADOR", label: "Estibador" },
+
+   { value: "OPERADOR", label: "Operador"}
 ];
 export const opciones_documento = [
    { value: "DNI", label: "DNI" },

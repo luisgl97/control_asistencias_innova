@@ -136,6 +136,7 @@ export default function AsistenciaSemanal() {
             fecha_inicio,
          });
          const datos = res.data.datos;
+
          setDatosAsistencia(datos);
          setDatosAsistenciaGuard(datos);
          if (datos.length > 0) {

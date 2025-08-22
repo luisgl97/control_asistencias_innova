@@ -35,7 +35,7 @@ const Usuario = sequelize.define(
       allowNull: false,
     },
     cargo: {
-      type: DataTypes.ENUM("MONTADOR", "ALMACEN"),
+      type: DataTypes.ENUM('MONTADOR', 'ALMACEN', 'TECNICO DE ELEVADORES', 'SOLDADOR', 'TECNICO ELECTRICISTA', 'ESTIBADOR', 'OPERADOR'),
       allowNull: true,
     },
     filial_id: {

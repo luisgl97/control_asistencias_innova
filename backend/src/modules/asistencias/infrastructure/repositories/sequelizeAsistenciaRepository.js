@@ -82,6 +82,7 @@ class SequelizeAsistenciaRepository {
         rol: ["TRABAJADOR", "LIDER TRABAJADOR"],
         //estado: true,
       },
+      
       attributes: {
         exclude: ["password"],
       },
@@ -92,6 +93,10 @@ class SequelizeAsistenciaRepository {
           required: false, // LEFT JOIN
           where: { fecha },
         },
+        {
+        model: db.filiales,
+        as: "filial",
+      }
       ],
     });
 
@@ -134,6 +139,9 @@ class SequelizeAsistenciaRepository {
         estado: estadoFinal,
         horas_extras: asistencia?.horas_extras ?? "--",
         hizo_horas_extras: asistencia?.hizo_horas_extras ?? false,
+
+        filial_id: usuario.filial.id,
+        filial_nombre: usuario.filial.razon_social,
       };
     });
 
@@ -364,6 +372,7 @@ class SequelizeAsistenciaRepository {
 
     // 4️⃣ Inicializar estructura filtrando por primer día en registros_diarios
     usuarios.forEach((usuario) => {
+
       const fechaInicioObra = fechaInicioPorUsuario[usuario.id];
       if (!fechaInicioObra) return; // nunca ha sido asignado
       if (moment(fechaInicioObra).isAfter(fechaFin)) return; // su primer día está fuera del rango consultado
@@ -380,6 +389,7 @@ class SequelizeAsistenciaRepository {
 
       usuariosMap.set(usuario.id, {
         trabajador: `${usuario.nombres} ${usuario.apellidos}`,
+        filial_id: usuario.filial_id,
         estado: usuario.estado,
         asistenciaPorDia: {},
         asistencias: 0,
@@ -419,6 +429,7 @@ class SequelizeAsistenciaRepository {
           usuarioData.observados += 1;
           break;
         case "ASISTIO":
+        case "TARDANZA JUSTIFICADA":
           usuarioData.asistenciaPorDia[fechaKey] = `${label} ✅`;
           usuarioData.asistencias += 1;
           break;
@@ -477,6 +488,7 @@ class SequelizeAsistenciaRepository {
     // 7️⃣ Armar resultado
     const resultado = Array.from(usuariosMap.values()).map((user) => {
       const fila = {
+        filial_id: user.filial_id,
         trabajador: user.trabajador,
         asistencias: user.asistencias,
         tardanzas: user.tardanzas,

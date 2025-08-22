@@ -27,6 +27,7 @@ module.exports = async (idUsuario, fecha_inicio, fecha_fin, asistenciaRepository
     switch (estado) {
       case "ASISTIO":
       case "SALIDA ANTICIPADA":
+      case "TARDANZA JUSTIFICADA":
         asistencias += 1;
         break;
       case "ASISTIO TARDE":

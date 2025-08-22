@@ -119,7 +119,7 @@ await usuario.update({ estado: false, fecha_baja: hoy });
 
   async listarUsuariosTrabajadores() {
     const usuarios = await Usuario.findAll({
-      where: { rol: ["TRABAJADOR", "LIDER TRABAJADOR"] },
+      where: { rol: ["TRABAJADOR", "LIDER TRABAJADOR"], cargo: ['MONTADOR', 'ALMACEN', 'TECNICO DE ELEVADORES', 'SOLDADOR', 'TECNICO ELECTRICISTA', 'ESTIBADOR', 'OPERADOR'] },
       attributes: ["id", "dni", "tipo_documento", "nombres", "apellidos", "cargo", "estado"],
     });
     return usuarios;
