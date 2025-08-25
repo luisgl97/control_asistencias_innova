@@ -6,5 +6,7 @@ const LocalizacionController = require("../controller/localizacionController");
 
 router.use(verificarToken);
 router.post("/", LocalizacionController.obtenerLatLong);
+router.post("/direccion", LocalizacionController.obtenerDireccion);
+
 
 module.exports = router;
