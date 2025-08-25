@@ -79,15 +79,12 @@ export default function MarcarAsistencia() {
       setUbicacionError(null);
       try {
          const { lat, lng } = await obtenerCoordenadas();
-
-         const response = await axios.get(
-            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`
-         );
+         const response = await asistenciaService.getUbicacion({lat,lng})      
          if (response.data) {
             setUbicacion({
                latitude: lat,
                longitude: lng,
-               display_name: response.data.display_name,
+               display_name: response.data.direccion,
             });
          }
       } catch (error) {
@@ -126,7 +123,7 @@ export default function MarcarAsistencia() {
             obra.latitud,
             obra.longitud
          );
-         if (distancia <100) {
+         if (distancia < 100) {
             obraEncontrada = obra;
             break;
          }
@@ -298,7 +295,10 @@ export default function MarcarAsistencia() {
                               Marcar Asistencia
                            </h2>
                         </div>
-                        <MisObrasAsignadas obrasHoy={obras} obrasSiguiente={obrasSiguiente}/>
+                        <MisObrasAsignadas
+                           obrasHoy={obras}
+                           obrasSiguiente={obrasSiguiente}
+                        />
                      </div>
                      <p className="text-blue-100 text-sm sm:text-base">
                         Registra tu entrada o salida del trabajo

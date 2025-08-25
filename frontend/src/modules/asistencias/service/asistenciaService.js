@@ -3,8 +3,7 @@ import api from "@/shared/service/api";
 const asistenciaService = {
    verificaAsistencia: (data) =>
       api.post("/asistencias/verificar-asistencia-del-dia", data),
-   detalle: (data) =>
-      api.post("/asistencias/detalle", data),
+   detalle: (data) => api.post("/asistencias/detalle", data),
    registrarIngreso: (data) => api.post("/asistencias/registrar-ingreso", data),
    registrarSalida: (data) => api.post("/asistencias/registrar-salida", data),
    generarReporte: (data) => api.post("/asistencias/reporte", data),
@@ -21,8 +20,10 @@ const asistenciaService = {
       api.post("/asistencias/registrar-inicio-refrigerio", data),
    registrarFinRefrigerio: (data) =>
       api.post("/asistencias/registrar-fin-refrigerio", data),
-   getAutorizadores:()=>api.get("/usuarios/autorizan-permiso"),
-   registrarTardanzaJustificada:(data)=>api.post("/permisos/autorizar-tardanza-justificada",data)
+   getAutorizadores: () => api.get("/usuarios/autorizan-permiso"),
+   registrarTardanzaJustificada: (data) =>
+      api.post("/permisos/autorizar-tardanza-justificada", data),
+   getUbicacion: (data) => api.post("/localizacion/direccion", data),
 };
 
 export default asistenciaService;
