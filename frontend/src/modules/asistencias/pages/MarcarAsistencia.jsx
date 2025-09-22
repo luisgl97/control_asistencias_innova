@@ -88,8 +88,34 @@ export default function MarcarAsistencia() {
             });
          }
       } catch (error) {
-         console.error(error);
-         setUbicacionError("Error al obtener la ubicación");
+          console.error("Error al obtener la ubicación:", error);
+
+          let mensaje = "Error desconocido al obtener la ubicación";
+
+          if (typeof error === "string") {
+            mensaje = error;
+            toast.error(error)
+          } else if (error?.message) {
+            // Geolocation API u otros errores generales
+            mensaje = error.message;
+          } else if (error?.response?.data?.mensaje) {
+            // Error del backend (mensaje principal)
+            mensaje = error.response.data.mensaje;
+         
+            // Agrega detalle si existe
+            if (error.response.data.detalle) {
+              mensaje += `: ${error.response.data.detalle}`;
+            }
+          } else if (error?.codigo && error?.respuesta?.mensaje) {
+            // Error personalizado del backend
+            mensaje = `${error.codigo}: ${error.respuesta.mensaje}`;
+         
+            if (error.respuesta.detalle) {
+              mensaje += `: ${error.respuesta.detalle}`;
+            }
+          }
+       
+          setUbicacionError(mensaje);
       } finally {
          setUbicacionLoading(false);
       }

@@ -15,7 +15,21 @@ export const obtenerCoordenadas = () => {
             resolve({ lat: latitude, lng: longitude });
          },
          (error) => {
-            reject(error);
+            let mensaje = "Error al acceder a la geolocalización";
+
+            switch (error.code) {
+               case error.PERMISSION_DENIED:
+                  mensaje = "Permiso de geolocalización denegado";
+                  break;
+               case error.POSITION_UNAVAILABLE:
+                  mensaje = "La ubicación no está disponible";
+                  break;
+               case error.TIMEOUT:
+                  mensaje = "Tiempo de espera agotado al obtener la ubicación";
+                  break;
+            }
+
+            reject({ code: error.code, message: mensaje });
          },
          {
             enableHighAccuracy: true,
