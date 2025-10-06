@@ -3,7 +3,6 @@ const db = require("../../../../models");
 function mapearEstadosAsistenciaParaElErp(listaAsistencias) {
   const listaAsistenciasMapeado = Promise.all(
     listaAsistencias.map(async (asistencia) => {
-
       let estado;
 
       switch (asistencia.estado) {
@@ -45,36 +44,69 @@ function mapearEstadosAsistenciaParaElErp(listaAsistencias) {
 
       const { ubicacion_ingreso, ubicacion_salida } = asistencia;
 
-      const obra_id_registrada_manhana = ubicacion_ingreso?.obra_id
-      const obra_id_registrada_tarde = ubicacion_salida?.obra_id
+      let ubicacionIngreso = ubicacion_ingreso;
 
-      const obrasAplanadas = obras.map(obra => obra.get()).flat();
+      try {
+        if (
+          typeof ubicacionIngreso === "string" &&
+          ubicacionIngreso.trim() !== ""
+        ) {
+          ubicacionIngreso = JSON.parse(
+            ubicacionIngreso
+          );
+        }
+      } catch (e) {
+        console.error("Error al parsear ubicacion_ingreso:", e);
+        ubicacionIngreso = {};
+      }
 
-      const descripcion_obra_registrada_manhana = obrasAplanadas.find(obra => obra.obra_id == obra_id_registrada_manhana)?.descripcion_tarea
-      
-      const descripcion_obra_registrada_tarde = obrasAplanadas.find(obra => obra.id == obra_id_registrada_tarde)?.descripcion_tarea
+      let ubicacionSalida = ubicacion_salida;
+
+      try {
+        if (
+          typeof ubicacionSalida === "string" &&
+          ubicacionSalida.trim() !== ""
+        ) {
+          ubicacionSalida = JSON.parse(
+            ubicacionSalida
+          );
+        }
+      } catch (e) {
+        console.error("Error al parsear ubicacion_salida:", e);
+        ubicacionSalida = {};
+      }
+
+      const obra_id_registrada_manhana = ubicacionIngreso?.obra_id;
+      const obra_id_registrada_tarde = ubicacionSalida?.obra_id;
+
+      const obrasAplanadas = obras.map((obra) => obra.get()).flat();
+
+      const descripcion_obra_registrada_manhana = obrasAplanadas.find(
+        (obra) => obra.obra_id == obra_id_registrada_manhana
+      )?.descripcion_tarea;
+
+      const descripcion_obra_registrada_tarde = obrasAplanadas.find(
+        (obra) => obra.obra_id == obra_id_registrada_tarde
+      )?.descripcion_tarea;
 
       const jornada_manhana = {
-        nombre_obra: ubicacion_ingreso?.obra_nombre,
-        direccion_obra: ubicacion_ingreso?.obra_direccion,
-        descripcion_obra: descripcion_obra_registrada_manhana || ""
-      }
+        nombre_obra: ubicacionIngreso?.obra_nombre || "",
+        direccion_obra: ubicacionIngreso?.obra_direccion || "",
+        descripcion_obra: descripcion_obra_registrada_manhana || "",
+      };
 
       const jornada_tarde = {
-        nombre_obra: ubicacion_salida?.obra_nombre || "",
-        direccion_obra: ubicacion_salida?.obra_direccion || "",
-        descripcion_obra: descripcion_obra_registrada_tarde || ""
-      }
+        nombre_obra: ubicacionSalida?.obra_nombre || "",
+        direccion_obra: ubicacionSalida?.obra_direccion || "",
+        descripcion_obra: descripcion_obra_registrada_tarde || "",
+      };
 
-      const obrasMapeadas = 
-        obras.map((obra) => {
-          return {
-            nombre: obra.obra.nombre,
-            direccion: obra.obra.direccion,
-          };
-        })
-      ;
-
+      const obrasMapeadas = obras.map((obra) => {
+        return {
+          nombre: obra.obra.nombre,
+          direccion: obra.obra.direccion,
+        };
+      });
       return {
         trabajador: {
           dni: asistencia.usuario.dni,
@@ -84,7 +116,7 @@ function mapearEstadosAsistenciaParaElErp(listaAsistencias) {
           estado: estado,
           horas_extras: asistencia.horas_extras,
           jornada_manhana: jornada_manhana,
-           jornada_tarde: jornada_tarde
+          jornada_tarde: jornada_tarde,
         },
       };
     })
