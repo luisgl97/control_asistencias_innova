@@ -1,4 +1,5 @@
 const db = require("../../../../models");
+const { calcularDiferenciaHorasMinutosSegundos } = require("../../../../utils/calcularDiferenciaHorasMinutosSegundos");
 
 function mapearEstadosAsistenciaParaElErp(listaAsistencias) {
   const listaAsistenciasMapeado = Promise.all(
@@ -101,18 +102,19 @@ function mapearEstadosAsistenciaParaElErp(listaAsistencias) {
         descripcion_obra: descripcion_obra_registrada_tarde || "",
       };
 
-      const obrasMapeadas = obras.map((obra) => {
-        return {
-          nombre: obra.obra.nombre,
-          direccion: obra.obra.direccion,
-        };
-      });
+      
+
+      const horas_trabajadas = calcularDiferenciaHorasMinutosSegundos(asistencia.hora_ingreso, asistencia.hora_salida);
+
       return {
         trabajador: {
           dni: asistencia.usuario.dni,
         },
         asistencia: {
           fecha: asistencia.fecha,
+          hora_ingreso: asistencia.hora_ingreso,
+          hora_salida: asistencia.hora_salida,
+          tiempo_trabajado: horas_trabajadas,
           estado: estado,
           horas_extras: asistencia.horas_extras,
           jornada_manhana: jornada_manhana?.nombre_obra ? jornada_manhana : null,
