@@ -115,8 +115,8 @@ function mapearEstadosAsistenciaParaElErp(listaAsistencias) {
           fecha: asistencia.fecha,
           estado: estado,
           horas_extras: asistencia.horas_extras,
-          jornada_manhana: jornada_manhana,
-          jornada_tarde: jornada_tarde,
+          jornada_manhana: jornada_manhana?.nombre_obra ? jornada_manhana : null,
+          jornada_tarde: jornada_tarde?.nombre_obra ? jornada_tarde : null,
         },
       };
     })
