@@ -7,15 +7,9 @@ import MobileMenu from "./MobileMenu";
 import UserMenu from "./UserMenu";
 import logotipo from "@/assets/png/logov1-removebg-preview.png";
 import { Button } from "@/components/ui/button";
+import { isPathActive } from "../utils/isPathActive";
 
-const isPathActive = (currentPath, itemPath) => {
-   const itemUrl = new URL(itemPath, window.location.origin);
-   const itemPathname = itemUrl.pathname;
 
-   return (
-      currentPath === itemPathname || currentPath.startsWith(itemPathname + "/")
-   );
-};
 
 const HeaderAsistencias = () => {
    const location = useLocation();

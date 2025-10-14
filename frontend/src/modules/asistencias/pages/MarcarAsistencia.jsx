@@ -307,7 +307,7 @@ export default function MarcarAsistencia() {
    return (
       <div className="min-h-screen bg-gray-50">
          {/* Contenido principal */}
-         <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 mt-0 md:mt-4 grid grid-cols-1 md:grid-cols-3 gap-8">
+         <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8 mt-0 md:mt-4 grid grid-cols-1 md:grid-cols-3 gap-8">
             {/* Historial reciente - Solo visible en desktop */}
             <section className="w-full order-1 md:order-2 md:col-span-2 space-y-4">
                <HorariosTrabajo className={"md:hidden"} esSabado={esSabado} />

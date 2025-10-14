@@ -11,6 +11,9 @@ import LoaderInnova from "@/shared/components/LoaderInnova";
 import AuthGuard from "./auth.guard";
 import RoleGuard from "./rol.guard";
 import HeaderAsistencias from "@/shared/components/HeaderAsistencias";
+import SubHeaderTrabajador from "@/shared/components/SubHeaderTrabajador";
+import RegistrarSolicitud from "@/modules/Solicitudes/pages/RegistrarSolicitud";
+import GestionSolicitudes from "@/modules/Solicitudes/pages/GestionSolicitudes";
 
 // Lazy load de todas las páginas
 const Login = lazy(() => import("@/modules/auth/pages/Login"));
@@ -55,7 +58,10 @@ export default function AppRoutes() {
                            />
                         }
                      >
-                        <Route index element={<MarcarAsistencia />} />
+                        <Route element={<SubHeaderTrabajador/>}>
+                              <Route index element={<MarcarAsistencia />} />
+                              <Route path="/solicitudes" element={<GestionSolicitudes />} />
+                        </Route>
                      </Route>
 
                      <Route
