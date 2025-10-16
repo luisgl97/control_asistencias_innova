@@ -6,6 +6,7 @@ import {
    Building,
    ClipboardList,
    Clock,
+   Inbox,
    Menu,
    Notebook,
    User,
@@ -122,6 +123,17 @@ const MobileMenu = ({ user, logout }) => {
                         >
                            <Notebook className="w-4 h-4 mr-2" />
                            Registro Diario
+                        </Button>
+                        <Button
+                           variant="outline"
+                           className="w-full justify-start bg-transparent"
+                           onClick={() => {
+                              navigate("/bandeja-solicitudes");
+                              closeMobileMenu();
+                           }}
+                        >
+                           <Inbox className="w-4 h-4 mr-2" />
+                           Solicitud de equipos
                         </Button>
                      </>
                   )}

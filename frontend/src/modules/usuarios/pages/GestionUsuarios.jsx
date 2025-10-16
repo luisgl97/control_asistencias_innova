@@ -170,6 +170,9 @@ const GestionUsuarios = () => {
                         usuarios registrados)
                      </CardDescription>
                   </div>
+                  <div className="text-red-700">
+                  Agregr un slector de usairos por filial No olvidar por favor
+                  </div>
                   <div className="flex justify-end ">
                      <Button
                         className="gap-2 bg-innova-blue hover:bg-innova-blue/90"

@@ -34,3 +34,14 @@ export const opciones_filiales_asistencia = [
    { value: "4", label: "INNOVA RENTAL MAQUINARIA SAC" },
    { value: "5", label: "INNOVA GREEN" },
 ];
+
+export const opciones_estado_solicitud=[
+   { value: 0, label: "Todas" },
+   { value: "solicitado", label: "Solicitudes Activas" },
+   { value: "entregado", label: "Solicitudes Entregadas" },
+]
+
+export const opciones_cambio_estado=[
+   { value: "solicitado", label: "Solicitado" },
+   { value: "entregado", label: "Entregado" },
+]

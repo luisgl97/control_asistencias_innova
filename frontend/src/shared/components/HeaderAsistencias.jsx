@@ -96,6 +96,19 @@ const HeaderAsistencias = () => {
                            >
                               Registro diario
                            </Button>
+                           <Button
+                              variant="ghost "
+                              className={`font-semibold text-base ${
+                                 isPathActive(location.pathname, "/bandeja-solicitudes")
+                                    ? "text-neutral-800"
+                                    : "text-neutral-500"
+                              }  hover:text-neutral-800`}
+                              onClick={() => {
+                                 navigate("/bandeja-solicitudes");
+                              }}
+                           >
+                              Solicitud de equipos
+                           </Button>
                         </section>
                      )}
                      {user.rol === "LIDER TRABAJADOR" && (
