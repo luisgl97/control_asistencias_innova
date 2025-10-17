@@ -17,7 +17,6 @@ const NuevaSolicitud = ({
   tipoEquipo,
   setTipoEquipo
 }) => {
-  console.log(editingSolicitud);
 
   const [currentEquipo, setCurrentEquipos] = useState(equipos);
   useEffect(() => {

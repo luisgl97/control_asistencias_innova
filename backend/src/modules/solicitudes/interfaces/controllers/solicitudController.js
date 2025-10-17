@@ -7,7 +7,6 @@ const solicitudRepository=new SequelizeSolicitudRepository()
 const SolicitudController={
     async crearSolicitud(req,res){
         try {
-            // console.log("Entro ala función para crear solicitud");
             const data_usuario=req.usuario;
             const equipos_id=req.body.equipos;
             const solicitud_response=await crearSolicitud(data_usuario.id,equipos_id,solicitudRepository,req.body.observacion);

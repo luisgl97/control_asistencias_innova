@@ -41,7 +41,6 @@ const BandejaSolicitudes = () => {
         data = data.filter((s) => s.estado === estadoSolicitud);
       }
       if (busqueda) {
-        console.log(busqueda);
         data=data.filter((s) => {
           return (
             s.usuario_solicitante.nombres.toLowerCase().includes(busqueda.toLowerCase()) ||
