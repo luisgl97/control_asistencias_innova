@@ -10,8 +10,7 @@ const SolicitudController={
             // console.log("Entro ala función para crear solicitud");
             const data_usuario=req.usuario;
             const equipos_id=req.body.equipos;
-            console.log("Equipos recibidos",equipos_id);
-            const solicitud_response=await crearSolicitud(data_usuario.id,equipos_id,solicitudRepository);
+            const solicitud_response=await crearSolicitud(data_usuario.id,equipos_id,solicitudRepository,req.body.observacion);
             res.status(solicitud_response.codigo).json(solicitud_response.respuesta);
         } catch (error) {
             console.log("El error encontrado fue:",error);
@@ -30,7 +29,7 @@ const SolicitudController={
     },
     async actualizarSolicitudEquipos(req,res){
         try {
-            const payload=req.body;
+            const payload=req.body;            
             const responseSolicitud=await actualizarSolicitud(payload,solicitudRepository);
             res.status(responseSolicitud.codigo).json(responseSolicitud.respuesta);
         } catch (error) {

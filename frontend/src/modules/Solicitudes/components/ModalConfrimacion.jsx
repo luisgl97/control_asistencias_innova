@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import {
@@ -10,16 +9,30 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { Textarea } from "@/components/ui/textarea";
 
-export function ConfirmationModal({ equipos=0, editingSolicitud, handleSubmit }) {
+export function ConfirmationModal({
+  equipos = 0,
+  editingSolicitud,
+  handleSubmit,
+  mensaje_edit
+}) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+    const[mensaje,setMensaje]=useState(mensaje_edit||"");
+
   const handleClick = async () => {
     setLoading(true);
-    await handleSubmit();
+    await handleSubmit(mensaje);
     setLoading(false);
     setOpen(false);
+    setMensaje("")
   };
+
+  const handleClose=()=>{
+    setMensaje("")
+    setOpen(false)
+  }
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
       <AlertDialogTrigger asChild>
@@ -31,15 +44,24 @@ export function ConfirmationModal({ equipos=0, editingSolicitud, handleSubmit })
         <AlertDialogHeader>
           <AlertDialogTitle>Confirmar Solicitud</AlertDialogTitle>
           <AlertDialogDescription>
-            Deseas confirmar la solicitud de {equipos} equipo(s)?
+            Confirmar la solicitud de {equipos} equipo(s)
           </AlertDialogDescription>
         </AlertDialogHeader>
+        <div className="max-w-full ">
+          <Textarea
+            value={mensaje}
+            placeholder="Ingrese un mensaje (Opcional)"
+            className="w-full resize-none overflow-auto break-all"
+            onChange={(e)=>setMensaje(e.target.value)
+            }
+          />
+        </div>
 
         <AlertDialogFooter className="flex gap-3 sm:justify-end">
           <Button
             type="button"
             variant="outline"
-            onClick={() => setOpen(false)}
+            onClick={handleClose}
             disabled={loading}
           >
             Cancelar

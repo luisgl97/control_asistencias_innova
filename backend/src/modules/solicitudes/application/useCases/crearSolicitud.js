@@ -1,8 +1,9 @@
-module.exports =async (usuario_id,equipos_id=[],solicitudRepository,transaction=null) =>{
+module.exports =async (usuario_id,equipos_id=[],solicitudRepository,observacion,transaction=null) =>{
     const payload={
         fecha:new Date().toISOString().split("T")[0],
         estado:"solicitado",
-        usuario_id:usuario_id
+        usuario_id:usuario_id,
+        observacion:observacion
     }
 
     const solicitud_creada=await solicitudRepository.crearSolicitud(payload,transaction)

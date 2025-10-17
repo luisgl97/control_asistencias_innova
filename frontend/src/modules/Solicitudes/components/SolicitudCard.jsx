@@ -23,7 +23,6 @@ const SolicitudCard = ({ solicitud, fetchSolicitudes }) => {
       const payload = {
         solicitud_id: form.id,
       };
-      console.log(payload);
       await solicitudesService.actualizarEstadoSolicitud(payload);
       await fetchSolicitudes();
       toast.success("Solicitud actualizada correctamente");
@@ -84,8 +83,15 @@ const SolicitudCard = ({ solicitud, fetchSolicitudes }) => {
             ))}
           </section>
         </article>
+        {solicitud.observacion&&<article className="text-neutral-600 text-sm mt-4 ">
+          <span className="text-gray-800">Mensaje:</span>
+          <div>
+            {solicitud.observacion}
+          </div>
+        </article>}
+
       </CardContent>
-      <CardFooter className="justify-between grid-cols-2 gap-4 mt-6">
+      <CardFooter className="justify-between grid-cols-2 gap-4 mt-3 ">
         {solicitud.estado === "solicitado" && (
           <>
             <SelectConEtiquetaFlotante

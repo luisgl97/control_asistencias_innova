@@ -6,6 +6,8 @@ const { Equipo } = require("../models/equipoModel");
 class SequelizeSolicitudRepository {
   async crearSolicitud(payload, transaction = null) {
     const solicitud = await Solicitud.create(payload, { transaction });
+    console.log("Solicitud creada: ", solicitud);
+
     return solicitud;
   }
   async crearSolicitudEquipo(payload, transaction = null) {
@@ -25,18 +27,30 @@ class SequelizeSolicitudRepository {
           as: "equipos",
         },
       ],
-      order: [["fecha", "DESC"]],
+      order: [
+        ["fecha", "DESC"],
+        ["estado", "DESC"], // ← segundo criterio de orden
+      ],
     });
 
     return solicitudes;
   }
-  async actualizarSolicitudEquipos(solicitud_id, equipos, transaction = null) {
+  async actualizarSolicitudEquipos(
+    solicitud_id,
+    equipos,
+    observacion,
+    transaction = null
+  ) {
     await SolicitudEquipo.destroy({ where: { solicitud_id }, transaction });
     for (const e of equipos) {
       const payload = {
         solicitud_id,
         equipo_id: e,
       };
+      await Solicitud.update(
+        { observacion: observacion },
+        { where: { id: solicitud_id } }
+      );
       await SolicitudEquipo.create(payload, { transaction });
     }
   }

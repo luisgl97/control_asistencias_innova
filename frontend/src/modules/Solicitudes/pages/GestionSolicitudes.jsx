@@ -88,7 +88,7 @@ export default function GestionSolicitudes() {
     );
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (mensaje="") => {
     if (selectedEquipos.length === 0) {
       toast.error("Selecciona al menos un equipo de protección.");
       return;
@@ -96,6 +96,7 @@ export default function GestionSolicitudes() {
     try {
       const payload = {
         equipos: selectedEquipos,
+        observacion:mensaje||"",
       };
       if (editingSolicitud) {
         payload.solicitud_id = editingSolicitud.id;

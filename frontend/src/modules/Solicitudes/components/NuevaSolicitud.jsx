@@ -17,16 +17,18 @@ const NuevaSolicitud = ({
   tipoEquipo,
   setTipoEquipo
 }) => {
-  const [currentEquipo,setCurrentEquipos]=useState(equipos);
-  useEffect(()=>{
-    let data=[...equipos]
-    if(tipoEquipo){
-      data=data.filter((e)=>e.tipo==tipoEquipo)
+  console.log(editingSolicitud);
+
+  const [currentEquipo, setCurrentEquipos] = useState(equipos);
+  useEffect(() => {
+    let data = [...equipos]
+    if (tipoEquipo) {
+      data = data.filter((e) => e.tipo == tipoEquipo)
     }
     setCurrentEquipos(data)
 
-  },[tipoEquipo])
-    
+  }, [tipoEquipo])
+
   return (
     <TabsContent value="form" className="mt-4">
       {loadingEquipos ? (
@@ -68,10 +70,7 @@ const NuevaSolicitud = ({
             </p>
           )}
           <div className="flex justify-end mt-6">
-            {/* <Button onClick={handleSubmit} className="bg-green-700">
-              {editingSolicitud ? "Guardar cambios" : "Registrar"}
-            </Button> */}
-            <ConfirmationModal editingSolicitud={editingSolicitud} equipos={selectedEquipos.length} handleSubmit={handleSubmit}/>
+            <ConfirmationModal editingSolicitud={editingSolicitud} equipos={selectedEquipos.length} handleSubmit={handleSubmit} mensaje_edit={editingSolicitud?.observacion} />
           </div>
         </div>
       )}

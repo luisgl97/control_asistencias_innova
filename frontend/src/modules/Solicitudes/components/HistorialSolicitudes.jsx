@@ -62,7 +62,7 @@ const HistorialSolicitudes = ({
                 </div>
                 <section className="flex flex-wrap gap-2 mt-2.5 ">
                   {s.equipos.map((e) => (
-                    <Badge className="bg-neutral-100 shadow font-light text-neutral-700">
+                    <Badge key={e.id} className="bg-neutral-100 shadow font-light text-neutral-700">
                       {e.nombre}
                     </Badge>
                   ))}

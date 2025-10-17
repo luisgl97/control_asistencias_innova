@@ -29,6 +29,10 @@ const Solicitud = sequelize.define(
         key: "id",
       },
     },
+    observacion:{
+      type:DataTypes.STRING(600),
+      allowNull:true
+    },
     atendido_por: {
       type: DataTypes.INTEGER,
       allowNull: true,
