@@ -38,12 +38,12 @@ export const opciones_filiales_asistencia = [
 export const opciones_estado_solicitud=[
    { value: 0, label: "Todas" },
    { value: "solicitado", label: "Solicitudes Activas" },
-   { value: "entregado", label: "Solicitudes Entregadas" },
+   { value: "entregado", label: "Solicitudes Atendidas" },
 ]
 
 export const opciones_cambio_estado=[
    { value: "solicitado", label: "Solicitado" },
-   { value: "entregado", label: "Entregado" },
+   { value: "entregado", label: "Atendido" },
 ]
 
 export const opciones_tipo_equipo=[

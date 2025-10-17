@@ -34,7 +34,7 @@ const SubHeaderTrabajador = () => {
                      navigate("/solicitudes");
                   }}
                >
-                  Solicitudes de EPP
+                  Solicitud de equipos
                </Button>
             </ButtonGroup>
          </header>

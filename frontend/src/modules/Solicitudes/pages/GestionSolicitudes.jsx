@@ -54,7 +54,7 @@ export default function GestionSolicitudes() {
     if (value === "form") {
       if (!puedeRegistrar && !editingSolicitud) {
         toast.warning(
-          "No puedes registrar una nueva solicitud hasta que la anterior sea entregado."
+          "No puedes registrar una nueva solicitud hasta que la anterior sea atendida."
         );
         return;
       }
@@ -122,9 +122,11 @@ export default function GestionSolicitudes() {
   };
 
   return (
-    <Card className="w-full max-w-3xl mx-auto mt-8 shadow-lg rounded-2xl">
+    // <Card className="w-full max-w-3xl mx-auto mt-8 shadow-lg rounded-2xl ">
+    <Card className="mx-4 md:w-full max-w-3xl md:mx-auto mt-8 shadow-lg rounded-2xl " >
+
       <CardHeader>
-        <CardTitle>Solicitudes de EPP</CardTitle>
+        <CardTitle>Solicitud de equipos</CardTitle>
       </CardHeader>
       <CardContent>
         <Tabs value={tab} onValueChange={handleTabChange}>

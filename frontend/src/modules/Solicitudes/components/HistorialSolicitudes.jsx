@@ -42,7 +42,7 @@ const HistorialSolicitudes = ({
                       s.estado === "entregado" ? "bg-amber-500" : "bg-green-600"
                     }`}
                   >
-                    {s.estado === "entregado" ? "Entregado" : "Solicitado"}
+                    {s.estado === "entregado" ? "Atendido" : "Solicitado"}
                   </Badge>
                 </section>
                 {s.estado === "solicitado" && (

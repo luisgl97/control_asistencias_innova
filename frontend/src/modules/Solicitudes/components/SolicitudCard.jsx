@@ -62,7 +62,7 @@ const SolicitudCard = ({ solicitud, fetchSolicitudes }) => {
                   : "bg-green-600"
               }`}
             >
-              {solicitud.estado === "entregado" ? "Entregado" : "Solicitado"}
+              {solicitud.estado === "entregado" ? "Atendido" : "Solicitado"}
             </Badge>
           </section>
         </article>
@@ -112,7 +112,7 @@ const SolicitudCard = ({ solicitud, fetchSolicitudes }) => {
         )}
         {solicitud.estado === "entregado" && solicitud?.usuario_atendio && (
           <div className="text-sm">
-            <span className="text-neutral-700">Entregado por:</span>
+            <span className="text-neutral-700">Atendido por:</span>
             <span className="text-neutral-600">
               {" "}
               {solicitud.usuario_atendio.nombres}{" "}
