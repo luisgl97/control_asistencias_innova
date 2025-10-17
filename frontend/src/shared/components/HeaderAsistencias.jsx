@@ -9,188 +9,194 @@ import logotipo from "@/assets/png/logov1-removebg-preview.png";
 import { Button } from "@/components/ui/button";
 import { isPathActive } from "../utils/isPathActive";
 
-
-
 const HeaderAsistencias = () => {
-   const location = useLocation();
+  const location = useLocation();
 
-   const { user, logout } = useAuth();
-   const navigate = useNavigate();
-   return (
-      <>
-         <header className="bg-white shadow-sm border-b">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-               <div className="flex items-center justify-between h-16">
-                  {/* Logo y título */}
-                  <article className="flex gap-8 items-center">
-                     <div className="flex items-center space-x-3">
-                        <div className="">
-                           <img src={logotipo} className="w-10 h-10 relative" alt="logo" />              
-                        </div>
-                        <div className="hidden sm:block">
-                           <h1 className="text-lg font-bold text-gray-900">
-                              Márcate
-                           </h1>
-                           <p className="text-sm text-gray-500">
-                              Sistema de asistencias
-                           </p>
-                        </div>
-                        <div className="sm:hidden">
-                           <h1 className="text-base font-bold text-gray-900">
-                              Márcate
-                           </h1>
-                        </div>
-                     </div>
-                     {(user.rol === "GERENTE" ||
-                        user.rol === "ADMINISTRADOR") && (
-                        <section className="hidden md:flex gap-4 ">
-                           <Button
-                              variant="ghost "
-                              className={`font-semibold text-base ${
-                                 isPathActive(location.pathname, "/asistencias")
-                                    ? "text-neutral-800"
-                                    : "text-neutral-500"
-                              }  hover:text-neutral-800`}
-                              onClick={() => {
-                                 navigate("/asistencias");
-                              }}
-                           >
-                              Asistencias
-                           </Button>
-                           <Button
-                              variant="ghost "
-                              className={`font-semibold text-base ${
-                                 isPathActive(location.pathname, "/usuarios")
-                                    ? "text-neutral-800"
-                                    : "text-neutral-500"
-                              }  hover:text-neutral-800`}
-                              onClick={() => {
-                                 navigate("/usuarios");
-                              }}
-                           >
-                              Usuarios
-                           </Button>
-                           <Button
-                              variant="ghost "
-                              className={`font-semibold text-base ${
-                                 isPathActive(location.pathname, "/obras")
-                                    ? "text-neutral-800"
-                                    : "text-neutral-500"
-                              }  hover:text-neutral-800`}
-                              onClick={() => {
-                                 navigate("/obras");
-                              }}
-                           >
-                              Obras
-                           </Button>
-                           <Button
-                              variant="ghost "
-                              className={`font-semibold text-base ${
-                                 isPathActive(location.pathname, "/registro-diario")
-                                    ? "text-neutral-800"
-                                    : "text-neutral-500"
-                              }  hover:text-neutral-800`}
-                              onClick={() => {
-                                 navigate("/registro-diario");
-                              }}
-                           >
-                              Registro diario
-                           </Button>
-                           <Button
-                              variant="ghost "
-                              className={`font-semibold text-base ${
-                                 isPathActive(location.pathname, "/bandeja-solicitudes")
-                                    ? "text-neutral-800"
-                                    : "text-neutral-500"
-                              }  hover:text-neutral-800`}
-                              onClick={() => {
-                                 navigate("/bandeja-solicitudes");
-                              }}
-                           >
-                              Solicitud de equipos
-                           </Button>
-                        </section>
-                     )}
-                     {user.rol === "LIDER TRABAJADOR" && (
-                        <>
-                           <section className="hidden md:flex gap-4 ">
-                              <Button
-                                 variant="ghost "
-                                 className={`font-semibold text-base ${
-                                    isPathActive(location.pathname, "/")
-                                       ? "text-neutral-800"
-                                       : "text-neutral-500"
-                                 }  hover:text-neutral-800`}
-                                 onClick={() => {
-                                    navigate("/");
-                                 }}
-                              >
-                                 Mi asistencia
-                              </Button>
-                           </section>
-                           <section className="hidden md:flex gap-4 ">
-                              <Button
-                                 variant="ghost "
-                                 className={`font-semibold text-base ${
-                                    isPathActive(
-                                       location.pathname,
-                                       "/asistencias"
-                                    )
-                                       ? "text-neutral-800"
-                                       : "text-neutral-500"
-                                 }  hover:text-neutral-800`}
-                                 onClick={() => {
-                                    navigate("/asistencias");
-                                 }}
-                              >
-                                 Asistencias
-                              </Button>
-                           </section>
-                        </>
-                     )}
-                  </article>
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+  return (
+    <>
+      <header className="bg-white shadow-sm border-b">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            {/* Logo y título */}
+            <article className="flex gap-8 items-center">
+              <div className="flex items-center space-x-3">
+                <div className="">
+                  <img
+                    src={logotipo}
+                    className="w-10 h-10 relative"
+                    alt="logo"
+                  />
+                </div>
+                <div className="hidden sm:block">
+                  <h1 className="text-lg font-bold text-gray-900">Márcate</h1>
+                  <p className="text-sm text-gray-500">
+                    Sistema de asistencias
+                  </p>
+                </div>
+                <div className="sm:hidden">
+                  <h1 className="text-base font-bold text-gray-900">Márcate</h1>
+                </div>
+              </div>
+              {(user.rol === "GERENTE" || user.rol === "ADMINISTRADOR") && (
+                <section className="hidden md:flex gap-4 ">
+                  <Button
+                    variant="ghost "
+                    className={`font-semibold text-base ${
+                      isPathActive(location.pathname, "/asistencias")
+                        ? "text-neutral-800"
+                        : "text-neutral-500"
+                    }  hover:text-neutral-800`}
+                    onClick={() => {
+                      navigate("/asistencias");
+                    }}
+                  >
+                    Asistencias
+                  </Button>
+                  <Button
+                    variant="ghost "
+                    className={`font-semibold text-base ${
+                      isPathActive(location.pathname, "/usuarios")
+                        ? "text-neutral-800"
+                        : "text-neutral-500"
+                    }  hover:text-neutral-800`}
+                    onClick={() => {
+                      navigate("/usuarios");
+                    }}
+                  >
+                    Usuarios
+                  </Button>
+                  <Button
+                    variant="ghost "
+                    className={`font-semibold text-base ${
+                      isPathActive(location.pathname, "/obras")
+                        ? "text-neutral-800"
+                        : "text-neutral-500"
+                    }  hover:text-neutral-800`}
+                    onClick={() => {
+                      navigate("/obras");
+                    }}
+                  >
+                    Obras
+                  </Button>
+                  <Button
+                    variant="ghost "
+                    className={`font-semibold text-base ${
+                      isPathActive(location.pathname, "/registro-diario")
+                        ? "text-neutral-800"
+                        : "text-neutral-500"
+                    }  hover:text-neutral-800`}
+                    onClick={() => {
+                      navigate("/registro-diario");
+                    }}
+                  >
+                    Registro diario
+                  </Button>
+                  <Button
+                    variant="ghost "
+                    className={`font-semibold text-base ${
+                      isPathActive(location.pathname, "/bandeja-solicitudes")
+                        ? "text-neutral-800"
+                        : "text-neutral-500"
+                    }  hover:text-neutral-800`}
+                    onClick={() => {
+                      navigate("/bandeja-solicitudes");
+                    }}
+                  >
+                    Solicitud de equipos
+                  </Button>
+                </section>
+              )}
+              {user.rol === "LIDER TRABAJADOR" && (
+                <>
+                  <section className="hidden md:flex gap-4 ">
+                    <Button
+                      variant="ghost "
+                      className={`font-semibold text-base ${
+                        isPathActive(location.pathname, "/")
+                          ? "text-neutral-800"
+                          : "text-neutral-500"
+                      }  hover:text-neutral-800`}
+                      onClick={() => {
+                        navigate("/");
+                      }}
+                    >
+                      Mi asistencia
+                    </Button>
+                  </section>
+                  <section className="hidden md:flex gap-4 ">
+                    <Button
+                      variant="ghost "
+                      className={`font-semibold text-base ${
+                        isPathActive(location.pathname, "/asistencias")
+                          ? "text-neutral-800"
+                          : "text-neutral-500"
+                      }  hover:text-neutral-800`}
+                      onClick={() => {
+                        navigate("/asistencias");
+                      }}
+                    >
+                      Asistencias
+                    </Button>
+                  </section>
+                </>
+              )}
+            </article>
 
-                  {/* Desktop - Info del usuario */}
-                  <div className="flex items-center space-x-3">
-                     <div className="text-right">
-                        <p className="text-sm font-medium text-gray-900">
-                           {user ? user.nombres : "Loading"}{" "}
-                           {user ? user.apellidos : "..."}
-                        </p>
-                        <div className="flex items-center space-x-2">
-                           <Badge
-                              variant="secondary"
-                              className={`${
-                                 user.rol == "GERENTE"
-                                    ? "text-xs"
-                                    : "text-xs hidden sm:flex"
-                              }`}
-                           >
-                              {user ? user.rol : "Loading"}
-                           </Badge>
-                           {user?.cargo && (
-                              <Badge variant="outline" className="text-xs">
-                                 {user.cargo}
-                              </Badge>
-                           )}
-                        </div>
-                     </div>
-                     <UserMenu nombre={user?.nombres} logout={logout} />
-                  </div>
-               </div>
+            {/* Desktop - Info del usuario */}
+            <div className="flex items-center space-x-3">
+              <div className="text-right">
+                <p className="text-sm font-medium text-gray-900">
+                  {/* Versión móvil: solo primera palabra */}
+                  <span className="block md:hidden">
+                    {user
+                      ? `${user.nombres?.split(" ")[0] ?? ""} ${
+                          user.apellidos?.split(" ")[0] ?? ""
+                        }`
+                      : "Loading"}
+                  </span>
+
+                  {/* Versión escritorio: texto completo */}
+                  <span className="hidden md:block">
+                    {user ? `${user.nombres} ${user.apellidos}` : "Loading..."}
+                  </span>
+                </p>
+
+                <div className="flex items-center space-x-2">
+                  <Badge
+                    variant="secondary"
+                    className={`${
+                      user.rol == "GERENTE"
+                        ? "text-xs"
+                        : "text-xs hidden sm:flex"
+                    }`}
+                  >
+                    {user ? user.rol : "Loading"}
+                  </Badge>
+                  {user?.cargo && (
+                    <Badge variant="outline" className="text-xs">
+                      {user.cargo}
+                    </Badge>
+                  )}
+                </div>
+              </div>
+              <UserMenu nombre={user?.nombres} logout={logout} />
             </div>
-         </header>
+          </div>
+        </div>
+      </header>
 
-         {/* Mobile Menu Component */}
-         {(user.rol === "GERENTE" ||
-            user.rol === "ADMINISTRADOR" ||
-            user.rol === "LIDER TRABAJADOR") && (
-            <MobileMenu user={user} logout={logout} />
-         )}
+      {/* Mobile Menu Component */}
+      {(user.rol === "GERENTE" ||
+        user.rol === "ADMINISTRADOR" ||
+        user.rol === "LIDER TRABAJADOR") && (
+        <MobileMenu user={user} logout={logout} />
+      )}
 
-         <Outlet />
-      </>
-   );
+      <Outlet />
+    </>
+  );
 };
 
 export default HeaderAsistencias;
