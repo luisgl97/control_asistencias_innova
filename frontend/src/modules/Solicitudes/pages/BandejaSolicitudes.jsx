@@ -55,7 +55,7 @@ const BandejaSolicitudes = () => {
   }, [estadoSolicitud, solicitudes, busqueda]);
 
   return (
-    <article className="space-y-8 w-full max-w-7xl mx-auto my-16">
+    <article className="space-y-8 w-full px-2 md:px-0 max-w-7xl mx-auto my-16">
       <section className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <SelectConEtiquetaFlotante
           value={estadoSolicitud}
