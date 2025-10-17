@@ -17,14 +17,7 @@ import solicitudesService from "../service/solicitudesService";
 const SolicitudCard = ({ solicitud, fetchSolicitudes }) => {
   const [form, setForm] = useState(solicitud);
   const deshabilitar = solicitud.estado == form.estado;
-    if (solicitud.id==5) {
-        console.log(solicitud.estado);
-    console.log(form.estado);
-    console.log(solicitud.estado == form.estado);
-    }
-    
-    
-    
+
   const handleclick = async () => {
     try {
       const payload = {
@@ -53,11 +46,14 @@ const SolicitudCard = ({ solicitud, fetchSolicitudes }) => {
             <div className="flex space-x-2">
               <CalendarIcon className="size-5 text-neutral-700" />
               <span className="text-sm text-neutral-600 font-light">
-                {new Date(solicitud.fecha).toLocaleDateString("es-ES", {
-                  year: "numeric",
-                  month: "long",
-                  day: "numeric",
-                })}
+                {new Date(`${solicitud.fecha}T00:00:00`).toLocaleDateString(
+                  "es-ES",
+                  {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                  }
+                )}
               </span>
             </div>
             <Badge
@@ -81,6 +77,7 @@ const SolicitudCard = ({ solicitud, fetchSolicitudes }) => {
               <Badge
                 key={i}
                 className="bg-neutral-100 shadow font-light text-neutral-700"
+                // className={`${e.tipo==="herramienta"?"bg-neutral-100 text-neutral-700":"text-white bg-amber-400"} shadow font-light `}
               >
                 {e.nombre}
               </Badge>
@@ -116,8 +113,14 @@ const SolicitudCard = ({ solicitud, fetchSolicitudes }) => {
               {solicitud.usuario_atendio.apellidos}
             </span>
             <div className="flex gap-2">
-                <CalendarIcon className="size-4"/>
-                {solicitud.fecha_entrega}
+              <CalendarIcon className="size-4" />
+              {new Date(
+                `${solicitud.fecha_entrega}T00:00:00`
+              ).toLocaleDateString("es-ES", {
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+              })}
             </div>
           </div>
         )}

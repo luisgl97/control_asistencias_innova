@@ -15,8 +15,6 @@ class SequelizeSolicitudRepository {
     return solicitud_equipo;
   }
   async obtenerSolicitudesPorTrabajador(trabajador_id, transaction = null) {
-    console.log();
-
     const solicitudes = await Solicitud.findAll({
       where: {
         usuario_id: trabajador_id,
@@ -27,6 +25,7 @@ class SequelizeSolicitudRepository {
           as: "equipos",
         },
       ],
+      order: [["fecha", "DESC"]],
     });
 
     return solicitudes;
@@ -51,6 +50,7 @@ class SequelizeSolicitudRepository {
         {
           model: db.equipos,
           as: "equipos",
+          // order: ['tipo', 'ASC'],
         },
         {
           model: db.usuarios,
@@ -62,16 +62,20 @@ class SequelizeSolicitudRepository {
           required: false, // Para permitir resultados aunque este usuario sea null
         },
       ],
+      order: [
+        ["fecha", "ASC"], // Ordena las solicitudes por fecha
+        [{ model: db.equipos, as: "equipos" }, "tipo", "ASC"], // Ordena los equipos por tipo
+      ],
     });
     return solicitudes;
   }
 
-  async actualizarEstadoSolicitud(solicitud_id,usuario_id) {
+  async actualizarEstadoSolicitud(solicitud_id, usuario_id) {
     await Solicitud.update(
       {
         estado: "entregado",
         fecha_entrega: new Date().toISOString().split("T")[0],
-        atendido_por:usuario_id
+        atendido_por: usuario_id,
       },
       { where: { id: solicitud_id } }
     );

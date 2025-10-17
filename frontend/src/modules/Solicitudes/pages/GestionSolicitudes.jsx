@@ -9,7 +9,6 @@ import HistorialSolicitudes from "../components/HistorialSolicitudes";
 import NuevaSolicitud from "../components/NuevaSolicitud";
 import solicitudesService from "../service/solicitudesService";
 
-
 // --- Componente principal ------------------------------------------
 export default function GestionSolicitudes() {
   const [tab, setTab] = useState("historial");
@@ -23,6 +22,8 @@ export default function GestionSolicitudes() {
 
   const [selectedEquipos, setSelectedEquipos] = useState([]);
   const [editingSolicitud, setEditingSolicitud] = useState(null);
+    const [tipoEquipo, setTipoEquipo] = useState(0);
+  
 
   // --- Cargar historial al inicio
   useEffect(() => {
@@ -31,7 +32,7 @@ export default function GestionSolicitudes() {
 
   const fetchSolicitudes = async () => {
     setLoadingSolicitudes(true);
-    const response=await solicitudesService.obtenerSolicitudes();    
+    const response = await solicitudesService.obtenerSolicitudes();
     setSolicitudes(response.data.solicitudes);
     setLoadingSolicitudes(false);
   };
@@ -43,7 +44,7 @@ export default function GestionSolicitudes() {
   // --- Cargar equipos
   const fetchEquipos = async () => {
     setLoadingEquipos(true);
-    const response=await solicitudesService.obtenerEquipos();    
+    const response = await solicitudesService.obtenerEquipos();
     setEquipos(response.data.equipos);
     setLoadingEquipos(false);
   };
@@ -59,12 +60,14 @@ export default function GestionSolicitudes() {
       }
       setTituloForm("Registrar solicitud");
       setSelectedEquipos([]);
+      setTipoEquipo(0)
       setEditingSolicitud(null);
       fetchEquipos();
     } else {
       setEditingSolicitud(null);
       setTituloForm("Registrar solicitud");
       setSelectedEquipos([]);
+      setTipoEquipo(0)
     }
     setTab(value);
   };
@@ -89,15 +92,15 @@ export default function GestionSolicitudes() {
     if (selectedEquipos.length === 0) {
       toast.error("Selecciona al menos un equipo de protección.");
       return;
-    }    
+    }
     try {
-      const payload={
-        equipos:selectedEquipos,
-      }
+      const payload = {
+        equipos: selectedEquipos,
+      };
       if (editingSolicitud) {
-        payload.solicitud_id=editingSolicitud.id;
-        await solicitudesService.actualizarSolicitud(payload)
-        toast.success("Cambios guardados correctamente.");        
+        payload.solicitud_id = editingSolicitud.id;
+        await solicitudesService.actualizarSolicitud(payload);
+        toast.success("Cambios guardados correctamente.");
       } else {
         await solicitudesService.crearSolicitud(payload);
         toast.success("Solicitud registrada exitosamente.");
@@ -105,18 +108,17 @@ export default function GestionSolicitudes() {
       limpiardatos();
     } catch (error) {
       toast.error("Error en el servidor");
-      console.error(error)
+      console.error(error);
     }
-    
   };
-  const limpiardatos=()=>{
+  const limpiardatos = () => {
     fetchSolicitudes();
     setTab("historial");
     setEditingSolicitud(null);
     setTituloForm("Registrar solicitud");
     setSelectedEquipos([]);
-
-  }
+    setTipoEquipo(0)
+  };
 
   return (
     <Card className="w-full max-w-3xl mx-auto mt-8 shadow-lg rounded-2xl">
@@ -143,14 +145,18 @@ export default function GestionSolicitudes() {
           />
 
           {/* --- TAB FORMULARIO --- */}
-          <NuevaSolicitud
-            editingSolicitud={editingSolicitud}
-            handleSubmit={handleSubmit}
-            loadingEquipos={loadingEquipos}
-            equipos={equipos}
-            selectedEquipos={selectedEquipos} 
-            toggleEquipo={toggleEquipo}
-          />
+          {(equipos && equipos.length > 0) && (
+            <NuevaSolicitud
+              editingSolicitud={editingSolicitud}
+              handleSubmit={handleSubmit}
+              loadingEquipos={loadingEquipos}
+              equipos={equipos}
+              selectedEquipos={selectedEquipos}
+              toggleEquipo={toggleEquipo}
+              setTipoEquipo={setTipoEquipo}
+              tipoEquipo={tipoEquipo}
+            />
+          )}
         </Tabs>
       </CardContent>
     </Card>

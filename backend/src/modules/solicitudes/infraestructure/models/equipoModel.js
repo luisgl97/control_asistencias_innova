@@ -13,6 +13,10 @@ const Equipo = sequelize.define(
       type: DataTypes.STRING(100),
       allowNull: false,
     },
+    tipo: {
+      type: DataTypes.ENUM("herramienta","epp"),
+      allowNull: false,
+    },
   },
   {
     tableName: "equipos",

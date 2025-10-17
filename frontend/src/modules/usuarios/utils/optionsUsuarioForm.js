@@ -45,3 +45,9 @@ export const opciones_cambio_estado=[
    { value: "solicitado", label: "Solicitado" },
    { value: "entregado", label: "Entregado" },
 ]
+
+export const opciones_tipo_equipo=[
+   { value: 0, label: "Todas" },
+   { value: "herramienta", label: "Herramientas" },
+   { value: "epp", label: "Equipo de protección" },
+]

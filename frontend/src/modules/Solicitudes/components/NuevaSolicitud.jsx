@@ -1,8 +1,11 @@
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { TabsContent } from "@/components/ui/tabs";
+import { opciones_tipo_equipo } from "@/modules/usuarios/utils/optionsUsuarioForm";
+import SelectConEtiquetaFlotante from "@/shared/components/selectConEtiquetaFlotante";
 import { Loader2 } from "lucide-react";
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { ConfirmationModal } from "./ModalConfrimacion";
 
 const NuevaSolicitud = ({
   loadingEquipos,
@@ -10,8 +13,20 @@ const NuevaSolicitud = ({
   handleSubmit,
   editingSolicitud,
   selectedEquipos,
-  toggleEquipo
+  toggleEquipo,
+  tipoEquipo,
+  setTipoEquipo
 }) => {
+  const [currentEquipo,setCurrentEquipos]=useState(equipos);
+  useEffect(()=>{
+    let data=[...equipos]
+    if(tipoEquipo){
+      data=data.filter((e)=>e.tipo==tipoEquipo)
+    }
+    setCurrentEquipos(data)
+
+  },[tipoEquipo])
+    
   return (
     <TabsContent value="form" className="mt-4">
       {loadingEquipos ? (
@@ -20,9 +35,18 @@ const NuevaSolicitud = ({
         </div>
       ) : (
         <div>
+          <section className="w-full mb-4">
+            <SelectConEtiquetaFlotante
+              value={tipoEquipo}
+              onChange={(name, value) => setTipoEquipo(value)}
+              name="tipo"
+              label="Tipo de Equipo"
+              opciones={opciones_tipo_equipo}
+            />
+          </section>
           {equipos.length > 0 ? (
             <div className="space-y-3">
-              {equipos.map((eq) => (
+              {currentEquipo.map((eq) => (
                 <div key={eq.id} className="flex items-center space-x-2">
                   <Checkbox
                     id={eq.id}
@@ -44,9 +68,10 @@ const NuevaSolicitud = ({
             </p>
           )}
           <div className="flex justify-end mt-6">
-            <Button onClick={handleSubmit} className="bg-green-700">
+            {/* <Button onClick={handleSubmit} className="bg-green-700">
               {editingSolicitud ? "Guardar cambios" : "Registrar"}
-            </Button>
+            </Button> */}
+            <ConfirmationModal editingSolicitud={editingSolicitud} equipos={selectedEquipos.length} handleSubmit={handleSubmit}/>
           </div>
         </div>
       )}
