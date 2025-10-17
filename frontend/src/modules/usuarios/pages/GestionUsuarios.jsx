@@ -31,6 +31,8 @@ import usuarioService from "../services/usuarioService";
 import { useNavigate } from "react-router-dom";
 import ModalEliminarUsuario from "../components/ModalEliminarUsuario";
 import { toast } from "sonner";
+import SelectConEtiquetaFlotante from "@/shared/components/selectConEtiquetaFlotante";
+import { opciones_filiales_asistencia } from "../utils/optionsUsuarioForm";
 
 // Tipo para el usuario basado en la estructura proporcionada
 
@@ -40,6 +42,7 @@ const GestionUsuarios = () => {
    const [error, setError] = useState(null);
    const [searchTerm, setSearchTerm] = useState("");
    const [filteredUsuarios, setFilteredUsuarios] = useState([]);
+   const [filial,setFilial]=useState(0)
    const navigate = useNavigate();
 
    const fetchUsuarios = async () => {
@@ -65,21 +68,24 @@ const GestionUsuarios = () => {
    }, []);
 
    // Filtrar usuarios basado en el término de búsqueda
-   useEffect(() => {
-      const filtered = usuarios.filter(
-         (usuario) =>
-            usuario.nombres.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            usuario.apellidos
-               .toLowerCase()
-               .includes(searchTerm.toLowerCase()) ||
-            usuario.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            usuario.dni.includes(searchTerm) ||
-            usuario.rol.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            (usuario.cargo &&
-               usuario.cargo.toLowerCase().includes(searchTerm.toLowerCase()))
-      );
-      setFilteredUsuarios(filtered);
-   }, [searchTerm, usuarios]);
+useEffect(() => {   
+   const filtered = usuarios.filter((usuario) => {
+      const matchesSearch =
+         usuario.nombres.toLowerCase().includes(searchTerm.toLowerCase()) ||
+         usuario.apellidos.toLowerCase().includes(searchTerm.toLowerCase()) ||
+         usuario.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+         usuario.dni.includes(searchTerm) ||
+         usuario.rol.toLowerCase().includes(searchTerm.toLowerCase()) ||
+         (usuario.cargo &&
+            usuario.cargo.toLowerCase().includes(searchTerm.toLowerCase()));
+
+      const matchesFilial = !filial || usuario.filial_id == filial;
+
+      return matchesSearch && matchesFilial;
+   });
+
+   setFilteredUsuarios(filtered);
+}, [searchTerm, usuarios, filial]);
 
    const activarUsuario = async (id) => {
       setLoading(true);
@@ -183,8 +189,9 @@ const GestionUsuarios = () => {
             </CardHeader>
             <CardContent>
                {/* Barra de búsqueda */}
-               <div className="flex items-center gap-4 mb-6">
-                  <div className="relative flex-1 max-w-sm">
+               {/* <div className="flex items-center gap-4 mb-6"> */}
+               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3  space-y-4 space-x-6 mb-6 ">
+                  <section className="relative flex-1 max-w-sm w-full">
                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                      <Input
                         placeholder="Buscar usuarios..."
@@ -192,10 +199,19 @@ const GestionUsuarios = () => {
                         onChange={(e) => setSearchTerm(e.target.value)}
                         className="pl-10"
                      />
-                  </div>
-                  <div className="text-sm text-muted-foreground">
+                  </section>
+                  {/* <div className="text-sm text-muted-foreground">
                      {filteredUsuarios.length} de {usuarios.length} usuarios
-                  </div>
+                  </div> */}
+                  <section>
+                     <SelectConEtiquetaFlotante
+                        value={filial}
+                        onChange={(name, value) => setFilial(value)}
+                        name="filial_id"
+                        label="Busca por filial"
+                        opciones={opciones_filiales_asistencia}
+                     />
+                  </section>
                </div>
 
                {/* Tabla de usuarios */}
