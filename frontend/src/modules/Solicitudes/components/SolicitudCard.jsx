@@ -36,7 +36,7 @@ const SolicitudCard = ({ solicitud, fetchSolicitudes }) => {
       <CardHeader>
         <CardTitle>
           {solicitud.usuario_solicitante.nombres}{" "}
-          {solicitud.usuario_solicitante.nombres}
+          {solicitud.usuario_solicitante.apellidos}
         </CardTitle>
       </CardHeader>
       <CardContent className="h-full">
