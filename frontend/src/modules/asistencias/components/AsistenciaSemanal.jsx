@@ -126,7 +126,6 @@ export default function AsistenciaSemanal() {
          const { fecha_fin, fecha_inicio, numero_semana, desactivar } =
             getRangoSemanaActual(offset);
          const data = getRangoSemanaActual(offset + 1);
-         console.log(data);
          setDesactivar(data.desactivar);
          setError(null);
 
