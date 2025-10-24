@@ -2,26 +2,36 @@ const {
   validarFechasDentroDelMesActual,
 } = require("../../infrastructure/utils/validarFechasDentroDelMesActual");
 
+const moment = require("moment-timezone");
+
 module.exports = async (dataReporte, asistenciaRepository) => {
   const { fecha_inicio, fecha_fin } = dataReporte;
 
-  const fechasValidas = validarFechasDentroDelMesActual(
-    fecha_inicio,
-    fecha_fin
-  );
+  // Verificar si la fecha_inicio y fecha_fin estan en dos meses distintos
+  // Si es asi saltar la validacion de validarFechasDentroDelMesActual
+  // usando moment
 
-  if (!fechasValidas) {
-    return {
-      codigo: 400,
-      respuesta: {
-        mensaje: "Las fechas deben estar dentro del mes actual o anteriores.",
-        estado: false,
-        total: 0,
-        datos: [],
-      },
-    };
+  const mesInicio = moment(fecha_inicio, "YYYY-MM-DD").month();
+  const mesFin = moment(fecha_fin, "YYYY-MM-DD").month();
+
+  if(mesInicio == mesFin){
+      const fechasValidas = validarFechasDentroDelMesActual(
+      fecha_inicio,
+      fecha_fin
+    );
+
+    if (!fechasValidas) {
+      return {
+        codigo: 400,
+        respuesta: {
+          mensaje: "Las fechas deben estar dentro del mes actual o anteriores.",
+          estado: false,
+          total: 0,
+          datos: [],
+        },
+      };
+    }
   }
-
   const reporte = await asistenciaRepository.obtenerReporteAsistencias(
     fecha_inicio,
     fecha_fin
