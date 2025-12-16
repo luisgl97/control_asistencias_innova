@@ -19,7 +19,7 @@ function mapearEstadosAsistenciaParaElErp(listaAsistencias) {
           estado = "tardanza";
           break;
         case "SALIDA ANTICIPADA":
-          estado = "permiso";
+          estado = "presente";
           break;
         case "FALTA JUSTIFICADA":
           estado = "falta-justificada";
