@@ -1,5 +1,18 @@
+const {
+  CONST_HORA_FIN_SAB,
+  CONST_HORA_FIN_LV,
+  CONST_HORA_INICIO,
+} = require("../../../../constants/horarios");
 const db = require("../../../../models");
-const { calcularDiferenciaHorasMinutosSegundos } = require("../../../../utils/calcularDiferenciaHorasMinutosSegundos");
+const {
+  calcularDiferenciaHorasMinutosSegundos,
+} = require("../../../../utils/calcularDiferenciaHorasMinutosSegundos");
+
+// Usar moment para manejo de fechas (lima Peru)
+const moment = require("moment");
+require("moment/locale/es"); // importa el idioma español
+require("moment-timezone");
+moment.locale("es"); // establece el idioma a español
 
 function mapearEstadosAsistenciaParaElErp(listaAsistencias) {
   const listaAsistenciasMapeado = Promise.all(
@@ -52,9 +65,7 @@ function mapearEstadosAsistenciaParaElErp(listaAsistencias) {
           typeof ubicacionIngreso === "string" &&
           ubicacionIngreso.trim() !== ""
         ) {
-          ubicacionIngreso = JSON.parse(
-            ubicacionIngreso
-          );
+          ubicacionIngreso = JSON.parse(ubicacionIngreso);
         }
       } catch (e) {
         console.error("Error al parsear ubicacion_ingreso:", e);
@@ -68,9 +79,7 @@ function mapearEstadosAsistenciaParaElErp(listaAsistencias) {
           typeof ubicacionSalida === "string" &&
           ubicacionSalida.trim() !== ""
         ) {
-          ubicacionSalida = JSON.parse(
-            ubicacionSalida
-          );
+          ubicacionSalida = JSON.parse(ubicacionSalida);
         }
       } catch (e) {
         console.error("Error al parsear ubicacion_salida:", e);
@@ -102,9 +111,42 @@ function mapearEstadosAsistenciaParaElErp(listaAsistencias) {
         descripcion_obra: descripcion_obra_registrada_tarde || "",
       };
 
-      
+      let horas_trabajadas = calcularDiferenciaHorasMinutosSegundos(
+        asistencia.hora_ingreso,
+        asistencia.hora_salida
+      );
 
-      const horas_trabajadas = calcularDiferenciaHorasMinutosSegundos(asistencia.hora_ingreso, asistencia.hora_salida);
+     // console.log("Horas trabajadas calculadas:", horas_trabajadas);
+
+      // Detectar que dia del calendario es asistencia.fecha (usando moment)
+      const dia = moment(asistencia.fecha).day(); // 6 = sábado
+
+      // 🔹 Total trabajado en minutos (incluye segundos)
+      const minutosTrabajados =
+        horas_trabajadas.horas * 60 +
+        horas_trabajadas.minutos +
+        horas_trabajadas.segundos / 60;
+
+      // 🔹 Tope máximo en minutos según el día
+      let minutosMaximos;
+
+      if (dia == 6) {
+        // Sábado → 5h 30m
+        minutosMaximos = CONST_HORA_FIN_SAB - CONST_HORA_INICIO;
+      } else {
+        // Lunes a viernes → 9h 30m
+        minutosMaximos = CONST_HORA_FIN_LV - CONST_HORA_INICIO;
+      }
+
+      // 🔹 Si se pasa del tope, capar
+      if (minutosTrabajados > minutosMaximos) {
+        const horas = Math.floor(minutosMaximos / 60);
+        const minutos = minutosMaximos % 60;
+
+        horas_trabajadas.horas = horas;
+        horas_trabajadas.minutos = minutos;
+        horas_trabajadas.segundos = 0;
+      }
 
       return {
         trabajador: {
@@ -117,7 +159,9 @@ function mapearEstadosAsistenciaParaElErp(listaAsistencias) {
           tiempo_trabajado: horas_trabajadas,
           estado: estado,
           horas_extras: asistencia.horas_extras,
-          jornada_manhana: jornada_manhana?.nombre_obra ? jornada_manhana : null,
+          jornada_manhana: jornada_manhana?.nombre_obra
+            ? jornada_manhana
+            : null,
           jornada_tarde: jornada_tarde?.nombre_obra ? jornada_tarde : null,
         },
       };
