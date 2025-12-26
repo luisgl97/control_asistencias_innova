@@ -1,16 +1,3 @@
-import { AppWindowIcon, CodeIcon } from "lucide-react";
-
-import { Button } from "@/components/ui/button";
-import {
-   Card,
-   CardContent,
-   CardDescription,
-   CardFooter,
-   CardHeader,
-   CardTitle,
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import AsistenciaSemanal from "../components/AsistenciaSemanal";
 import AsistenciaPordia from "../components/AsistenciaPordia";
@@ -20,16 +7,16 @@ import Reportes from "../components/Reportes";
 import { useAuth } from "@/context/AuthContext";
 
 export default function GestionAsistencias() {
-   const [isLoading, setIsLoading] = useState(false);
-   const { user, loading, logout } = useAuth();
+   const [isLoading] = useState(false);
+   const { user } = useAuth();
 
    return (
-      <div className="flex w-full justify-center my-8">
+      <div className="flex w-full justify-center my-2">
          <Tabs
             defaultValue="dia"
-            className="w-full max-w-7xl flex items-start space-y-2"
+            className="w-full max-w-7xl flex items-start"
          >
-            <TabsList className="grid grid-cols-2 md:grid-none md:flex  w-full md:w-auto h-auto space-x-2 bg-white gap-2 md:gap-0">
+            <TabsList className="grid grid-cols-2 md:grid-none md:flex  w-full  h-auto bg-white gap-2 md:w-auto">
                <TabsTrigger
                   className="w-full bg-neutral-200/80  data-[state=active]:bg-innova-blue data-[state=active]:text-white"
                   disabled={isLoading}

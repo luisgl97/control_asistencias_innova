@@ -59,7 +59,7 @@ class SequelizeAsistenciaRepository {
     // Obtener fecha actual en Lima para comparar
     const hoy = moment().tz("America/Lima").format("YYYY-MM-DD");
 
-    // 1️⃣ Obtener fecha mínima de asignación por usuario
+    // Obtener fecha mínima de asignación por usuario
     const primerosRegistros = await db.registros_diarios.findAll({
       attributes: [
         "usuario_id",
@@ -76,13 +76,13 @@ class SequelizeAsistenciaRepository {
       );
     });
 
-    // 2️⃣ Obtener todos los usuarios activos que tienen asignación antes o igual a la fecha consultada
+    // Obtener todos los usuarios activos que tienen asignación antes o igual a la fecha consultada
     const usuarios = await Usuario.findAll({
       where: {
         rol: ["TRABAJADOR", "LIDER TRABAJADOR"],
         //estado: true,
       },
-      
+
       attributes: {
         exclude: ["password"],
       },
@@ -94,26 +94,42 @@ class SequelizeAsistenciaRepository {
           where: { fecha },
         },
         {
-        model: db.filiales,
-        as: "filial",
-      }
+          model: db.filiales,
+          as: "filial",
+        },
+        {
+          model: db.registros_diarios,
+          as: "registros_diarios",
+          required: false, // LEFT JOIN
+          where: { fecha },
+          include: [
+            {
+              model: db.obras,
+              as: "obra",
+            },
+          ],
+        },
       ],
     });
 
-      // 3️⃣ Filtrar
-  const usuariosFiltrados = usuarios.filter((u) => {
-    const fechaInicio = fechaInicioPorUsuario[u.id];
-    if (!fechaInicio || fechaInicio > fecha) return false; // nunca asignado o asignado después
+    // Filtrar
+    const usuariosFiltrados = usuarios.filter((u) => {
+      const fechaInicio = fechaInicioPorUsuario[u.id];
+      if (!fechaInicio || fechaInicio > fecha) return false; // nunca asignado o asignado después
 
-    // si está inactivo y tiene fecha_baja definida, excluir si la fecha consultada es posterior
-    if (!u.estado && u.fecha_baja && moment(fecha).isAfter(moment(u.fecha_baja), "day")) {
-      return false;
-    }
+      // si está inactivo y tiene fecha_baja definida, excluir si la fecha consultada es posterior
+      if (
+        !u.estado &&
+        u.fecha_baja &&
+        moment(fecha).isAfter(moment(u.fecha_baja), "day")
+      ) {
+        return false;
+      }
 
-    return true;
-  });
+      return true;
+    });
 
-    // 4️⃣ Construir listado
+    // Construir listado
 
     const listado = usuariosFiltrados.map((usuario) => {
       const asistencia = usuario.asistencias[0];
@@ -124,6 +140,10 @@ class SequelizeAsistenciaRepository {
       if (!asistencia) {
         estadoFinal = fecha < hoy ? "FALTA" : "SIN REGISTRO";
       }
+
+      const obrasMapeadas = usuario?.registros_diarios.map((registros) => 
+        registros.obra?.nombre,
+      );
 
       return {
         id: usuario.id,
@@ -139,7 +159,7 @@ class SequelizeAsistenciaRepository {
         estado: estadoFinal,
         horas_extras: asistencia?.horas_extras ?? "--",
         hizo_horas_extras: asistencia?.hizo_horas_extras ?? false,
-
+        obras_asignadas: obrasMapeadas,
         filial_id: usuario.filial.id,
         filial_nombre: usuario.filial.razon_social,
       };
@@ -372,20 +392,19 @@ class SequelizeAsistenciaRepository {
 
     // 4️⃣ Inicializar estructura filtrando por primer día en registros_diarios
     usuarios.forEach((usuario) => {
-
       const fechaInicioObra = fechaInicioPorUsuario[usuario.id];
       if (!fechaInicioObra) return; // nunca ha sido asignado
       if (moment(fechaInicioObra).isAfter(fechaFin)) return; // su primer día está fuera del rango consultado
 
       const ultima = ultimaAsistenciaPorUsuario.get(usuario.id);
-     // ❗ Si tiene fecha_baja, solo mostrarlo si su baja fue DESPUÉS del inicio del rango
-    if (
-      usuario.fecha_baja &&
-      moment(usuario.fecha_baja).isBefore(fechaInicio) &&
-      (!ultima || moment(ultima).isBefore(fechaInicio))
-    ) {
-      return; // ya estaba dado de baja antes del rango y sin asistencias en él
-    }
+      // ❗ Si tiene fecha_baja, solo mostrarlo si su baja fue DESPUÉS del inicio del rango
+      if (
+        usuario.fecha_baja &&
+        moment(usuario.fecha_baja).isBefore(fechaInicio) &&
+        (!ultima || moment(ultima).isBefore(fechaInicio))
+      ) {
+        return; // ya estaba dado de baja antes del rango y sin asistencias en él
+      }
 
       usuariosMap.set(usuario.id, {
         trabajador: `${usuario.nombres} ${usuario.apellidos}`,
@@ -452,7 +471,6 @@ class SequelizeAsistenciaRepository {
             : usuarioData.tardanzas++;
           break;
         case "FALTA JUSTIFICADA":
-          
           usuarioData.asistenciaPorDia[fechaKey] = "📄 Falta Justificada";
           usuarioData.observados += 1;
           break;
@@ -496,30 +514,30 @@ class SequelizeAsistenciaRepository {
         faltas: user.faltas,
       };
 
-       const hoy = moment().tz("America/Lima").format("YYYY-MM-DD");
+      const hoy = moment().tz("America/Lima").format("YYYY-MM-DD");
 
       diasDelRango.forEach(({ diaSemana, fecha, fechaBonita }) => {
-      if (fecha < user.fechaInicioObra) {
-        fila[`${diaSemana} (${fechaBonita})`] = "No aplica";
-        return;
-      }
-
-      let valor = user.asistenciaPorDia[fecha];
-
-      if (!valor) {
-        if (fecha === hoy) {
-          valor = "Sin registro";
-        } else {
-          valor = "Falta";
+        if (fecha < user.fechaInicioObra) {
+          fila[`${diaSemana} (${fechaBonita})`] = "No aplica";
+          return;
         }
-      }
 
-      fila[`${diaSemana} (${fechaBonita})`] = valor;
+        let valor = user.asistenciaPorDia[fecha];
 
-      if (valor === "Falta") {
-        fila.faltas += 1;
-      }
-    });
+        if (!valor) {
+          if (fecha === hoy) {
+            valor = "Sin registro";
+          } else {
+            valor = "Falta";
+          }
+        }
+
+        fila[`${diaSemana} (${fechaBonita})`] = valor;
+
+        if (valor === "Falta") {
+          fila.faltas += 1;
+        }
+      });
 
       return fila;
     });
